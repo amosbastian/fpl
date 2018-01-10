@@ -1,3 +1,3 @@
-##### python-fpl
+# python-fpl
 
-A Python wrapper for the Fantasy Premier League API.
+A Python wrapper around the Fantasy Premier League API.
