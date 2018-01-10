@@ -1,1 +1,1 @@
-from fpl_python import FPL
+import fpl
