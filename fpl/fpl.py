@@ -15,13 +15,9 @@ class FPL():
 		return requests.get("{}entry/{}/event/{}/picks".format(API_BASE_URL,
 			user_id, gameweek)).json()
 
-	def user_picks(self, user_id, gameweek):
-		return requests.get("{}entry/{}/event/{}/live".format(API_BASE_URL,
-			user_id, gameweek)).json()
-
 	def user_cup(self, user_id):
-		return requests.get("{}entry/{}/event/{}/cup".format(API_BASE_URL,
-			user_id, gameweek)).json()
+		return requests.get("{}entry/{}/cup".format(API_BASE_URL,
+			user_id)).json()
 
 	def user_transfers(self, user_id):
 		return requests.get("{}entry/{}/transfers".format(API_BASE_URL,
