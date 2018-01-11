@@ -15,7 +15,7 @@ A Python wrapper around the Fantasy Premier League API.
 
 1. Get specific user
 
-	print(fpl.user("3523615"))
+    print(fpl.user("3523615"))
 
 2. Get specific user's history
 
