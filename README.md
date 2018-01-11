@@ -1,21 +1,25 @@
-# python-fpl
+python-fpl
+==========
 
 A Python wrapper around the Fantasy Premier League API.
 
-# Installation
+Installation
+------------
 
 ```
 pip install fpl
 ```
 
-# Usage
+Usage
+-----
 
 ```python
 import fpl
 fpl = fpl.FPL()
 ```
 
-# Documentation
+Documentation
+-------------
 
 1. Get specific user
 
