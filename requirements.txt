@@ -2,7 +2,6 @@ attrs==17.4.0
 certifi==2017.11.5
 chardet==3.0.4
 idna==2.6
-multidict==3.3.2
 pkg-resources==0.0.0
 pluggy==0.6.0
 py==1.5.2
