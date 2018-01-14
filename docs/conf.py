@@ -19,7 +19,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('/home/amos/Documents/python-fpl/fpl'))
+sys.path.insert(0, os.path.abspath('../fpl'))
 
 
 # -- General configuration ------------------------------------------------
