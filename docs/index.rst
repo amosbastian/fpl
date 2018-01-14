@@ -1,10 +1,16 @@
 Welcome to python-fpl's documentation!
 ======================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+A Python wrapper around the Fantasy Premier League API
 
+Getting Started
+===============
+
+.. toctree::
+   :maxdepth: 1
+
+   installation
+   examples
    fpl
 
 
@@ -14,4 +20,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
