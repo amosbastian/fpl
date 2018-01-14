@@ -1,7 +1,7 @@
 # virtualenv
 env/
 
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -10,3 +10,8 @@ __pycache__/
 dist/
 *.egg-info/
 build/
+
+# Sphinx documentation
+docs/_build/
+docs/_static/
+docs/_templates/
