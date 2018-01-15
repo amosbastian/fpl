@@ -1,4 +1,4 @@
-Welcome to python-fpl's documentation!
+Welcome to fpl's documentation!
 ======================================
 
 A Python wrapper around the Fantasy Premier League API

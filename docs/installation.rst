@@ -1,7 +1,7 @@
-Installing python-fpl
+Installing fpl
 =====================
 
-The recommended way to install fpl-python is via ``pip``.
+The recommended way to install fpl is via ``pip``.
 
 .. code-block:: bash
 
@@ -10,10 +10,10 @@ The recommended way to install fpl-python is via ``pip``.
 .. note:: Depending on your system, you may need to use ``pip3`` to install
           packages for python 3.
 
-Updating fpl-python
+Updating fpl
 -------------------------
 
-To update fpl-python you can run:
+To update fpl you can run:
 
 .. code-block:: bash
 
@@ -33,7 +33,7 @@ Example output:
 Installing older versions
 -------------------------
 
-Older versions of fpl-python can be installed by specifying the version number 
+Older versions of fpl can be installed by specifying the version number 
 as part of the installation command:
 
 .. code-block:: bash
