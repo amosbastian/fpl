@@ -31,7 +31,8 @@ class User(object):
         """
         Returns a dictionary containing information about the user.
         """
-        return requests.get("{}entry/{}".format(API_BASE_URL, self.id)).json()
+        return requests.get("{}entry/{}".format(API_BASE_URL,
+            self.id)).json()["entry"]
 
     def _history(self):
         """
@@ -78,5 +79,50 @@ class User(object):
         return requests.get("{}entry/{}/transfers".format(API_BASE_URL,
             self.id)).json()
 
+    @property
+    def name(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
+    @property
+    def first_name(self):
+        return self.entry["player_first_name"]
+
+    @property
+    def last_name(self):
+        return self.entry["player_last_name"]
+
+    @property
+    def region_long(self):
+        return self.entry["player_region_name"]
+
+    @property
+    def region_short(self):
+        return self.entry["player_region_short_iso"]
+
+    @property
+    def total_transfers(self):
+        return self.entry["total_transfers"]
+
+    @property
+    def joined_time(self):
+        return self.entry["joined_time"]
+
+    @property
+    def team_value(self):
+        return self.entry["value"] / 10.0
+
+    @property
+    def bank(self):
+        return self.entry["bank"] / 10.0
+
+    @property
+    def total_value(self):
+        return self.team_value * self.bank
+
+    @property
+    def favourite_team(self):
+        return self.entry["favourite_team"]
+
 if __name__ == '__main__':
-    amos = User(3523615)
+    user = User(3523615)
+    print(user.name)
