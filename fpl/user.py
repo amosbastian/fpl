@@ -12,11 +12,8 @@ class User(object):
         self.id = user_id
 
         self.cup = self._cup()
-        self.entry = self._entry()
         self.history = self._history()
-        self.leagues = self._leagues()
-        self.leagues_entered = self._leagues_entered()
-        self.picks = self._picks()
+        # self.picks = self._picks()
         self.transfers = self._transfers()
 
     def _cup(self):
@@ -27,12 +24,12 @@ class User(object):
         return requests.get("{}entry/{}/cup".format(API_BASE_URL,
             self.id)).json()
 
-    def _entry(self):
+    @property
+    def entry(self):
         """
         Returns a dictionary containing information about the user.
         """
-        return requests.get("{}entry/{}".format(API_BASE_URL,
-            self.id)).json()["entry"]
+        return self.cup["entry"]
 
     def _history(self):
         """
@@ -41,88 +38,158 @@ class User(object):
         return requests.get("{}entry/{}/history".format(API_BASE_URL,
             self.id)).json()
 
-    def _leagues(self):
+    @property
+    def season(self):
         """
-        Returns a dictionary with information about all leagues that the user is
-        participating in.
+        Returns a list containing information about each of the seasons the user
+        has participated in.
         """
-        return requests.get("{}entry/{}".format(API_BASE_URL, self.id)).json()
+        return self.history["season"]
 
-    def _leagues_entered(self):
+    @property
+    def chips(self):
         """
-        Returns a dictionary with information about all leagues that the user is
-        participating in.
+        Returns a list containing information about the usage of the player's
+        chips.
         """
-        return requests.get("{}leagues-entered/{}".format(API_BASE_URL,
-            self.id)).json()
+        return self.history["chips"]
 
-    def _picks(self):
+    @property
+    def leagues(self):
         """
-        Returns a dictionary containing all the picks of the user.
+        Returns a dictionary containing information about all the leagues that
+        the user is participating in.
         """
-        picks = {}
-        for gameweek in range(1, 39):
-            pick = requests.get("{}entry/{}/event/{}/picks".format(
-                API_BASE_URL, self.id, gameweek))
+        return self.history["leagues"]
 
-            if pick.status_code == 404:
-                return picks
+    @property
+    def classic(self):
+        """
+        Returns a list containing information about all the leagues that the
+        user is currently participating in.
+        """
+        return self.leagues["classic"]
 
-            picks[gameweek] = pick.json()
+    @property
+    def h2h(self):
+        return self.leagues["h2h"]
 
-        return picks
+    # def _picks(self):
+    #     """
+    #     Returns a dictionary containing all the picks of the user.
+    #     """
+    #     picks = {}
+    #     for gameweek in range(1, 39):
+    #         pick = requests.get("{}entry/{}/event/{}/picks".format(
+    #             API_BASE_URL, self.id, gameweek))
+
+    #         if pick.status_code == 404:
+    #             return picks
+
+    #         picks[gameweek] = pick.json()
+
+    #     return picks
 
     def _transfers(self):
         """
-        Returns a dictionary with all the transfers made by the user.
+        Returns a dictionary containing information about all the transfers the
+        user has made so far.
         """
         return requests.get("{}entry/{}/transfers".format(API_BASE_URL,
             self.id)).json()
 
     @property
+    def wildcards(self):
+        """
+        Returns a list containing information about the usage of the player's
+        wildcard(s).
+        """
+        return self.transfers["wildcards"]
+
+    @property
+    def transfer_history(self):
+        """
+        Returns a list containing information about the user's transfer history.
+        """
+        return self.transfers["history"]
+
+    @property
     def name(self):
+        """
+        Returns the user's full name.
+        """
         return "{} {}".format(self.first_name, self.last_name)
 
     @property
     def first_name(self):
+        """
+        Returns the user's first name.
+        """
         return self.entry["player_first_name"]
 
     @property
     def last_name(self):
+        """
+        Returns the user's last name.
+        """
         return self.entry["player_last_name"]
 
     @property
     def region_long(self):
+        """
+        Returns the user's full region name.
+        """
         return self.entry["player_region_name"]
 
     @property
     def region_short(self):
+        """
+        Returns the user's short region name.
+        """
         return self.entry["player_region_short_iso"]
 
     @property
     def total_transfers(self):
+        """
+        Returns the user's total transfer amount.
+        """
         return self.entry["total_transfers"]
 
     @property
     def joined_time(self):
+        """
+        Returns the gameweek that the user joined.
+        """
         return self.entry["joined_time"]
 
     @property
     def team_value(self):
+        """
+        Returns the user's team value.
+        """
         return self.entry["value"] / 10.0
 
     @property
     def bank(self):
+        """
+        Returns the amount of money the user has in the bank.
+        """
         return self.entry["bank"] / 10.0
 
     @property
     def total_value(self):
+        """
+        Returns the user's total value (team value + bank)
+        """
         return self.team_value + self.bank
 
     @property
     def favourite_team(self):
+        """
+        Returns the user's favourite team.
+        """
         return self.entry["favourite_team"]
 
 if __name__ == '__main__':
     user = User(3523615)
-    
+    print(json.dumps(user.wildcards))
