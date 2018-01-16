@@ -7,7 +7,6 @@ class User(object):
     """
     A class representing a user of the Fantasy Premier League.
     """
-
     def __init__(self, user_id):
         self.id = user_id
 

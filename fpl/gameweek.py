@@ -5,7 +5,7 @@ API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 
 class Gameweek(object):
     """
-    A class representing a gameweek of the Fantasy Premier League
+    A class representing a gameweek of the Fantasy Premier League.
     """
     def __init__(self, gameweek):
         self.__dict__ = gameweek
