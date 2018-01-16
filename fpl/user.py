@@ -13,7 +13,7 @@ class User(object):
 
         self.cup = self._cup()
         self.history = self._history()
-        # self.picks = self._picks()
+        self.picks = self._picks()
         self.transfers = self._transfers()
 
     def _cup(self):
@@ -74,21 +74,42 @@ class User(object):
     def h2h(self):
         return self.leagues["h2h"]
 
-    # def _picks(self):
-    #     """
-    #     Returns a dictionary containing all the picks of the user.
-    #     """
-    #     picks = {}
-    #     for gameweek in range(1, 39):
-    #         pick = requests.get("{}entry/{}/event/{}/picks".format(
-    #             API_BASE_URL, self.id, gameweek))
+    def _picks(self):
+        """
+        Returns a dictionary containing information about the user's chip usage,
+        automatic substitutions and picks, alongside general information about
+        each gameweek.
+        """
+        picks = {}
+        for gameweek in range(1, 39):
+            pick = requests.get("{}entry/{}/event/{}/picks".format(
+                API_BASE_URL, self.id, gameweek))
 
-    #         if pick.status_code == 404:
-    #             return picks
+            if pick.status_code == 404:
+                return picks
 
-    #         picks[gameweek] = pick.json()
+            picks[gameweek] = pick.json()
 
-    #     return picks
+        return picks
+
+    def team(self, gameweek):
+        """
+        Returns a list of the user's team in the specified gameweek.
+        """
+        return self.picks[gameweek]["picks"]
+
+    def chip(self, gameweek):
+        """
+        Returns the chip used by the user in the specified gameweek.
+        """
+        return self.picks[gameweek]["active_chip"]
+
+    def automatic_subs(self, gameweek):
+        """
+        Returns a list of the automatic substitutions of the user in the
+        specified gameweek.
+        """
+        return self.picks[gameweek]["automatic_subs"]
 
     def _transfers(self):
         """
@@ -192,4 +213,4 @@ class User(object):
 
 if __name__ == '__main__':
     user = User(3523615)
-    print(json.dumps(user.wildcards))
+    print(json.dumps(user.chip(4)))
