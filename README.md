@@ -8,7 +8,7 @@ Installing python-fpl
 
 The recommended way to install fpl-python is via ``pip``.
 
-   pip install fpl
+    pip install fpl
 
 Depending on your system, you may need to use ``pip3`` to install packages for python 3.
 
