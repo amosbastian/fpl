@@ -212,7 +212,3 @@ class User(object):
     #     Returns the user's favourite team.
     #     """
     #     return self.entry["favourite_team"]
-
-if __name__ == '__main__':
-    user = User(3523615)
-    print(user.player_first_name)

@@ -5991,3 +5991,7 @@ class FPL():
         """
         return requests.get("{}leagues-h2h-standings/{}".format(
             API_BASE_URL, league_id)).json()
+
+if __name__ == '__main__':
+    fpl = FPL()
+    print(fpl.gameweeks[0])
