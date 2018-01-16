@@ -117,7 +117,7 @@ class User(object):
 
     @property
     def total_value(self):
-        return self.team_value * self.bank
+        return self.team_value + self.bank
 
     @property
     def favourite_team(self):
@@ -125,4 +125,4 @@ class User(object):
 
 if __name__ == '__main__':
     user = User(3523615)
-    print(user.name)
+    
