@@ -16,6 +16,8 @@ class User(object):
         self.picks = self._picks()
         self.transfers = self._transfers()
 
+        self.__dict__ = self.entry
+
     def _cup(self):
         """
         Returns a dictionary with information about the cup progression of the
@@ -134,83 +136,83 @@ class User(object):
         """
         return self.transfers["history"]
 
-    @property
-    def name(self):
-        """
-        Returns the user's full name.
-        """
-        return "{} {}".format(self.first_name, self.last_name)
+    # @property
+    # def name(self):
+    #     """
+    #     Returns the user's full name.
+    #     """
+    #     return "{} {}".format(self.first_name, self.last_name)
 
-    @property
-    def first_name(self):
-        """
-        Returns the user's first name.
-        """
-        return self.entry["player_first_name"]
+    # @property
+    # def first_name(self):
+    #     """
+    #     Returns the user's first name.
+    #     """
+    #     return self.entry["player_first_name"]
 
-    @property
-    def last_name(self):
-        """
-        Returns the user's last name.
-        """
-        return self.entry["player_last_name"]
+    # @property
+    # def last_name(self):
+    #     """
+    #     Returns the user's last name.
+    #     """
+    #     return self.entry["player_last_name"]
 
-    @property
-    def region_long(self):
-        """
-        Returns the user's full region name.
-        """
-        return self.entry["player_region_name"]
+    # @property
+    # def region_long(self):
+    #     """
+    #     Returns the user's full region name.
+    #     """
+    #     return self.entry["player_region_name"]
 
-    @property
-    def region_short(self):
-        """
-        Returns the user's short region name.
-        """
-        return self.entry["player_region_short_iso"]
+    # @property
+    # def region_short(self):
+    #     """
+    #     Returns the user's short region name.
+    #     """
+    #     return self.entry["player_region_short_iso"]
 
-    @property
-    def total_transfers(self):
-        """
-        Returns the user's total transfer amount.
-        """
-        return self.entry["total_transfers"]
+    # @property
+    # def total_transfers(self):
+    #     """
+    #     Returns the user's total transfer amount.
+    #     """
+    #     return self.entry["total_transfers"]
 
-    @property
-    def joined_time(self):
-        """
-        Returns the gameweek that the user joined.
-        """
-        return self.entry["joined_time"]
+    # @property
+    # def joined_time(self):
+    #     """
+    #     Returns the gameweek that the user joined.
+    #     """
+    #     return self.entry["joined_time"]
 
-    @property
-    def team_value(self):
-        """
-        Returns the user's team value.
-        """
-        return self.entry["value"] / 10.0
+    # @property
+    # def team_value(self):
+    #     """
+    #     Returns the user's team value.
+    #     """
+    #     return self.entry["value"] / 10.0
 
-    @property
-    def bank(self):
-        """
-        Returns the amount of money the user has in the bank.
-        """
-        return self.entry["bank"] / 10.0
+    # @property
+    # def bank(self):
+    #     """
+    #     Returns the amount of money the user has in the bank.
+    #     """
+    #     return self.entry["bank"] / 10.0
 
-    @property
-    def total_value(self):
-        """
-        Returns the user's total value (team value + bank)
-        """
-        return self.team_value + self.bank
+    # @property
+    # def total_value(self):
+    #     """
+    #     Returns the user's total value (team value + bank)
+    #     """
+    #     return self.team_value + self.bank
 
-    @property
-    def favourite_team(self):
-        """
-        Returns the user's favourite team.
-        """
-        return self.entry["favourite_team"]
+    # @property
+    # def favourite_team(self):
+    #     """
+    #     Returns the user's favourite team.
+    #     """
+    #     return self.entry["favourite_team"]
 
 if __name__ == '__main__':
     user = User(3523615)
-    print(json.dumps(user.chip(4)))
+    print(user.player_first_name)
