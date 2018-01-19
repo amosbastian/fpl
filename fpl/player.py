@@ -7,58 +7,24 @@ class Player(object):
     """
     A class representing a player in the Fantasy Premier League.
     """
-    def __init__(self, player):
-        self.__dict__ = player
-        self.additional = self._additional()
+    def __init__(self, player_id):
+        self.id = player_id
 
-    def _additional(self):
+    @property
+    def specific(self):
         """
-        Returns additional information that isn't included in the other list of
-        players.
+        Returns the player with the specific player_id.
         """
         return requests.get("{}element-summary/{}".format(API_BASE_URL,
             self.id)).json()
 
     @property
-    def history_past(self):
+    def additional(self):
         """
-        Returns a list containing information about the player's performance
-        in previous seasons.
+        Returns additional information that isn't included in the other list of
+        players.
         """
-        return self.additional["history_past"]
-
-    @property
-    def fixtures_summary(self):
-        """
-        Returns a list containing a summary of the player's upcoming fixtures.
-        """
-        return self.additional["fixtures_summary"]
-
-    @property
-    def explain(self):
-        """
-        Returns a list containing some information about something (I'm not
-        exactly sure what it is yet).
-        """
-        return self.additional["explain"]
-
-    @property
-    def history_summary(self):
-        """
-        Returns a list containing a summary of the player's history.
-        """
-        return self.additional["history_summary"]
-
-    @property
-    def fixtures(self):
-        """
-        Returns a list of the player's upcoming fixtures.
-        """
-        return self.additional["fixtures"]
-
-    @property
-    def history(self):
-        """
-        Returns a list of the player's history.
-        """
-        return self.additional["history"]
+        response = requests.get("{}elements".format(API_BASE_URL)).json()
+        for player in response:
+            if player["id"] == self.id:
+                return player
