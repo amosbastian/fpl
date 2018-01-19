@@ -9,9 +9,9 @@ class Gameweek(object):
     """
     def __init__(self, gameweek):
         self.__dict__ = gameweek
-        self.additional = self._additional()
 
-    def _additional(self):
+    @property
+    def additional(self):
         return requests.get("{}event/{}/live".format(API_BASE_URL,
             self.id)).json()
 
