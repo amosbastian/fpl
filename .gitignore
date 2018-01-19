@@ -5,6 +5,7 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # Distribution
 dist/
@@ -15,3 +16,5 @@ build/
 docs/_build/
 docs/_static/
 docs/_templates/
+
+.idea/
