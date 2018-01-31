@@ -1,6 +1,8 @@
 import json
 import requests
 
+API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+
 class ClassicLeague(object):
     """
     A class representing a classic league in the Fantasy Premier League.
@@ -16,7 +18,7 @@ class ClassicLeague(object):
         self.created = self._league["created"]
         self.started = self._league["start_event"]
 
-        self.standings = self._information["results"]
+        self.standings = self._information["standings"]["results"]
 
     @property
     def type(self):
@@ -25,5 +27,7 @@ class ClassicLeague(object):
 
     def _information(self):
         return requests.get("{}leagues-classic-standings/{}".format(
-            API_BASE_URL, league_id)).json()
+            API_BASE_URL, self.id)).json()
         
+if __name__ == '__main__':
+    print(json.dumps(ClassicLeague(743038).standings))
