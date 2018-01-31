@@ -9,23 +9,49 @@ class User(object):
     """
     def __init__(self, user_id):
         self.id = user_id
-        self.__dict__ = self.entry
+        self._information = self._information()
+        self._entry = self._information["entry"]
 
-    @property
-    def cup(self):
+        # General user information
+        self.first_name = self._entry["player_first_name"]
+        self.second_name = self._entry["player_last_name"]
+        self.team_name = self._entry["name"]
+        self.email = self._entry["email"]
+        self.favourite_team = self._entry["favourite_team"]
+        
+        # Region information
+        self.region_id = self._entry["player_region_id"]
+        self.region_name = self._entry["player_region_name"]
+        self.region_short = self._entry["player_region_short_iso"]
+        
+        # Overall score
+        self.overall_points = self._entry["summary_overall_points"]
+        self.overall_rank = self._entry["summary_overall_rank"]
+
+        # Gameweek information
+        self.gameweek_points = self._entry["summary_event_points"]
+        self.gameweek_rank = self._entry["summary_event_rank"]
+        self.gameweek_transfers = self._entry["event_transfers"]
+        self.gameweek_started = self._entry["started_event"]
+        self.gameweek_hit = self._entry["event_transfers_cost"]
+        self.current_gameweek = self._entry["current_event"]
+        
+        # Transfer and team value information
+        self.total_transfers = self._entry["total_transfers"]
+        self.bank = self._entry["bank"] / 10.0
+        self.team_value = self._entry["value"] / 10.0
+        self.free_transfers = self._entry["extra_free_transfers"]
+
+        # Cup information
+        self.cup_status = self._information["cup_status"]
+        self.cup_matches = self._information["cup_matches"]
+
+    def _information(self):
         """
-        Returns a dictionary with information about the cup progression of the
-        user.
+        Returns some general information about the user.
         """
         return requests.get("{}entry/{}/cup".format(API_BASE_URL,
             self.id)).json()
-
-    @property
-    def entry(self):
-        """
-        Returns a dictionary containing information about the user.
-        """
-        return self.cup["entry"]
 
     @property
     def history(self):
@@ -62,13 +88,17 @@ class User(object):
     @property
     def classic(self):
         """
-        Returns a list containing information about all the leagues that the
-        user is currently participating in.
+        Returns a list containing information about all the classic leagues that
+        the user is currently participating in.
         """
         return self.leagues["classic"]
 
     @property
     def h2h(self):
+        """
+        Returns a list containing information about all the h2h leagues that
+        the user is currently participating in.
+        """
         return self.leagues["h2h"]
 
     @property
@@ -102,7 +132,7 @@ class User(object):
         """
         return self.picks[gameweek]["active_chip"]
 
-    def automatic_subs(self, gameweek):
+    def automatic_substitutions(self, gameweek):
         """
         Returns a list of the automatic substitutions of the user in the
         specified gameweek.
@@ -132,3 +162,6 @@ class User(object):
         Returns a list containing information about the user's transfer history.
         """
         return self.transfers["history"]
+
+if __name__ == '__main__':
+    print(json.dumps(User(3523615).cup_status))
