@@ -1,11 +1,5 @@
 import requests
 import json
-from user import User
-from team import Team
-from player import Player
-from gameweek import Gameweek
-from classic_league import ClassicLeague
-from h2h_league import H2HLeague
 
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 
@@ -89,4 +83,5 @@ class FPL():
 
 if __name__ == '__main__':
     fpl = FPL()
-    print(fpl.classic_league(743038))
+    for player in fpl.classic_league(521697).standings["results"]:
+        print(player["entry_name"], player["start_event"])
