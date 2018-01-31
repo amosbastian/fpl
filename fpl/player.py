@@ -47,36 +47,42 @@ class Player(object):
 
     @property
     def team(self):
-        """Conveŕt team number to actual Team object"""
+        """Converts team number to actual Team object"""
         return self._additional["team"]
 
     @property
     def position(self):
-        """Convert number to actual position"""
+        """Converts number to actual position."""
         return self._additional["element_type"]
 
     @property
     def explain(self):
+        """Information about the player's upcoming fixture."""
         return self._specific["explain"]
 
     @property
     def fixtures(self):
+        """List of the player's upcoming fixtures."""
         return self._specific["fixtures"]
 
     @property
     def history_summary(self):
+        """List of the player's performance in his three most recent games."""
         return self._specific["history_summary"]
 
     @property
     def fixtures_summary(self):
+        """List of the player's closest three upcoming fixtures."""
         return self._specific["fixtures_summary"]
 
     @property
     def history_past(self):
+        """List of a summary of the player's performance in previous seasons."""
         return self._specific["history_past"]
 
     @property
     def history(self):
+        """List of the player's performance in fixtures of this season."""
         return self._specific["history"]
 
     def _specific(self):
@@ -97,4 +103,4 @@ class Player(object):
                 return player
 
 if __name__ == '__main__':
-    print(Player(1).name)
+    print(json.dumps(Player(1).history_summary))
