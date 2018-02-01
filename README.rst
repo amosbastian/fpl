@@ -1,4 +1,4 @@
-python-fpl
+fpl
 =====================
 
 |pypi| |docs|
