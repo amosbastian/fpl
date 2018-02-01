@@ -1,7 +1,5 @@
-API
+FPL
 ===
 
-.. automodule:: fpl
+.. autoclass:: fpl.fpl.FPL
     :members:
-    :undoc-members:
-    :show-inheritance:
