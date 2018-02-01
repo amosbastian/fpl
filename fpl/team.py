@@ -31,7 +31,3 @@ class Team(object):
 
     def __str__(self):
         return self.name
-
-if __name__ == '__main__':
-    team = Team(1)
-    print(team.next_fixture)
