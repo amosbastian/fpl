@@ -42,6 +42,3 @@ class Gameweek(object):
     def _additional(self):
         return requests.get("{}event/{}/live".format(API_BASE_URL,
             self.id)).json()
-
-if __name__ == '__main__':
-    print(json.dumps(Gameweek(1)._additional["fixtures"]))

@@ -101,6 +101,3 @@ class Player(object):
         for player in response:
             if player["id"] == self.id:
                 return player
-
-if __name__ == '__main__':
-    print(json.dumps(Player(1).history_summary))

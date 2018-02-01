@@ -29,6 +29,3 @@ class H2HLeague(object):
     def _information(self):
         return requests.get("{}leagues-h2h-standings/{}".format(
             API_BASE_URL, self.id)).json()
-        
-if __name__ == '__main__':
-    print(json.dumps(H2HLeague(28281).standings))

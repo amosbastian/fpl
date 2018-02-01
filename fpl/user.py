@@ -162,6 +162,3 @@ class User(object):
         Returns a list containing information about the user's transfer history.
         """
         return self.transfers["history"]
-
-if __name__ == '__main__':
-    print(json.dumps(User(3523615).cup_status))

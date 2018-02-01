@@ -20,6 +20,3 @@ class Team(object):
     def _information(self):
         response = requests.get("{}teams".format(API_BASE_URL)).json()
         return response[self.id - 1]
-
-if __name__ == '__main__':
-    print(json.dumps(Team(1)._information))
