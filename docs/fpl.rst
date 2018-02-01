@@ -1,5 +1,5 @@
 FPL
 ===
 
-.. autoclass:: fpl.fpl.FPL
+.. autoclass:: fpl.FPL
     :members:
