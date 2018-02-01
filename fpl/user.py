@@ -12,38 +12,54 @@ class User(object):
         self._information = self._information()
         self._entry = self._information["entry"]
 
-        # General user information
+        #: The user's first name.
         self.first_name = self._entry["player_first_name"]
+        #: The user's second name.
         self.second_name = self._entry["player_last_name"]
+        #: The user's team's name.
         self.team_name = self._entry["name"]
+        #: The user's email address.
         self.email = self._entry["email"]
+        #: The user's favourite team.
         self.favourite_team = self._entry["favourite_team"]
         
-        # Region information
+        #: The user's region's ID.
         self.region_id = self._entry["player_region_id"]
+        #: The user's region's name.
         self.region_name = self._entry["player_region_name"]
+        #: The user's region's short ISO.
         self.region_short = self._entry["player_region_short_iso"]
         
-        # Overall score
+        #: The user's overall points.
         self.overall_points = self._entry["summary_overall_points"]
+        #: The user's overall rank.
         self.overall_rank = self._entry["summary_overall_rank"]
 
-        # Gameweek information
+        #: The user's points in the current gameweek.
         self.gameweek_points = self._entry["summary_event_points"]
+        #: The user's rank in the current gameweek.
         self.gameweek_rank = self._entry["summary_event_rank"]
+        #: The amount of transfers made by the user in the current gameweek.
         self.gameweek_transfers = self._entry["event_transfers"]
+        #: The gameweek the user started playing.
         self.gameweek_started = self._entry["started_event"]
+        #: The point hit the user took in the current gameweek.
         self.gameweek_hit = self._entry["event_transfers_cost"]
+        #: Information about the user's current gameweek performance.
         self.current_gameweek = self._entry["current_event"]
         
-        # Transfer and team value information
+        #: The user's total transfers.
         self.total_transfers = self._entry["total_transfers"]
+        #: The amount of money the user has in the bank.
         self.bank = self._entry["bank"] / 10.0
+        #: The user's team's value.
         self.team_value = self._entry["value"] / 10.0
+        #: The amount of free transfers the user currently has.
         self.free_transfers = self._entry["extra_free_transfers"]
 
-        # Cup information
+        #: The user's cup status.
         self.cup_status = self._information["cup_status"]
+        #: The user's cup matches.
         self.cup_matches = self._information["cup_matches"]
 
     def _information(self):
@@ -123,12 +139,16 @@ class User(object):
     def team(self, gameweek):
         """
         Returns a list of the user's team in the specified gameweek.
+
+        :param int player_id: The gameweek (1-38)
         """
         return self.picks[gameweek]["picks"]
 
     def chip(self, gameweek):
         """
         Returns the chip used by the user in the specified gameweek.
+
+        :param int player_id: The gameweek (1-38)
         """
         return self.picks[gameweek]["active_chip"]
 
@@ -136,6 +156,8 @@ class User(object):
         """
         Returns a list of the automatic substitutions of the user in the
         specified gameweek.
+
+        :param int player_id: The gameweek (1-38)
         """
         return self.picks[gameweek]["automatic_subs"]
 
