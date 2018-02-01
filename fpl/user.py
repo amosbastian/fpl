@@ -166,7 +166,3 @@ class User(object):
     def __str__(self):
         return "{} {} - {}".format(self.first_name, self.second_name,
             self.region_name)
-
-if __name__ == '__main__':
-    user = User(3523615)
-    print(str(user))
