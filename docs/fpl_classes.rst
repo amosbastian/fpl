@@ -5,6 +5,7 @@ Working with fpl's classes
    :maxdepth: 2
    :caption: Classes
 
+   classes/fpl
    classes/classic_league
    classes/gameweek
    classes/h2h_league

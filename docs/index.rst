@@ -11,7 +11,6 @@ Getting Started
 
    installation
    examples
-   fpl
    fpl_classes
 
 
