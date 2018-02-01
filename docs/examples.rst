@@ -8,15 +8,11 @@ To print the name, region and rank of a user we can simply do the following
 
 .. code-block:: python
 
-    fpl = fpl.FPL()
-    user = fpl.user("3523615")
+    from fpl.user import User
 
-    print("Name:\t{} {}\nRegion:\t{}\nRank:\t{}".format(
-        user["entry"]["player_first_name"],
-        user["entry"]["player_last_name"],
-        user["entry"]["player_region_name"],
-        user["entry"]["summary_overall_rank"]
-    ))
+    user = User(3523615)
+    print("Name:\t{} {}\nRegion:\t{}\nRank:\t{}".format(user.first_name,
+        user.second_name, user.region_name, user.overall_rank))
 
 which outputs
 

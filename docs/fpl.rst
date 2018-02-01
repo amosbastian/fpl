@@ -1,5 +1,5 @@
-FPL
-===========
+Player
+================
 
-.. autoclass:: fpl.fpl.FPL
-    :members:
+.. autoclass:: fpl.fpl.Player
+   :members:
