@@ -21,8 +21,6 @@ Documentation and examples for `fpl` can be found at http://fpl.readthedocs.io/e
 
 .. |pypi| image:: https://badge.fury.io/py/fpl.svg
   :target: https://pypi.python.org/pypi/fpl/0.3.0
-  :alt: Latest version released on PyPi
 
-.. |docs| image:: https://readthedocs.org/projects/riot-watcher/badge/?version=latest
-  :target: http://riot-watcher.readthedocs.io/en/latest/?badge=latest
-  :alt: Documentation Status
+.. |docs| image:: https://readthedocs.org/projects/fpl/badge/?version=latest
+  :target: http://fpl.readthedocs.io/en/latest/
