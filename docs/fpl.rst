@@ -1,7 +1,5 @@
 FPL
 ===========
 
-.. autoclass:: fpl.FPL
+.. autoclass:: fpl.fpl.FPL
     :members:
-    :undoc-members:
-    :show-inheritance:
