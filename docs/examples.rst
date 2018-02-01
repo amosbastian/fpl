@@ -25,9 +25,9 @@ which outputs
 
 Printing a list of the top 10 goalscorers
 -----------------------------------------
-
-If we want to find out the top goalscorers we can simply create a dictionary of 
-`player_id`s with the amount of goals scored and then sort it, as follows
+If we want to find out the top goalscorers we can simply get a list of all
+players using the `get_player()` function and then sort them the amount of goals
+they have scored.
 
 .. code-block:: python
 
