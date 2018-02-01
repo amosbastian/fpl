@@ -28,3 +28,6 @@ class ClassicLeague(object):
     def _information(self):
         return requests.get("{}leagues-classic-standings/{}".format(
             API_BASE_URL, self.id)).json()
+
+    def __str__(self):
+        return "{} - {}".format(self.name, self.id)

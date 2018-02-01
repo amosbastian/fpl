@@ -20,3 +20,6 @@ class Team(object):
     def _information(self):
         response = requests.get("{}teams".format(API_BASE_URL)).json()
         return response[self.id - 1]
+
+    def __str__(self):
+        return self.name

@@ -42,3 +42,6 @@ class Gameweek(object):
     def _additional(self):
         return requests.get("{}event/{}/live".format(API_BASE_URL,
             self.id)).json()
+
+    def __str__(self):
+        return "{} - {}".format(self.name, self.deadline)
