@@ -1,5 +1,5 @@
 FPL
 ===========
 
-.. autoclass:: fpl.fpl_test.FPL
+.. autoclass:: fpl.user.User
     :members:
