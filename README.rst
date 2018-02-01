@@ -5,7 +5,7 @@ fpl
 
 A Python wrapper around the Fantasy Premier League API.
 
-Installing python-fpl
+Installing fpl
 ---------------------
 
 The recommended way to install fpl-python is via ``pip``.
