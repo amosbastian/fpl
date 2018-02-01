@@ -164,12 +164,8 @@ class User(object):
         return self.transfers["history"]
 
     def __str__(self):
-        overall_points = "Overall points:\t\t{}".format(self.overall_points)
-        overall_rank = "Overall rank:\t\t{}".format(self.overall_rank)
-        gameweek_points = "Gameweek points:\t{}".format(self.gameweek_points)
-        return "{} {} - {}\n{}\n{}\n{}".format(self.first_name,
-            self.second_name, self.region_name, overall_points, overall_rank,
-            gameweek_points)
+        return "{} {} - {}".format(self.first_name, self.second_name,
+            self.region_name)
 
 if __name__ == '__main__':
     user = User(3523615)
