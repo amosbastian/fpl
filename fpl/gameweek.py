@@ -59,7 +59,3 @@ class Gameweek(object):
 
     def __str__(self):
         return "{} - {}".format(self.name, self.deadline)
-
-if __name__ == '__main__':
-    gameweek = Gameweek(1)
-    print(json.dumps(gameweek._additional))
