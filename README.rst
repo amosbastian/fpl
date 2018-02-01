@@ -20,7 +20,7 @@ Documentation and examples for `fpl` can be found at http://fpl.readthedocs.io/e
 
 
 .. |pypi| image:: https://badge.fury.io/py/fpl.svg
-  :target: https://pypi.python.org/pypi/fpl/0.3.0
+  :target: https://pypi.python.org/pypi/fpl/
 
 .. |docs| image:: https://readthedocs.org/projects/fpl/badge/?version=latest
   :target: http://fpl.readthedocs.io/en/latest/
