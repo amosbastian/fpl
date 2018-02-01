@@ -11,12 +11,13 @@ To print the name, region and rank of a user we can simply do the following
     from fpl.user import User
 
     user = User(3523615)
+
     print("Name:\t{} {}\nRegion:\t{}\nRank:\t{}".format(user.first_name,
         user.second_name, user.region_name, user.overall_rank))
 
 which outputs
 
-.. code-block:: default
+.. code-block:: none
 
     Name:   Amos Bastian
     Region: Netherlands
@@ -30,44 +31,28 @@ If we want to find out the top goalscorers we can simply create a dictionary of
 
 .. code-block:: python
 
-    import fpl
-    import json
+    from fpl import FPL
+    from fpl.player import Player
 
-    def build_form():
-        """
-        Returns dictionary with the amount of goals scored by each player.
-        """
-        player_form = {}
+    fpl = FPL()
 
-        for player in players:
-            player_id = player["id"]
-            goals_scored = player["goals_scored"]
-            player_form[player_id] = goals_scored
+    players = fpl.get_players()
 
-        return player_form
-
-    if __name__ == '__main__':
-        fpl = fpl.FPL()
-        players = fpl.players
-        player_form = build_form()
-        sorted_players = sorted(player_form.items(), key=lambda x:x[1],
-            reverse=True)
-
-        for player in sorted_players[:10]:
-            print("Player with id {} has scored {} goals!".format(player[0],
-                player[1]))
+    for player in sorted(players, key=lambda x: x.goals, reverse=True)[:10]:
+        print("{0:10} - {1:2} goals".format(player.name, player.goals))
 
 with example output:
 
-.. code-block:: default
+.. code-block:: none
 
-    Player with id 394 has scored 20 goals!
-    Player with id 234 has scored 18 goals!
-    Player with id 247 has scored 14 goals!
-    Player with id 257 has scored 13 goals!
-    Player with id 161 has scored 10 goals!
-    Player with id 235 has scored 10 goals!
-    Player with id 285 has scored 10 goals!
-    Player with id 472 has scored 10 goals!
-    Player with id 209 has scored 9 goals!
-    Player with id 28 has scored 8 goals!
+    Kane       - 21 goals
+    Salah      - 19 goals
+    Agüero     - 17 goals
+    Sterling   - 14 goals
+    Vardy      - 11 goals
+    Firmino    - 11 goals
+    Lukaku     - 11 goals
+    Rooney     - 10 goals
+    Morata     - 10 goals
+    Lacazette  -  9 goals
+
