@@ -17,9 +17,9 @@ class ClassicLeague(object):
 
         #: The name of the league.
         self.name = self._league["name"]
-        #: When the league was created.
+        #: The date the league was created.
         self.created = self._league["created"]
-        #: Which gameweek the league started.
+        #: The gameweek the league started in.
         self.started = self._league["start_event"]
 
         self.standings = self._information["standings"]["results"]
