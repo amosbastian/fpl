@@ -3,6 +3,56 @@ import requests
 
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 
+def team_converter(team_id):
+    if team_id == 1:
+        return "Arsenal"
+    elif team_id == 2:
+        return "Bournemouth"
+    elif team_id == 3:
+        return "Brighton"
+    elif team_id == 4:
+        return "Burnley"
+    elif team_id == 5:
+        return "Chelsea"
+    elif team_id == 6:
+        return "Crystal Palace"
+    elif team_id == 7:
+        return "Everton"
+    elif team_id == 8:
+        return "Huddersfield"
+    elif team_id == 9:
+        return "Leicester"
+    elif team_id == 10:
+        return "Liverpool"
+    elif team_id == 11:
+        return "Man City"
+    elif team_id == 12:
+        return "Man Utd"
+    elif team_id == 13:
+        return "Newcastle"
+    elif team_id == 14:
+        return "Southampton"
+    elif team_id == 15:
+        return "Stoke"
+    elif team_id == 16:
+        return "Swansea"
+    elif team_id == 17:
+        return "Spurs"
+    elif team_id == 18:
+        return "Watford"
+    else:
+        return "West Brom"
+
+def position_converter(position):
+    if position == 1:
+        return "Goalkeeper"
+    elif position == 2:
+        return "Defender"
+    elif position == 3:
+        return "Midfielder"
+    else:
+        return "Forward"
+
 class Player(object):
     """
     A class representing a player in the Fantasy Premier League.
@@ -38,6 +88,8 @@ class Player(object):
         self.yellow_cards = self._additional["yellow_cards"]
         self.red_cards = self._additional["red_cards"]
         self.selected_by = float(self._additional["selected_by_percent"])
+        self.team_id = self._additional["team"]
+        self.type = self._additional["element_type"]
 
 
     @property
@@ -48,12 +100,12 @@ class Player(object):
     @property
     def team(self):
         """Converts team number to actual Team object"""
-        return self._additional["team"]
+        return team_converter(self.team_id)
 
     @property
     def position(self):
         """Converts number to actual position."""
-        return self._additional["element_type"]
+        return position_converter(self.type)
 
     @property
     def explain(self):
@@ -101,3 +153,6 @@ class Player(object):
         for player in response:
             if player["id"] == self.id:
                 return player
+
+    def __str__(self):
+        return "{} - {} - {}".format(player.name, player.position, player.team)
