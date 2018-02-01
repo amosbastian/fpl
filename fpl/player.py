@@ -4,6 +4,9 @@ import requests
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 
 def team_converter(team_id):
+    """
+    Converts a team's ID to their actual name.
+    """
     if team_id == 1:
         return "Arsenal"
     elif team_id == 2:
@@ -44,6 +47,9 @@ def team_converter(team_id):
         return "West Brom"
 
 def position_converter(position):
+    """
+    Converts a player's `element_type` too their actual position.
+    """
     if position == 1:
         return "Goalkeeper"
     elif position == 2:
@@ -62,33 +68,53 @@ class Player(object):
         self._specific = self._specific()
         self._additional = self._additional()
 
-        # Player names
+        #: The player's web name.
         self.name = self._additional["web_name"]
+        #: The player's first name.
         self.first_name = self._additional["first_name"]
+        #: The player's second name.
         self.second_name = self._additional["second_name"]
 
-        # Gameweek and transfer information
+        #: The player's points in the current gameweek.
         self.gameweek_points = self._additional["event_points"]
+        #: The player's price change in the current gameweek.
         self.gameweek_price_change = self._additional["cost_change_event"]
+        #: The player's transfers in in the current gameweek.
         self.gameweek_transfers_in = self._additional["transfers_in_event"]
+        #: The player's transfers out in the current gameweek.
         self.gameweek_transfers_out = self._additional["transfers_out_event"]
+        #: The player's transfers in in the current season.
         self.transfers_in = self._additional["transfers_in"]
+        #: The player's transfers out in the current season.
         self.transfers_out = self._additional["transfers_out"]
 
-        # General information
+        #: The player's current price.
         self.price = self._additional["now_cost"] / 10.0
-        self.goals = self._additional["goals_scored"]        
+        #: The amount of goals scored by the player.
+        self.goals = self._additional["goals_scored"]
+        #: The amount of goals assisted by the player.
         self.assists = self._additional["assists"]
+        #: The amount of clean sheets the player has had.
         self.clean_sheets = self._additional["clean_sheets"]
+        #: The amount of saves the player has made.
         self.saves = self._additional["saves"]
+        #: The amount of points the player scores per game on average.
         self.ppg = self._additional["points_per_game"]
+        #: The amount of minutes the player has played.
         self.minutes = self._additional["minutes"]
+        #: The amount of bonus points the player has scored.
         self.bps = self._additional["bps"]
+        #: The amount of penalties the player has missed.
         self.penalties_missed = self._additional["penalties_missed"]
+        #: The amount of yellow cards the player has received.
         self.yellow_cards = self._additional["yellow_cards"]
+        #: The amount of red cards the player has received.
         self.red_cards = self._additional["red_cards"]
+        #: The percentage of users the player is selected by.
         self.selected_by = float(self._additional["selected_by_percent"])
+        #: The ID of the team the player plays for.
         self.team_id = self._additional["team"]
+        #: The type of player the player is (1, 2, 3 or 4).
         self.type = self._additional["element_type"]
 
 
@@ -99,12 +125,12 @@ class Player(object):
 
     @property
     def team(self):
-        """Converts team number to actual Team object"""
+        """A `Team` object of the team the player plays for."""
         return team_converter(self.team_id)
 
     @property
     def position(self):
-        """Converts number to actual position."""
+        """The position that the player plays in."""
         return position_converter(self.type)
 
     @property
