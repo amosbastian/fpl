@@ -48,7 +48,7 @@ def team_converter(team_id):
 
 def position_converter(position):
     """
-    Converts a player's `element_type` too their actual position.
+    Converts a player's `element_type` to their actual position.
     """
     if position == 1:
         return "Goalkeeper"
@@ -63,18 +63,29 @@ class Player(object):
     """
     A class representing a player in the Fantasy Premier League.
     """
-    def __init__(self, player_id):
-        self.id = player_id
-        self._specific = self._specific()
-        self._additional = self._additional()
+    def __init__(self, player_id, additional):
+        self._id = player_id
+        self._specific = self._get_specific()
+        self._additional = additional
 
-        #: The player's web name.
-        self.name = self._additional["web_name"]
+        #: The amount of goals assisted by the player.
+        self.assists = self._additional["assists"]
+        #: The amount of bonus points the player has scored.
+        self.bps = self._additional["bps"]
+        #: The amount of clean sheets the player has had.
+        self.clean_sheets = self._additional["clean_sheets"]
+        #: Information about the player's upcoming fixture.
+        self.explain = self._specific["explain"]
         #: The player's first name.
         self.first_name = self._additional["first_name"]
-        #: The player's second name.
-        self.second_name = self._additional["second_name"]
-
+        #: List of the player's upcoming fixtures.
+        self.fixtures = self._specific["fixtures"]
+        #: List of the player's closest three upcoming fixtures.
+        self.fixtures_summary = self._specific["fixtures_summary"]
+        #: The player's form.
+        self.form = self._additional["form"]
+        #: The amount of games a player has played in.
+        self.games_played = self._games_played()
         #: The player's points in the current gameweek.
         self.gameweek_points = self._additional["event_points"]
         #: The player's price change in the current gameweek.
@@ -83,102 +94,82 @@ class Player(object):
         self.gameweek_transfers_in = self._additional["transfers_in_event"]
         #: The player's transfers out in the current gameweek.
         self.gameweek_transfers_out = self._additional["transfers_out_event"]
+        #: The amount of goals scored by the player.
+        self.goals = self._additional["goals_scored"]
+        #: List of the player's performance in fixtures of the current season.
+        self.history = self._specific["history"]
+        #: List of a summary of the player's performance in previous seasons.
+        self.history_past = self._specific["history_past"]
+        #: List of the player's performance in his three most recent games.
+        self.history_summary = self._specific["history_summary"]    
+        #: The amount of minutes the player has played.
+        self.minutes = self._additional["minutes"]
+        #: The player's web name.
+        self.name = self._additional["web_name"]
+        #: News about the player.
+        self.news = self._additional["news"]
+        #: The amount of penalties the player has missed.
+        self.penalties_missed = self._additional["penalties_missed"]
+        #: The type of player the player is (1, 2, 3 or 4).
+        self.player_type = self._additional["element_type"]
+        #: The amount of points a player has scored this season.
+        self.points = self._additional["total_points"]
+        #: The position that the player plays in.
+        self.position = position_converter(self.player_type)
+        #: The amount of points the player scores per game on average.
+        self.ppg = self._additional["points_per_game"]
+        #: The amount of points the player scores per 90 minutes.
+        self.pp90 = self._pp90()
+        #: The player's current price.
+        self.price = self._additional["now_cost"] / 10.0
+        #: The amount of red cards the player has received.
+        self.red_cards = self._additional["red_cards"]
+        #: The amount of saves the player has made.
+        self.saves = self._additional["saves"]
+        #: The player's second name.
+        self.second_name = self._additional["second_name"]
+        #: The percentage of users the player is selected by.
+        self.selected_by = float(self._additional["selected_by_percent"])
+        #: The status of the player, which can be available, injured or ...
+        self.status = self._additional["status"]
+        #: The player's squad number.
+        self.squad_number = self._additional["squad_number"]
+        #: The ID of the team the player plays for.
+        self.team_id = self._additional["team"]
+        #: The team the player currently plays for.
+        self.team = team_converter(self.team_id)
         #: The player's transfers in in the current season.
         self.transfers_in = self._additional["transfers_in"]
         #: The player's transfers out in the current season.
         self.transfers_out = self._additional["transfers_out"]
-
-        #: The player's current price.
-        self.price = self._additional["now_cost"] / 10.0
-        #: The amount of goals scored by the player.
-        self.goals = self._additional["goals_scored"]
-        #: The amount of goals assisted by the player.
-        self.assists = self._additional["assists"]
-        #: The amount of clean sheets the player has had.
-        self.clean_sheets = self._additional["clean_sheets"]
-        #: The amount of saves the player has made.
-        self.saves = self._additional["saves"]
-        #: The amount of points the player scores per game on average.
-        self.ppg = self._additional["points_per_game"]
-        #: The amount of minutes the player has played.
-        self.minutes = self._additional["minutes"]
-        #: The amount of bonus points the player has scored.
-        self.bps = self._additional["bps"]
-        #: The amount of penalties the player has missed.
-        self.penalties_missed = self._additional["penalties_missed"]
         #: The amount of yellow cards the player has received.
         self.yellow_cards = self._additional["yellow_cards"]
-        #: The amount of red cards the player has received.
-        self.red_cards = self._additional["red_cards"]
-        #: The percentage of users the player is selected by.
-        self.selected_by = float(self._additional["selected_by_percent"])
-        #: The ID of the team the player plays for.
-        self.team_id = self._additional["team"]
-        #: The type of player the player is (1, 2, 3 or 4).
-        self.type = self._additional["element_type"]
 
 
-    @property
-    def status(self):
-        """The status of the player, which can be available, injured or ..."""
-        return self._additional["status"]
-
-    @property
-    def team(self):
-        """A `Team` object of the team the player plays for."""
-        return team_converter(self.team_id)
-
-    @property
-    def position(self):
-        """The position that the player plays in."""
-        return position_converter(self.type)
-
-    @property
-    def explain(self):
-        """Information about the player's upcoming fixture."""
-        return self._specific["explain"]
-
-    @property
-    def fixtures(self):
-        """List of the player's upcoming fixtures."""
-        return self._specific["fixtures"]
-
-    @property
-    def history_summary(self):
-        """List of the player's performance in his three most recent games."""
-        return self._specific["history_summary"]
-
-    @property
-    def fixtures_summary(self):
-        """List of the player's closest three upcoming fixtures."""
-        return self._specific["fixtures_summary"]
-
-    @property
-    def history_past(self):
-        """List of a summary of the player's performance in previous seasons."""
-        return self._specific["history_past"]
-
-    @property
-    def history(self):
-        """List of the player's performance in fixtures of this season."""
-        return self._specific["history"]
-
-    def _specific(self):
+    def _get_specific(self):
         """
         Returns the player with the specific player_id.
         """
         return requests.get("{}element-summary/{}".format(API_BASE_URL,
-            self.id)).json()
+            self._id)).json()
 
-    def _additional(self):
+
+    def _games_played(self):
         """
-        Returns additional information that isn't included in the other list of
-        players.
+        Returns the amount of games a player has played in.
         """
-        response = requests.get("{}elements".format(API_BASE_URL)).json()
-        for player in response:
-            if player["id"] == self.id:
-                return player
+        return sum([1 for fixture in self.fixtures if fixture["minutes"] > 0])
+
+
+    def _pp90(self):
+        """
+        Returns the amount of points a player scores per 90 minutes played.
+        """
+        if self.minutes == 0:
+            return 0
+        else:
+            return self.points / float(self.minutes)
+
 
     def __str__(self):
-        return "{} - {} - {}".format(player.name, player.position, player.team)
+        return "{} - {} - {}".format(self.name, self.position, self.team)
