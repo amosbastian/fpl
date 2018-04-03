@@ -7,7 +7,9 @@ from .gameweek import Gameweek
 from .h2h_league import H2HLeague
 from .classic_league import ClassicLeague
 
+
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+
 
 class FPL():
     def get_user(self, user_id):
@@ -19,12 +21,14 @@ class FPL():
         """
         return User(user_id)
 
+
     def get_teams(self):
         """
         Returns a list of `Team` objects of the teams currently participating 
         in the Premier League.
         """
         return[Team(team_id) for team_id in range(1, 20)]
+
 
     def get_team(self, team_id):
         """
@@ -56,6 +60,7 @@ class FPL():
             19 - West Brom
         """
         return Team(team_id)
+
 
     def get_players(self):
         """
