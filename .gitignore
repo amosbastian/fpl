@@ -1,5 +1,6 @@
 # virtualenv
 env/
+venv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -18,6 +19,4 @@ docs/_static/
 docs/_templates/
 
 .idea/
-
-# Not ready yet
-fpl/fixture.py
+.vscode/
