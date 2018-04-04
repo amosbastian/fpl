@@ -27,7 +27,7 @@ class FPL():
         Returns a list of `Team` objects of the teams currently participating 
         in the Premier League.
         """
-        return[Team(team_id) for team_id in range(1, 20)]
+        return[Team(team_id) for team_id in range(1, 21)]
 
 
     def get_team(self, team_id):
