@@ -22,7 +22,7 @@ class ClassicLeague(object):
         #: The gameweek the league started in.
         self.started = self._league["start_event"]
 
-        self.standings = self._information["standings"]["results"]
+        self.standings = self._standings() 
         """
         A list (of dictionaries) containing information about the league's
         standings.
@@ -37,6 +37,19 @@ class ClassicLeague(object):
         """Returns information about the given league."""
         return requests.get("{}leagues-classic-standings/{}".format(
             API_BASE_URL, self.id)).json()
+            
+    def _standings():
+        """Returns league standings for all teams."""
+        standings = []
+        # iterate through all available pages
+        for page in itertools.count(start=1):
+            url = "{}leagues-classic-standings/{}?ls-page={}".format(API_BASE_URL, self.id, page)
+            page_results = requests.get(url).json()['standings']['results']
+            # check if page exists 
+            if page_results:
+                standings.extend(page_results)
+            else:
+                return standings 
 
     def __str__(self):
         return "{} - {}".format(self.name, self.id)
