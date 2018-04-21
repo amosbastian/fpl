@@ -1,5 +1,6 @@
 import json
 import requests
+import itertools 
 
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 
@@ -38,7 +39,7 @@ class ClassicLeague(object):
         return requests.get("{}leagues-classic-standings/{}".format(
             API_BASE_URL, self.id)).json()
             
-    def _standings():
+    def _standings(self):
         """Returns league standings for all teams."""
         standings = []
         # iterate through all available pages
