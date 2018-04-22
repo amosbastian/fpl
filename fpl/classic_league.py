@@ -44,7 +44,8 @@ class ClassicLeague(object):
         standings = []
         # iterate through all available pages
         for page in itertools.count(start=1):
-            url = "{}leagues-classic-standings/{}?ls-page={}".format(API_BASE_URL, self.id, page)
+            url = "{}leagues-classic-standings/{}?ls-page={}".format(
+                API_BASE_URL, self.id, page)
             page_results = requests.get(url).json()['standings']['results']
             # check if page exists 
             if page_results:
