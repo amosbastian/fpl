@@ -7,10 +7,12 @@ class H2HLeague(object):
     """
     A class representing a h2h league in the Fantasy Premier League.
     """
-    def __init__(self, league_id):
+    def __init__(self, league_id):        
         self.id = league_id
         self._information = self._information()
         self._league = self._information["league"]
+        # login to static fpl account, authentication required for h2h fixtures 
+        self._session = login_session("fpl-test@emailsy.info", "fpl-test")
 
         #: A dictionary containing information about new entries to the league.
         self.new_entries = self._information["new_entries"]
@@ -30,6 +32,12 @@ class H2HLeague(object):
         standings.
         """
 
+        self.fixtures = self._fixtures()
+        """
+        A list (of dictionaries) containing information about the league's
+        standings.
+        """
+
     @property
     def type(self):
         """The type of league that the league is."""
@@ -43,55 +51,45 @@ class H2HLeague(object):
     def __str__(self):
         return "{} - {}".format(self.name, self.id)
         
-    
-    def get_fixtures(self, email, password):
-        """
-        Returns h2h results and fixtures for the given league.
-        Login to FPL is required to access this data.
-        
-        :param string user: email 
-        :param string password: password
-        """
-        # login to FPL
-        session = self.login_session(email, password)
-        
+    def _fixtures(self):
+        """Returns h2h results/fixtures for given league, login required."""       
         fixtures = []
         # iterate through all available pages
         for page in itertools.count(start=1):
-            url = "{}leagues-entries-and-h2h-matches/league/{}?page={}".format(API_BASE_URL, self.id, page)
-            page_results = session.get(url).json()['matches']['results']
+            url = "{}leagues-entries-and-h2h-matches/league/{}?page={}".format(
+                API_BASE_URL, self.id, page)
+            page_results = self._session.get(url).json()['matches']['results']
             # check if page exists 
             if page_results:
                 fixtures.extend(page_results)
             else:
                 return fixtures 
             
-            
-    def login_session(self, email, password):
-        """
-        Returns a requests session with FPL login authentication.
         
-        :param string user: email 
-        :param string password: password 
-        """
-        session = requests.Session()
         
-        # initial request to retrieve csrftoken
-        session.get('https://fantasy.premierleague.com/')
-        csrftoken = session.cookies['csrftoken']
-        
-        # login request 
-        body = {
-            'csrfmiddlewaretoken': csrftoken, 
-            'login': email, 
-            'password': password, 
-            'app': 'plfpl-web',
-            'redirect_uri': 'https://fantasy.premierleague.com/a/login'
-        }
-        response = session.post('https://users.premierleague.com/accounts/login/', data=body)
-        assert "Sign Out" in response.text, "Login unsuccessful, check credentials" 
-        
-        return session
+def login_session(email, password):
+    """
+    Returns a requests session with FPL login authentication.
     
-   
+    :param string user: email 
+    :param string password: password 
+    """
+    session = requests.Session()
     
+    # initial request to retrieve csrftoken
+    session.get('https://fantasy.premierleague.com/')
+    csrftoken = session.cookies['csrftoken']
+    
+    # login request 
+    body = {
+        'csrfmiddlewaretoken': csrftoken, 
+        'login': email, 
+        'password': password, 
+        'app': 'plfpl-web',
+        'redirect_uri': 'https://fantasy.premierleague.com/a/login'
+    }
+    login_url = 'https://users.premierleague.com/accounts/login/'
+    response = session.post(login_url, data=body)
+    assert "Sign Out" in response.text, "Login unsuccessful, check credentials" 
+    
+    return session
