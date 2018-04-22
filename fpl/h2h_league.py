@@ -7,7 +7,7 @@ class H2HLeague(object):
     """
     A class representing a h2h league in the Fantasy Premier League.
     """
-    def __init__(self, league_id):        
+    def __init__(self, league_id):
         self.id = league_id
         self._information = self._information()
         self._league = self._information["league"]
@@ -46,7 +46,7 @@ class H2HLeague(object):
     def _information(self):
         """Returns information about the given league."""
         return requests.get("{}leagues-h2h-standings/{}".format(
-            API_BASE_URL, self.id)).json()    
+            API_BASE_URL, self.id)).json()
 
     def __str__(self):
         return "{} - {}".format(self.name, self.id)
