@@ -1,8 +1,8 @@
-import json
+import itertools
 import requests
-import itertools 
 
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+
 
 class ClassicLeague(object):
     """
@@ -10,7 +10,7 @@ class ClassicLeague(object):
     """
     def __init__(self, league_id):
         self.id = league_id
-        self._information = self._information()
+        self._information = self._get_information()
         self._league = self._information["league"]
 
         #: A dictionary containing information about new entries to the league.
@@ -23,7 +23,7 @@ class ClassicLeague(object):
         #: The gameweek the league started in.
         self.started = self._league["start_event"]
 
-        self.standings = self._standings() 
+        self.standings = self._standings()
         """
         A list (of dictionaries) containing information about the league's
         standings.
@@ -34,24 +34,24 @@ class ClassicLeague(object):
         """The type of league that the league is."""
         return self._league["league_type"]
 
-    def _information(self):
+    def _get_information(self):
         """Returns information about the given league."""
         return requests.get("{}leagues-classic-standings/{}".format(
             API_BASE_URL, self.id)).json()
-            
+
     def _standings(self):
         """Returns league standings for all teams."""
         standings = []
-        # iterate through all available pages
+        # Iterate through all available pages
         for page in itertools.count(start=1):
             url = "{}leagues-classic-standings/{}?ls-page={}".format(
                 API_BASE_URL, self.id, page)
             page_results = requests.get(url).json()['standings']['results']
-            # check if page exists 
+            # Check if page exists
             if page_results:
                 standings.extend(page_results)
             else:
-                return standings 
+                return standings
 
     def __str__(self):
         return "{} - {}".format(self.name, self.id)
