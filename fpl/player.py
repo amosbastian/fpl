@@ -1,7 +1,7 @@
-import json
 import requests
 
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+
 
 def team_converter(team_id):
     """
@@ -43,8 +43,8 @@ def team_converter(team_id):
         return "Spurs"
     elif team_id == 18:
         return "Watford"
-    else:
-        return "West Brom"
+    return "West Brom"
+
 
 def position_converter(position):
     """
@@ -58,6 +58,7 @@ def position_converter(position):
         return "Midfielder"
     else:
         return "Forward"
+
 
 class Player(object):
     """
@@ -101,7 +102,7 @@ class Player(object):
         #: List of a summary of the player's performance in previous seasons.
         self.history_past = self._specific["history_past"]
         #: List of the player's performance in his three most recent games.
-        self.history_summary = self._specific["history_summary"]    
+        self.history_summary = self._specific["history_summary"]
         #: The amount of minutes the player has played.
         self.minutes = self._additional["minutes"]
         #: The player's web name.
@@ -145,14 +146,12 @@ class Player(object):
         #: The amount of yellow cards the player has received.
         self.yellow_cards = self._additional["yellow_cards"]
 
-
     def _get_specific(self):
         """
         Returns the player with the specific player_id.
         """
-        return requests.get("{}element-summary/{}".format(API_BASE_URL,
-            self._id)).json()
-
+        return requests.get(
+            "{}element-summary/{}".format(API_BASE_URL, self._id)).json()
 
     def _games_played(self):
         """
@@ -160,16 +159,13 @@ class Player(object):
         """
         return sum([1 for fixture in self.fixtures if fixture["minutes"] > 0])
 
-
     def _pp90(self):
         """
         Returns the amount of points a player scores per 90 minutes played.
         """
         if self.minutes == 0:
             return 0
-        else:
-            return self.points / float(self.minutes)
-
+        return self.points / float(self.minutes)
 
     def __str__(self):
         return "{} - {} - {}".format(self.name, self.position, self.team)
