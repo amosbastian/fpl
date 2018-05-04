@@ -14,25 +14,23 @@ API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 class FPL():
     def get_user(self, user_id):
         """
-        Returns a `User` object containing information about the user with the 
+        Returns a `User` object containing information about the user with the
         given `user_id`.
 
         :param string user_id: A user's id
         """
         return User(user_id)
 
-
     def get_teams(self):
         """
-        Returns a list of `Team` objects of the teams currently participating 
+        Returns a list of `Team` objects of the teams currently participating
         in the Premier League.
         """
         return[Team(team_id) for team_id in range(1, 21)]
 
-
     def get_team(self, team_id):
         """
-        Returns a `Team` object containing information about the team with the 
+        Returns a `Team` object containing information about the team with the
         given `team_id`.
 
         :param string user_id: A team's id
@@ -61,10 +59,9 @@ class FPL():
         """
         return Team(team_id)
 
-
     def get_players(self):
         """
-        Returns a list of `Player` objects of all players currently playing for 
+        Returns a list of `Player` objects of all players currently playing for
         teams in the Premier League.
         """
         players = []
@@ -77,13 +74,11 @@ class FPL():
             return []
         return players
 
-
     def get_gameweeks(self):
         """
         Returns a list `Gameweek` objects.
         """
         return [Gameweek(gameweek_id) for gameweek_id in range(1, 38)]
-
 
     def get_gameweek(self, gameweek_id):
         """
@@ -93,13 +88,11 @@ class FPL():
         """
         return Gameweek(gameweek_id)
 
-
     def game_settings(self):
         """
         Returns a dictionary containing the Fantasy Premier League's rules.
         """
         return requests.get("{}game-settings".format(API_BASE_URL)).json()
-
 
     def get_classic_league(self, league_id):
         """
@@ -108,7 +101,6 @@ class FPL():
         :param string league_id: A league's id
         """
         return ClassicLeague(league_id)
-
 
     def get_h2h_league(self, league_id):
         """

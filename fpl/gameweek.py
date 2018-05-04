@@ -1,7 +1,7 @@
-import json
 import requests
 
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+
 
 class Gameweek(object):
     """
@@ -9,9 +9,9 @@ class Gameweek(object):
     """
     def __init__(self, gameweek_id):
         self.id = gameweek_id
-        
-        self._additional = self._additional()
-        self._specific = self._specific()
+
+        self._additional = self._get_additional()
+        self._specific = self._get_specific()
 
         #: A `datetime` object of the gameweek's deadline.
         self.deadline = self._specific["deadline_time"]
@@ -45,17 +45,17 @@ class Gameweek(object):
     @property
     def players(self):
         """
-        Returns a dictionary containing all players that played in the gameweek.
+        Returns a dictionary containing all players that played in the gameweek
         """
         return self._additional["elements"]
 
-    def _specific(self):
+    def _get_specific(self):
         response = requests.get("{}events".format(API_BASE_URL)).json()
         return response[self.id - 1]
 
-    def _additional(self):
-        return requests.get("{}event/{}/live".format(API_BASE_URL,
-            self.id)).json()
+    def _get_additional(self):
+        return requests.get(
+            "{}event/{}/live".format(API_BASE_URL, self.id)).json()
 
     def __str__(self):
         return "{} - {}".format(self.name, self.deadline)

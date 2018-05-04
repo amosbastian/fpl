@@ -1,7 +1,7 @@
-import json
 import requests
 
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+
 
 class User(object):
     """
@@ -9,7 +9,7 @@ class User(object):
     """
     def __init__(self, user_id):
         self.id = user_id
-        self._information = self._information()
+        self._information = self._get_information()
         self._entry = self._information["entry"]
 
         #: The user's first name.
@@ -22,14 +22,14 @@ class User(object):
         self.email = self._entry["email"]
         #: The user's favourite team.
         self.favourite_team = self._entry["favourite_team"]
-        
+
         #: The user's region's ID.
         self.region_id = self._entry["player_region_id"]
         #: The user's region's name.
         self.region_name = self._entry["player_region_name"]
         #: The user's region's short ISO.
         self.region_short = self._entry["player_region_short_iso"]
-        
+
         #: The user's overall points.
         self.overall_points = self._entry["summary_overall_points"]
         #: The user's overall rank.
@@ -47,7 +47,7 @@ class User(object):
         self.gameweek_hit = self._entry["event_transfers_cost"]
         #: Information about the user's current gameweek performance.
         self.current_gameweek = self._entry["current_event"]
-        
+
         #: The user's total transfers.
         self.total_transfers = self._entry["total_transfers"]
         #: The amount of money the user has in the bank.
@@ -62,26 +62,26 @@ class User(object):
         #: The user's cup matches.
         self.cup_matches = self._information["cup_matches"]
 
-    def _information(self):
+    def _get_information(self):
         """
         Returns some general information about the user.
         """
-        return requests.get("{}entry/{}/cup".format(API_BASE_URL,
-            self.id)).json()
+        return requests.get(
+            "{}entry/{}/cup".format(API_BASE_URL, self.id)).json()
 
     @property
     def history(self):
         """
         Returns a dictionary containing the history of the user.
         """
-        return requests.get("{}entry/{}/history".format(API_BASE_URL,
-            self.id)).json()
+        return requests.get(
+            "{}entry/{}/history".format(API_BASE_URL, self.id)).json()
 
     @property
     def season(self):
         """
-        Returns a list containing information about each of the seasons the user
-        has participated in.
+        Returns a list containing information about each of the seasons the
+        user has participated in.
         """
         return self.history["season"]
 
@@ -104,8 +104,8 @@ class User(object):
     @property
     def classic(self):
         """
-        Returns a list containing information about all the classic leagues that
-        the user is currently participating in.
+        Returns a list containing information about all the classic leagues
+        that the user is currently participating in.
         """
         return self.leagues["classic"]
 
@@ -120,9 +120,9 @@ class User(object):
     @property
     def picks(self):
         """
-        Returns a dictionary containing information about the user's chip usage,
-        automatic substitutions and picks, alongside general information about
-        each gameweek.
+        Returns a dictionary containing information about the user's chip
+        usage, automatic substitutions and picks, alongside general
+        information about each gameweek.
         """
         picks = {}
         for gameweek in range(1, 39):
@@ -167,8 +167,8 @@ class User(object):
         Returns a dictionary containing information about all the transfers the
         user has made so far.
         """
-        return requests.get("{}entry/{}/transfers".format(API_BASE_URL,
-            self.id)).json()
+        return requests.get(
+            "{}entry/{}/transfers".format(API_BASE_URL, self.id)).json()
 
     @property
     def wildcards(self):
@@ -181,10 +181,11 @@ class User(object):
     @property
     def transfer_history(self):
         """
-        Returns a list containing information about the user's transfer history.
+        Returns a list containing information about the user's transfer
+        history.
         """
         return self.transfers["history"]
 
     def __str__(self):
-        return "{} {} - {}".format(self.first_name, self.second_name,
-            self.region_name)
+        return "{} {} - {}".format(
+            self.first_name, self.second_name, self.region_name)
