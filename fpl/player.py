@@ -43,7 +43,9 @@ def team_converter(team_id):
         return "Spurs"
     elif team_id == 18:
         return "Watford"
-    return "West Brom"
+    elif team_id == 19:
+        return "West Brom"
+    return "West Ham"
 
 
 def position_converter(position):
