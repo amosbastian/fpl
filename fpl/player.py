@@ -7,46 +7,30 @@ def team_converter(team_id):
     """
     Converts a team's ID to their actual name.
     """
-    if team_id == 1:
-        return "Arsenal"
-    elif team_id == 2:
-        return "Bournemouth"
-    elif team_id == 3:
-        return "Brighton"
-    elif team_id == 4:
-        return "Burnley"
-    elif team_id == 5:
-        return "Chelsea"
-    elif team_id == 6:
-        return "Crystal Palace"
-    elif team_id == 7:
-        return "Everton"
-    elif team_id == 8:
-        return "Huddersfield"
-    elif team_id == 9:
-        return "Leicester"
-    elif team_id == 10:
-        return "Liverpool"
-    elif team_id == 11:
-        return "Man City"
-    elif team_id == 12:
-        return "Man Utd"
-    elif team_id == 13:
-        return "Newcastle"
-    elif team_id == 14:
-        return "Southampton"
-    elif team_id == 15:
-        return "Stoke"
-    elif team_id == 16:
-        return "Swansea"
-    elif team_id == 17:
-        return "Spurs"
-    elif team_id == 18:
-        return "Watford"
-    elif team_id == 19:
-        return "West Brom"
-    return "West Ham"
-
+    team_map = {
+        1: "Arsenal", 
+        2: "Bournemouth", 
+        3: "Brighton", 
+        4: "Burnley", 
+        5: "Cardiff", 
+        6: "Chelsea", 
+        7: "Crystal Palace", 
+        8: "Everton", 
+        9: "Fulham", 
+        10: "Huddersfield", 
+        11: "Leicester", 
+        12: "Liverpool", 
+        13: "Man City", 
+        14: "Man Utd", 
+        15: "Newcastle", 
+        16: "Southampton", 
+        17: "Spurs", 
+        18: "Watford", 
+        19: "West Ham", 
+        20: "Wolves" 
+    } 
+    return team_map[team_id] 
+    
 
 def position_converter(position):
     """
