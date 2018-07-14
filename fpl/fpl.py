@@ -41,21 +41,22 @@ class FPL():
              2 - Bournemouth
              3 - Brighton
              4 - Burnley
-             5 - Chelsea
-             6 - Crystal Palace
-             7 - Everton
-             8 - Huddersfield
-             9 - Leicester
-            10 - Liverpool
-            11 - Man City
-            12 - Man Utd
-            13 - Newcastle
-            14 - Southampton
-            15 - Stoke
-            16 - Swansea
+             5 - Cardiff
+             6 - Chelsea 
+             7 - Crystal Palace
+             8 - Everton 
+             9 - Fulham 
+            10 - Huddersfield
+            11 - Leicester 
+            12 - Liverpool 
+            13 - Man City
+            14 - Man Utd
+            15 - Newcastle 
+            16 - Southampton 
             17 - Spurs
             18 - Watford
-            19 - West Brom
+            19 - West Ham
+            20 - Wolves
         """
         return Team(team_id)
 
