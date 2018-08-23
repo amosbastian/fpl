@@ -1,18 +1,24 @@
+"""
+The FPL module.
+"""
 import requests
-import json
-from .user import User
-from .team import Team
-from .player import Player
-from .gameweek import Gameweek
-from .h2h_league import H2HLeague
-from .classic_league import ClassicLeague
 
+from .models.classic_league import ClassicLeague
+from .models.gameweek import Gameweek
+from .models.h2h_league import H2HLeague
+from .models.player import Player
+from .models.team import Team
+from .models.user import User
 
 API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 
 
 class FPL():
-    def get_user(self, user_id):
+    """
+    The FPL class.
+    """
+    @staticmethod
+    def get_user(user_id):
         """
         Returns a `User` object containing information about the user with the
         given `user_id`.
@@ -21,14 +27,16 @@ class FPL():
         """
         return User(user_id)
 
-    def get_teams(self):
+    @staticmethod
+    def get_teams():
         """
         Returns a list of `Team` objects of the teams currently participating
         in the Premier League.
         """
         return[Team(team_id) for team_id in range(1, 21)]
 
-    def get_team(self, team_id):
+    @staticmethod
+    def get_team(team_id):
         """
         Returns a `Team` object containing information about the team with the
         given `team_id`.
@@ -42,17 +50,17 @@ class FPL():
              3 - Brighton
              4 - Burnley
              5 - Cardiff
-             6 - Chelsea 
+             6 - Chelsea
              7 - Crystal Palace
-             8 - Everton 
-             9 - Fulham 
+             8 - Everton
+             9 - Fulham
             10 - Huddersfield
-            11 - Leicester 
-            12 - Liverpool 
+            11 - Leicester
+            12 - Liverpool
             13 - Man City
             14 - Man Utd
-            15 - Newcastle 
-            16 - Southampton 
+            15 - Newcastle
+            16 - Southampton
             17 - Spurs
             18 - Watford
             19 - West Ham
@@ -60,7 +68,8 @@ class FPL():
         """
         return Team(team_id)
 
-    def get_players(self):
+    @staticmethod
+    def get_players():
         """
         Returns a list of `Player` objects of all players currently playing for
         teams in the Premier League.
@@ -75,13 +84,15 @@ class FPL():
             return []
         return players
 
-    def get_gameweeks(self):
+    @staticmethod
+    def get_gameweeks():
         """
         Returns a list `Gameweek` objects.
         """
-        return [Gameweek(gameweek_id) for gameweek_id in range(1, 38)]
+        return [Gameweek(gameweek_id) for gameweek_id in range(1, 39)]
 
-    def get_gameweek(self, gameweek_id):
+    @staticmethod
+    def get_gameweek(gameweek_id):
         """
         Returns a `Gameweek` object of the specified gameweek.
 
@@ -89,13 +100,15 @@ class FPL():
         """
         return Gameweek(gameweek_id)
 
-    def game_settings(self):
+    @staticmethod
+    def game_settings():
         """
         Returns a dictionary containing the Fantasy Premier League's rules.
         """
         return requests.get("{}game-settings".format(API_BASE_URL)).json()
 
-    def get_classic_league(self, league_id):
+    @staticmethod
+    def get_classic_league(league_id):
         """
         Returns a `ClassicLeague` object with the given `league_id`.
 
@@ -103,7 +116,8 @@ class FPL():
         """
         return ClassicLeague(league_id)
 
-    def get_h2h_league(self, league_id):
+    @staticmethod
+    def get_h2h_league(league_id):
         """
         Returns a `H2HLeague` object with the given `league_id`.
 

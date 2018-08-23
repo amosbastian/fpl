@@ -8,7 +8,7 @@ class Gameweek(object):
     A class representing a gameweek of the Fantasy Premier League.
     """
     def __init__(self, gameweek_id):
-        self.id = gameweek_id
+        self.id = int(gameweek_id)
 
         self._additional = self._get_additional()
         self._specific = self._get_specific()
