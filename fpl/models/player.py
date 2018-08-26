@@ -1,6 +1,5 @@
+from ..constants import PLAYER_URL
 import requests
-
-API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 
 
 def team_converter(team_id):
@@ -8,27 +7,27 @@ def team_converter(team_id):
     Converts a team's ID to their actual name.
     """
     team_map = {
-        1: "Arsenal", 
-        2: "Bournemouth", 
-        3: "Brighton", 
-        4: "Burnley", 
-        5: "Cardiff", 
-        6: "Chelsea", 
-        7: "Crystal Palace", 
-        8: "Everton", 
-        9: "Fulham", 
-        10: "Huddersfield", 
-        11: "Leicester", 
-        12: "Liverpool", 
-        13: "Man City", 
-        14: "Man Utd", 
-        15: "Newcastle", 
-        16: "Southampton", 
-        17: "Spurs", 
-        18: "Watford", 
-        19: "West Ham", 
-        20: "Wolves" 
-    } 
+        1: "Arsenal",
+        2: "Bournemouth",
+        3: "Brighton",
+        4: "Burnley",
+        5: "Cardiff",
+        6: "Chelsea",
+        7: "Crystal Palace",
+        8: "Everton",
+        9: "Fulham",
+        10: "Huddersfield",
+        11: "Leicester",
+        12: "Liverpool",
+        13: "Man City",
+        14: "Man Utd",
+        15: "Newcastle",
+        16: "Southampton",
+        17: "Spurs",
+        18: "Watford",
+        19: "West Ham",
+        20: "Wolves"
+    }
     return team_map[team_id] 
 
 
@@ -136,8 +135,7 @@ class Player(object):
         """
         Returns the player with the specific player_id.
         """
-        return requests.get(
-            "{}element-summary/{}".format(API_BASE_URL, self._id)).json()
+        return requests.get(PLAYER_URL.format(self._id)).json()
 
     def _games_played(self):
         """

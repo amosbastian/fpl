@@ -1,16 +1,34 @@
 """
 The FPL module.
+
+Fantasy Premier League API:
+* https://fantasy.premierleague.com/drf/bootstrap-static
+* https://fantasy.premierleague.com/drf/bootstrap-dynamic
+* https://fantasy.premierleague.com/drf/entry/{user_id}
+* https://fantasy.premierleague.com/drf/entry/{user_id}/cup
+* https://fantasy.premierleague.com/drf/entry/{user_id}/event/{event_id}/picks
+* https://fantasy.premierleague.com/drf/entry/{user_id}/history
+* https://fantasy.premierleague.com/drf/entry/{user_id}/transfers
+* https://fantasy.premierleague.com/drf/elements
+* https://fantasy.premierleague.com/drf/element-summary/{player_id}
+* https://fantasy.premierleague.com/drf/events
+* https://fantasy.premierleague.com/drf/event/{event_id}/live
+* https://fantasy.premierleague.com/drf/fixtures/?event={event_id}
+* https://fantasy.premierleague.com/drf/game-settings
+* https://fantasy.premierleague.com/drf/my-team/{user_id}
+* https://fantasy.premierleague.com/drf/teams
+* https://fantasy.premierleague.com/drf/transfers
+* https://fantasy.premierleague.com/drf/leagues-classic-standings/{league_id}
 """
 import requests
 
+from .constants import PLAYER_URL, PLAYERS_URL, GAME_SETTINGS_URL
 from .models.classic_league import ClassicLeague
 from .models.gameweek import Gameweek
 from .models.h2h_league import H2HLeague
 from .models.player import Player
 from .models.team import Team
 from .models.user import User
-
-API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 
 
 class FPL():
@@ -41,7 +59,7 @@ class FPL():
         Returns a `Team` object containing information about the team with the
         given `team_id`.
 
-        :param string user_id: A team's id
+        :param int team_id: A team's id
 
         .. code-block:: none
 
@@ -69,13 +87,24 @@ class FPL():
         return Team(team_id)
 
     @staticmethod
+    def get_player(player_id):
+        """
+        Returns the `Player` object with the given `player_id`.
+
+        :param int player_id: A player's id
+        """
+        response = requests.get(PLAYER_URL.format(player_id))
+        if response.status_code == 200:
+            return Player()
+
+    @staticmethod
     def get_players():
         """
         Returns a list of `Player` objects of all players currently playing for
         teams in the Premier League.
         """
         players = []
-        response = requests.get("{}elements".format(API_BASE_URL))
+        response = requests.get(PLAYERS_URL)
         if response.status_code == 200:
             for player in response.json():
                 players.append(Player(player["id"], player))
@@ -96,7 +125,7 @@ class FPL():
         """
         Returns a `Gameweek` object of the specified gameweek.
 
-        :param int gameweek: The gameweek (1-38)
+        :param int gameweek_id: A gameweek's id.
         """
         return Gameweek(gameweek_id)
 
@@ -105,7 +134,7 @@ class FPL():
         """
         Returns a dictionary containing the Fantasy Premier League's rules.
         """
-        return requests.get("{}game-settings".format(API_BASE_URL)).json()
+        return requests.get(GAME_SETTINGS_URL).json()
 
     @staticmethod
     def get_classic_league(league_id):
