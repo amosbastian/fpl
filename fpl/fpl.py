@@ -2,27 +2,31 @@
 The FPL module.
 
 Fantasy Premier League API:
-* https://fantasy.premierleague.com/drf/bootstrap-static
-* https://fantasy.premierleague.com/drf/bootstrap-dynamic
-* https://fantasy.premierleague.com/drf/entry/{user_id}
-* https://fantasy.premierleague.com/drf/entry/{user_id}/cup
-* https://fantasy.premierleague.com/drf/entry/{user_id}/event/{event_id}/picks
-* https://fantasy.premierleague.com/drf/entry/{user_id}/history
-* https://fantasy.premierleague.com/drf/entry/{user_id}/transfers
-* https://fantasy.premierleague.com/drf/elements
-* https://fantasy.premierleague.com/drf/element-summary/{player_id}
-* https://fantasy.premierleague.com/drf/events
-* https://fantasy.premierleague.com/drf/event/{event_id}/live
-* https://fantasy.premierleague.com/drf/fixtures/?event={event_id}
-* https://fantasy.premierleague.com/drf/game-settings
-* https://fantasy.premierleague.com/drf/my-team/{user_id}
-* https://fantasy.premierleague.com/drf/teams
-* https://fantasy.premierleague.com/drf/transfers
-* https://fantasy.premierleague.com/drf/leagues-classic-standings/{league_id}
+* /bootstrap-static
+* /bootstrap-dynamic
+* /elements
+* /element-summary/{player_id}
+* /entry/{user_id}
+* /entry/{user_id}/cup
+* /entry/{user_id}/event/{event_id}/picks
+* /entry/{user_id}/history
+* /entry/{user_id}/transfers
+* /events
+* /event/{event_id}/live
+* /fixtures/?event={event_id}
+* /game-settings
+* /leagues-classic-standings/{league_id}
+* /leagues-classic-standings/{league_id}
+* /leagues-entries-and-h2h-matches/league/{league_id}
+* /leagues-h2h-standings/{league_id}
+* /my-team/{user_id}
+* /teams
+* /transfers
 """
+import os
 import requests
 
-from .constants import PLAYER_URL, PLAYERS_URL, GAME_SETTINGS_URL
+from .constants import API_URLS
 from .models.classic_league import ClassicLeague
 from .models.gameweek import Gameweek
 from .models.h2h_league import H2HLeague
@@ -35,15 +39,17 @@ class FPL():
     """
     The FPL class.
     """
-    @staticmethod
-    def get_user(user_id):
+    def __init__(self):
+        self.session = None
+
+    def get_user(self, user_id):
         """
         Returns a `User` object containing information about the user with the
         given `user_id`.
 
         :param string user_id: A user's id
         """
-        return User(user_id)
+        return User(user_id, session=self.session)
 
     @staticmethod
     def get_teams():
@@ -93,9 +99,10 @@ class FPL():
 
         :param int player_id: A player's id
         """
-        response = requests.get(PLAYER_URL.format(player_id))
-        if response.status_code == 200:
-            return Player()
+        # response = requests.get(API_URLS["player"].format(player_id))
+        # if response.status_code == 200:
+        #     return Player()
+        pass
 
     @staticmethod
     def get_players():
@@ -104,7 +111,7 @@ class FPL():
         teams in the Premier League.
         """
         players = []
-        response = requests.get(PLAYERS_URL)
+        response = requests.get(API_URLS["players"])
         if response.status_code == 200:
             for player in response.json():
                 players.append(Player(player["id"], player))
@@ -134,7 +141,7 @@ class FPL():
         """
         Returns a dictionary containing the Fantasy Premier League's rules.
         """
-        return requests.get(GAME_SETTINGS_URL).json()
+        return requests.get(API_URLS["settings"]).json()
 
     @staticmethod
     def get_classic_league(league_id):
@@ -145,11 +152,39 @@ class FPL():
         """
         return ClassicLeague(league_id)
 
-    @staticmethod
-    def get_h2h_league(league_id):
+    def get_h2h_league(self, league_id):
         """
         Returns a `H2HLeague` object with the given `league_id`.
 
         :param string league_id: A league's id
         """
-        return H2HLeague(league_id)
+        return H2HLeague(league_id, session=self.session)
+
+    def login(self, email=None, password=None):
+        """
+        Returns a requests session with FPL login authentication.
+
+        :param string user: email
+        :param string password: password
+        """
+        if not email and not password:
+            email = os.environ["FPL_EMAIL"]
+            password = os.environ["FPL_PASSWORD"]
+
+        session = requests.Session()
+
+        session.get("https://fantasy.premierleague.com/")
+        csrftoken = session.cookies["csrftoken"]
+
+        payload = {
+            "csrfmiddlewaretoken": csrftoken,
+            "login": email,
+            "password": password,
+            "app": "plfpl-web",
+            "redirect_uri": "https://fantasy.premierleague.com/a/login"
+        }
+
+        login_url = "https://users.premierleague.com/accounts/login/"
+        session.post(login_url, data=payload)
+
+        self.session = session
