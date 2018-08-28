@@ -1,6 +1,6 @@
 import requests
 
-API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+from ..constants import API_URLS
 
 
 class Gameweek(object):
@@ -50,12 +50,11 @@ class Gameweek(object):
         return self._additional["elements"]
 
     def _get_specific(self):
-        response = requests.get("{}events".format(API_BASE_URL)).json()
+        response = requests.get(API_URLS["gameweeks"]).json()
         return response[self.id - 1]
 
     def _get_additional(self):
-        return requests.get(
-            "{}event/{}/live".format(API_BASE_URL, self.id)).json()
+        return requests.get(API_URLS["gameweek_live"].format(self.id)).json()
 
     def __str__(self):
         return "{} - {}".format(self.name, self.deadline)

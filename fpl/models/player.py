@@ -1,4 +1,4 @@
-from ..constants import PLAYER_URL
+from ..constants import API_URLS
 import requests
 
 
@@ -135,7 +135,7 @@ class Player(object):
         """
         Returns the player with the specific player_id.
         """
-        return requests.get(PLAYER_URL.format(self._id)).json()
+        return requests.get(API_URLS["player"].format(self._id)).json()
 
     def _games_played(self):
         """

@@ -1,6 +1,6 @@
 import requests
 
-API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+from ..constants import API_URLS
 
 
 class Team(object):
@@ -21,7 +21,7 @@ class Team(object):
         self.next_fixture = self._information["next_event_fixture"][0]
 
     def _get_information(self):
-        response = requests.get("{}teams".format(API_BASE_URL)).json()
+        response = requests.get(API_URLS["teams"]).json()
         return response[self._id - 1]
 
     def __str__(self):

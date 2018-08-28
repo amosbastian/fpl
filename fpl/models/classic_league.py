@@ -1,7 +1,7 @@
 import itertools
 import requests
 
-API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+from ..constants import API_URLS
 
 
 class ClassicLeague(object):
@@ -24,10 +24,6 @@ class ClassicLeague(object):
         self.started = self._league["start_event"]
 
         self.standings = self._standings()
-        """
-        A list (of dictionaries) containing information about the league's
-        standings.
-        """
 
     @property
     def type(self):
@@ -36,18 +32,17 @@ class ClassicLeague(object):
 
     def _get_information(self):
         """Returns information about the given league."""
-        return requests.get("{}leagues-classic-standings/{}".format(
-            API_BASE_URL, self.id)).json()
+        return requests.get(API_URLS["league_classic"].format(self.id)).json()
 
     def _standings(self):
         """Returns league standings for all teams."""
         standings = []
-        # Iterate through all available pages
+
         for page in itertools.count(start=1):
-            url = "{}leagues-classic-standings/{}?ls-page={}".format(
-                API_BASE_URL, self.id, page)
+            url = "{}?ls-page={}".format(
+                API_URLS["league_classic"].format(self.id), page)
             page_results = requests.get(url).json()['standings']['results']
-            # Check if page exists
+
             if page_results:
                 standings.extend(page_results)
             else:
