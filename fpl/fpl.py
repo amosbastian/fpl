@@ -36,16 +36,13 @@ from .models.user import User
 
 
 class FPL():
-    """
-    The FPL class.
-    """
+    """The FPL class."""
     def __init__(self):
         self.session = None
 
     def get_user(self, user_id):
-        """
-        Returns a `User` object containing information about the user with the
-        given `user_id`.
+        """Returns a `User` object containing information about the user with
+        the given `user_id`.
 
         :param string user_id: A user's id
         """
@@ -53,17 +50,15 @@ class FPL():
 
     @staticmethod
     def get_teams():
-        """
-        Returns a list of `Team` objects of the teams currently participating
-        in the Premier League.
+        """Returns a list of `Team` objects of the teams currently
+        participating in the Premier League.
         """
         return[Team(team_id) for team_id in range(1, 21)]
 
     @staticmethod
     def get_team(team_id):
-        """
-        Returns a `Team` object containing information about the team with the
-        given `team_id`.
+        """Returns a `Team` object containing information about the team with
+        the given `team_id`.
 
         :param int team_id: A team's id
 
@@ -94,21 +89,16 @@ class FPL():
 
     @staticmethod
     def get_player(player_id):
-        """
-        Returns the `Player` object with the given `player_id`.
+        """Returns the `Player` object with the given `player_id`.
 
-        :param int player_id: A player's id
+        :param int player_id: A player's ID
         """
-        # response = requests.get(API_URLS["player"].format(player_id))
-        # if response.status_code == 200:
-        #     return Player()
-        pass
+        return Player(player_id, additional=None)
 
     @staticmethod
     def get_players():
-        """
-        Returns a list of `Player` objects of all players currently playing for
-        teams in the Premier League.
+        """Returns a list of `Player` objects of all players currently playing
+        for teams in the Premier League.
         """
         players = []
         response = requests.get(API_URLS["players"])
@@ -122,15 +112,12 @@ class FPL():
 
     @staticmethod
     def get_gameweeks():
-        """
-        Returns a list `Gameweek` objects.
-        """
+        """Returns a list `Gameweek` objects."""
         return [Gameweek(gameweek_id) for gameweek_id in range(1, 39)]
 
     @staticmethod
     def get_gameweek(gameweek_id):
-        """
-        Returns a `Gameweek` object of the specified gameweek.
+        """Returns a `Gameweek` object of the specified gameweek.
 
         :param int gameweek_id: A gameweek's id.
         """
@@ -138,31 +125,27 @@ class FPL():
 
     @staticmethod
     def game_settings():
-        """
-        Returns a dictionary containing the Fantasy Premier League's rules.
+        """Returns a dictionary containing the Fantasy Premier League's rules.
         """
         return requests.get(API_URLS["settings"]).json()
 
     @staticmethod
     def get_classic_league(league_id):
-        """
-        Returns a `ClassicLeague` object with the given `league_id`.
+        """Returns a `ClassicLeague` object with the given `league_id`.
 
         :param string league_id: A league's id
         """
         return ClassicLeague(league_id)
 
     def get_h2h_league(self, league_id):
-        """
-        Returns a `H2HLeague` object with the given `league_id`.
+        """Returns a `H2HLeague` object with the given `league_id`.
 
         :param string league_id: A league's id
         """
         return H2HLeague(league_id, session=self.session)
 
     def login(self, email=None, password=None):
-        """
-        Returns a requests session with FPL login authentication.
+        """Returns a requests session with FPL login authentication.
 
         :param string user: email
         :param string password: password
