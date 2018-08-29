@@ -36,8 +36,8 @@ class ClassicLeague(object):
         self.scoring_system = self._league["_scoring"]
         #: Whether the standings are being reprocessed.
         self.reprocessing_standings = self._league["reprocess_standings"]
-        #: The league admin's ID.
-        self.admin_id = self._league["admin_entry"]
+        #: Admin entry.
+        self.admin_entry = self._league["admin_entry"]
         #: The gameweek the league started in.
         self.started = self._league["start_event"]
 
