@@ -1,6 +1,7 @@
 import requests
 
 from ..constants import API_URLS
+from ..utils import team_converter
 
 
 def valid_gameweek(gameweek):
@@ -27,7 +28,7 @@ class User(object):
         #: The user's email address.
         self.email = self._entry["email"]
         #: The user's favourite team.
-        self.favourite_team = self._entry["favourite_team"]
+        self.favourite_team = team_converter(self._entry["favourite_team"])
 
         #: The user's region's ID.
         self.region_id = self._entry["player_region_id"]

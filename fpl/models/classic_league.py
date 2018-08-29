@@ -5,9 +5,7 @@ from ..constants import API_URLS
 
 
 class ClassicLeague(object):
-    """
-    A class representing a classic league in the Fantasy Premier League.
-    """
+    """A class representing a classic league in the Fantasy Premier League."""
     def __init__(self, league_id):
         self.id = league_id
         self._information = self._get_information()
@@ -18,35 +16,49 @@ class ClassicLeague(object):
 
         #: The name of the league.
         self.name = self._league["name"]
+        #: The shortname of the league.
+        self.short_name = self._league["short_name"]
         #: The date the league was created.
         self.created = self._league["created"]
+        #: Whether the league is closed or not.
+        self.closed = self._league["closed"]
+        #: Whether the league's forum is disabled.
+        self.forum_disabled = self._league["forum_disabled"]
+        #: Whether the league is public.
+        self.is_public = self._league["make_code_public"]
+        #: The league's rank.
+        self.rank = self._league["rank"]
+        #: The league's size.
+        self.size = self._league["size"]
+        #: The league's type.
+        self.league_type = self._league["league_type"]
+        #: The scoring system the league uses.
+        self.scoring_system = self._league["_scoring"]
+        #: Whether the standings are being reprocessed.
+        self.reprocessing_standings = self._league["reprocess_standings"]
+        #: The league admin's ID.
+        self.admin_id = self._league["admin_entry"]
         #: The gameweek the league started in.
         self.started = self._league["start_event"]
-
-        self.standings = self._standings()
-
-    @property
-    def type(self):
-        """The type of league that the league is."""
-        return self._league["league_type"]
 
     def _get_information(self):
         """Returns information about the given league."""
         return requests.get(API_URLS["league_classic"].format(self.id)).json()
 
-    def _standings(self):
-        """Returns league standings for all teams."""
+    def get_standings(self):
+        """Returns league standings for all teams in the league."""
         standings = []
 
         for page in itertools.count(start=1):
             url = "{}?ls-page={}".format(
                 API_URLS["league_classic"].format(self.id), page)
-            page_results = requests.get(url).json()['standings']['results']
+            page_results = requests.get(url).json()["standings"]["results"]
 
             if page_results:
                 standings.extend(page_results)
             else:
-                return standings
+                self.standings = standings
+                break
 
     def __str__(self):
         return "{} - {}".format(self.name, self.id)

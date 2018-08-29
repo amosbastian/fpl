@@ -4,7 +4,7 @@ import warnings
 from fpl import FPL
 
 
-class FPLTest(unittest.TestCase):
+class UserTest(unittest.TestCase):
     def setUp(self):
         self.fpl = FPL()
         warnings.filterwarnings("ignore", category=ResourceWarning,
