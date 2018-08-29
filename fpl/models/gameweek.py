@@ -1,12 +1,11 @@
 import requests
 
 from ..constants import API_URLS
+from .player import Player
 
 
 class Gameweek(object):
-    """
-    A class representing a gameweek of the Fantasy Premier League.
-    """
+    """A class representing a gameweek of the Fantasy Premier League."""
     def __init__(self, gameweek_id):
         self.id = int(gameweek_id)
 
@@ -36,18 +35,20 @@ class Gameweek(object):
 
     @property
     def fixtures(self):
-        """
-        A list of dictionaries containing information about the fixtures of
+        """A list of dictionaries containing information about the fixtures of
         the gameweek.
         """
         return self._additional["fixtures"]
 
-    @property
-    def players(self):
-        """
-        Returns a dictionary containing all players that played in the gameweek
-        """
-        return self._additional["elements"]
+    def get_players(self):
+        """Returns a list of players that played in the gameweek."""
+        player_ids = [int(player_id) for player_id
+                      in self._additional["elements"].keys()]
+        response = requests.get(API_URLS["players"]).json()
+        players = [Player(player["id"], player) for player in response
+                   if player["id"] in player_ids]
+
+        self.players = players
 
     def _get_specific(self):
         response = requests.get(API_URLS["gameweeks"]).json()
