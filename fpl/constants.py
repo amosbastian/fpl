@@ -2,8 +2,9 @@ API_BASE_URL = "https://fantasy.premierleague.com/drf/"
 
 API_URLS = {
     "dynamic": "{}bootstrap-dynamic".format(API_BASE_URL),
-    "fixtures": "{}fixtures/?event={{}}".format(API_BASE_URL),
+    "fixtures": "{}fixtures".format(API_BASE_URL),
     "gameweeks": "{}events".format(API_BASE_URL),
+    "gameweek_fixtures": "{}fixtures/?event={{}}".format(API_BASE_URL),
     "gameweek_live": "{}event/{{}}/live".format(API_BASE_URL),
     "h2h": "{}leagues-entries-and-h2h-matches/league/{{}}?page={{}}".format(
         API_BASE_URL),

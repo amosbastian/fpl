@@ -28,6 +28,7 @@ import requests
 
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
+from .models.fixture import Fixture
 from .models.gameweek import Gameweek
 from .models.h2h_league import H2HLeague
 from .models.player import Player
@@ -109,6 +110,32 @@ class FPL():
             print("Something went wrong, please try again later...")
             return []
         return players
+
+    @staticmethod
+    def get_fixture(fixture_id, gameweek=None):
+        """Returns the fixture with the given ID."""
+        if gameweek:
+            response = requests.get(API_URLS["gameweek_fixtures"].format(
+                gameweek)).json()
+        else:
+            response = requests.get(API_URLS["fixtures"]).json()
+
+        for fixture in response:
+            if fixture["id"] == fixture_id:
+                return Fixture(fixture)
+
+    @staticmethod
+    def get_fixtures(gameweek=None):
+        """Returns all possible fixtures, or all fixtures of a specific
+        gameweek.
+        """
+        if gameweek:
+            response = requests.get(API_URLS["gameweek_fixtures"].format(
+                gameweek)).json()
+        else:
+            response = requests.get(API_URLS["fixtures"]).json()
+
+        return [Fixture(fixture) for fixture in response]
 
     @staticmethod
     def get_gameweeks():

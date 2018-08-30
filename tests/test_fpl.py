@@ -3,6 +3,7 @@ import warnings
 
 from fpl import FPL
 from fpl.models.classic_league import ClassicLeague
+from fpl.models.fixture import Fixture
 from fpl.models.gameweek import Gameweek
 from fpl.models.h2h_league import H2HLeague
 from fpl.models.player import Player
@@ -38,6 +39,21 @@ class FPLTest(unittest.TestCase):
         players = self.fpl.get_players()
         self.assertIsInstance(players, list)
         self.assertIsInstance(players[0], Player)
+
+    def test_fixture(self):
+        fixture = self.fpl.get_fixture(6)
+        self.assertIsInstance(fixture, Fixture)
+        fixture = self.fpl.get_fixture(6, gameweek=1)
+        self.assertIsInstance(fixture, Fixture)
+
+    def test_fixtures(self):
+        fixtures = self.fpl.get_fixtures()
+        self.assertIsInstance(fixtures, list)
+        self.assertIsInstance(fixtures[0], Fixture)
+        fixtures = self.fpl.get_fixtures(gameweek=1)
+        self.assertEqual(len(fixtures), 10)
+        self.assertIsInstance(fixtures, list)
+        self.assertIsInstance(fixtures[0], Fixture)
 
     def test_gameweeks(self):
         gameweeks = self.fpl.get_gameweeks()
