@@ -1,14 +1,13 @@
 import requests
 
-API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+from ..constants import API_URLS
+from .player import Player
 
 
-class Gameweek(object):
-    """
-    A class representing a gameweek of the Fantasy Premier League.
-    """
+class Gameweek():
+    """A class representing a gameweek of the Fantasy Premier League."""
     def __init__(self, gameweek_id):
-        self.id = gameweek_id
+        self.gameweek_id = int(gameweek_id)
 
         self._additional = self._get_additional()
         self._specific = self._get_specific()
@@ -33,29 +32,33 @@ class Gameweek(object):
         self.best_player = self._specific["highest_scoring_entry"]
         #: The highest score of the gameweek.
         self.highest_score = self._specific["highest_score"]
+        #: The players that played in the gameweek.
+        self.players = None
 
     @property
     def fixtures(self):
-        """
-        A list of dictionaries containing information about the fixtures of
+        """A list of dictionaries containing information about the fixtures of
         the gameweek.
         """
         return self._additional["fixtures"]
 
-    @property
-    def players(self):
-        """
-        Returns a dictionary containing all players that played in the gameweek
-        """
-        return self._additional["elements"]
+    def get_players(self):
+        """Returns a list of players that played in the gameweek."""
+        player_ids = [int(player_id) for player_id
+                      in self._additional["elements"].keys()]
+        response = requests.get(API_URLS["players"]).json()
+        players = [Player(player["id"], player) for player in response
+                   if player["id"] in player_ids]
+
+        self.players = players
 
     def _get_specific(self):
-        response = requests.get("{}events".format(API_BASE_URL)).json()
-        return response[self.id - 1]
+        response = requests.get(API_URLS["gameweeks"]).json()
+        return response[self.gameweek_id - 1]
 
     def _get_additional(self):
-        return requests.get(
-            "{}event/{}/live".format(API_BASE_URL, self.id)).json()
+        return requests.get(API_URLS["gameweek_live"].format(
+            self.gameweek_id)).json()
 
     def __str__(self):
         return "{} - {}".format(self.name, self.deadline)

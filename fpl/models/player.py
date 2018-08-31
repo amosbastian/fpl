@@ -1,59 +1,28 @@
 import requests
 
-API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+from ..constants import API_URLS
+from ..utils import team_converter, position_converter
 
 
-def team_converter(team_id):
-    """
-    Converts a team's ID to their actual name.
-    """
-    team_map = {
-        1: "Arsenal", 
-        2: "Bournemouth", 
-        3: "Brighton", 
-        4: "Burnley", 
-        5: "Cardiff", 
-        6: "Chelsea", 
-        7: "Crystal Palace", 
-        8: "Everton", 
-        9: "Fulham", 
-        10: "Huddersfield", 
-        11: "Leicester", 
-        12: "Liverpool", 
-        13: "Man City", 
-        14: "Man Utd", 
-        15: "Newcastle", 
-        16: "Southampton", 
-        17: "Spurs", 
-        18: "Watford", 
-        19: "West Ham", 
-        20: "Wolves" 
-    } 
-    return team_map[team_id] 
-    
+def get_additional(player_id):
+    """Returns additional information about the player with the given
+    player ID.
 
-def position_converter(position):
+    :param int player_id: A player's ID
     """
-    Converts a player's `element_type` to their actual position.
-    """
-    if position == 1:
-        return "Goalkeeper"
-    elif position == 2:
-        return "Defender"
-    elif position == 3:
-        return "Midfielder"
-    else:
-        return "Forward"
+    players = requests.get(API_URLS["players"]).json()
+    for player in players:
+        if player["id"] == player_id:
+            return player
+    return []
 
 
-class Player(object):
-    """
-    A class representing a player in the Fantasy Premier League.
-    """
-    def __init__(self, player_id, additional):
-        self._id = player_id
+class Player():
+    """A class representing a player in the Fantasy Premier League."""
+    def __init__(self, player_id, additional=None):
+        self.player_id = player_id
         self._specific = self._get_specific()
-        self._additional = additional
+        self._additional = additional or get_additional(player_id)
 
         #: The amount of goals assisted by the player.
         self.assists = self._additional["assists"]
@@ -71,8 +40,6 @@ class Player(object):
         self.fixtures_summary = self._specific["fixtures_summary"]
         #: The player's form.
         self.form = self._additional["form"]
-        #: The amount of games a player has played in.
-        self.games_played = self._games_played()
         #: The player's points in the current gameweek.
         self.gameweek_points = self._additional["event_points"]
         #: The player's price change in the current gameweek.
@@ -105,8 +72,6 @@ class Player(object):
         self.position = position_converter(self.player_type)
         #: The amount of points the player scores per game on average.
         self.ppg = self._additional["points_per_game"]
-        #: The amount of points the player scores per 90 minutes.
-        self.pp90 = self._pp90()
         #: The player's current price.
         self.price = self._additional["now_cost"] / 10.0
         #: The amount of red cards the player has received.
@@ -133,21 +98,17 @@ class Player(object):
         self.yellow_cards = self._additional["yellow_cards"]
 
     def _get_specific(self):
-        """
-        Returns the player with the specific player_id.
-        """
-        return requests.get(
-            "{}element-summary/{}".format(API_BASE_URL, self._id)).json()
+        """Returns the player with the specific player_id."""
+        return requests.get(API_URLS["player"].format(self.player_id)).json()
 
-    def _games_played(self):
-        """
-        Returns the amount of games a player has played in.
-        """
+    @property
+    def games_played(self):
+        """Returns the amount of games a player has played in."""
         return sum([1 for fixture in self.fixtures if fixture["minutes"] > 0])
 
-    def _pp90(self):
-        """
-        Returns the amount of points a player scores per 90 minutes played.
+    @property
+    def pp90(self):
+        """Returns the amount of points a player scores per 90 minutes played.
         """
         if self.minutes == 0:
             return 0

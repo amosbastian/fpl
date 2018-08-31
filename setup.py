@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="fpl",
-    version="0.4.0",
+    version="0.5.0",
     packages=["fpl"],
     description="A Python wrapper for the Fantasy Premier League API",
     url="https://github.com/amosbastian/fpl",
@@ -10,10 +10,14 @@ setup(
     author_email="amosbastian@gmail.com",
     license="MIT",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python"
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6"
     ],
     keywords="fpl fantasy premier league",
     project_urls={
