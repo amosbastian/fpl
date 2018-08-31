@@ -4,7 +4,7 @@ from ..constants import API_URLS
 from .player import Player
 
 
-class Team(object):
+class Team():
     """A class representing a real team in the Fantasy Premier League."""
     def __init__(self, team_id):
         self._id = team_id
@@ -50,6 +50,8 @@ class Team(object):
         self.current_fixture = self._information["current_event_fixture"][0]
         #: A dictionary with information about the team's next fixture.
         self.next_fixture = self._information["next_event_fixture"][0]
+        #: The team's players.
+        self.players = None
 
     def get_players(self):
         """Sets the `players` property as a list of players that play for the

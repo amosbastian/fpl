@@ -1,5 +1,4 @@
 import unittest
-import warnings
 
 from fpl import FPL
 
@@ -8,8 +7,6 @@ class H2HLeagueTest(unittest.TestCase):
     def setUp(self):
         self.fpl = FPL()
         self.fpl.login()
-        warnings.filterwarnings("ignore", category=ResourceWarning,
-                                message="unclosed.*<ssl.SSLSocket.*>")
         self.h2h_league = self.fpl.get_h2h_league("760869")
 
     def test_h2h_league(self):

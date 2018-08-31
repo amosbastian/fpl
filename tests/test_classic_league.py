@@ -1,5 +1,4 @@
 import unittest
-import warnings
 
 from fpl import FPL
 
@@ -7,8 +6,6 @@ from fpl import FPL
 class ClassicLeagueTest(unittest.TestCase):
     def setUp(self):
         self.fpl = FPL()
-        warnings.filterwarnings("ignore", category=ResourceWarning,
-                                message="unclosed.*<ssl.SSLSocket.*>")
         self.classic_league = self.fpl.get_classic_league("633353")
 
     def test_classic_league(self):

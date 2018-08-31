@@ -7,14 +7,14 @@ from ..utils import team_converter
 def valid_gameweek(gameweek):
     """Returns True if the gameweek is valid."""
     if not isinstance(gameweek, int) and (gameweek < 1 or gameweek > 38):
-        raise("Gameweek must be a number between 1 and 38.")
+        raise "Gameweek must be a number between 1 and 38."
     return True
 
 
-class User(object):
+class User():
     """A class representing a user of the Fantasy Premier League."""
     def __init__(self, user_id, session):
-        self.id = user_id
+        self.user_id = user_id
         self._session = session
         self._information = self._get_information()
         self._entry = self._information["entry"]
@@ -74,12 +74,13 @@ class User(object):
 
     def _get_information(self):
         """Returns some general information about the user."""
-        return requests.get(API_URLS["user_cup"].format(self.id)).json()
+        return requests.get(API_URLS["user_cup"].format(self.user_id)).json()
 
     @property
     def history(self):
         """Returns a dictionary containing the history of the user."""
-        return requests.get(API_URLS["user_history"].format(self.id)).json()
+        return requests.get(API_URLS["user_history"].format(
+            self.user_id)).json()
 
     @property
     def season_history(self):
@@ -125,7 +126,7 @@ class User(object):
         picks = {}
         for gameweek in range(1, 39):
             team = requests.get(API_URLS["user_picks"].format(
-                self.id, gameweek))
+                self.user_id, gameweek))
 
             if team.status_code == 404:
                 return picks
@@ -137,9 +138,10 @@ class User(object):
     def my_team(self):
         """Returns a logged in user's current team."""
         if not self._session:
-            raise("User must be logged in.")
+            raise "User must be logged in."
 
-        response = self._session.get(API_URLS["user_team"].format(self.id))
+        response = self._session.get(API_URLS["user_team"].format(
+            self.user_id))
         return response.json()["picks"]
 
     def team(self, gameweek=None):
@@ -153,9 +155,9 @@ class User(object):
             return self.picks[gameweek]["picks"]
 
         teams = []
-        for gameweek in range(1, 39):
+        for gameweek_id in range(1, 39):
             try:
-                team = self.picks[gameweek]["picks"]
+                team = self.picks[gameweek_id]["picks"]
                 teams.append(team)
             except KeyError:
                 return teams
@@ -173,9 +175,9 @@ class User(object):
             return self.picks[gameweek]["active_chip"]
 
         active_chips = []
-        for gameweek in range(1, 39):
+        for gameweek_id in range(1, 39):
             try:
-                active_chip = self.picks[gameweek]["active_chip"]
+                active_chip = self.picks[gameweek_id]["active_chip"]
                 active_chips.append(active_chip)
             except KeyError:
                 return active_chips
@@ -194,9 +196,10 @@ class User(object):
             return self.picks[gameweek]["automatic_subs"]
 
         automatic_substitutions = []
-        for gameweek in range(1, 39):
+        for gameweek_id in range(1, 39):
             try:
-                automatic_substitution = self.picks[gameweek]["automatic_subs"]
+                automatic_substitution = self.picks[
+                    gameweek_id]["automatic_subs"]
                 automatic_substitutions.append(automatic_substitution)
             except KeyError:
                 return automatic_substitutions
@@ -214,9 +217,9 @@ class User(object):
             return self.picks[gameweek]["entry_history"]
 
         histories = []
-        for gameweek in range(1, 39):
+        for gameweek_id in range(1, 39):
             try:
-                history = self.picks[gameweek]["entry_history"]
+                history = self.picks[gameweek_id]["entry_history"]
                 histories.append(history)
             except KeyError:
                 return histories
@@ -228,7 +231,8 @@ class User(object):
         """Returns a dictionary containing information about all the transfers
         the user has made so far.
         """
-        return requests.get(API_URLS["user_transfers"].format(self.id)).json()
+        return requests.get(API_URLS["user_transfers"].format(
+            self.user_id)).json()
 
     @property
     def wildcards(self):
@@ -255,7 +259,7 @@ class User(object):
     def watchlist(self):
         """Returns the user's watchlist."""
         if not self._session:
-            raise("User must be logged in.")
+            raise "User must be logged in."
 
         return self._session.get(API_URLS["watchlist"]).json()
 

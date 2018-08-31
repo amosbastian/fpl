@@ -1,5 +1,4 @@
 import unittest
-import warnings
 
 from fpl import FPL
 from fpl.models.player import Player
@@ -8,8 +7,6 @@ from fpl.models.player import Player
 class GameweekTest(unittest.TestCase):
     def setUp(self):
         self.fpl = FPL()
-        warnings.filterwarnings("ignore", category=ResourceWarning,
-                                message="unclosed.*<ssl.SSLSocket.*>")
         self.gameweek = self.fpl.get_gameweek(1)
 
     def test_gameweek(self):

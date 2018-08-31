@@ -4,10 +4,10 @@ import requests
 from ..constants import API_URLS
 
 
-class ClassicLeague(object):
+class ClassicLeague():
     """A class representing a classic league in the Fantasy Premier League."""
     def __init__(self, league_id):
-        self.id = league_id
+        self.league_id = league_id
         self._information = self._get_information()
         self._league = self._information["league"]
 
@@ -40,10 +40,12 @@ class ClassicLeague(object):
         self.admin_entry = self._league["admin_entry"]
         #: The gameweek the league started in.
         self.started = self._league["start_event"]
+        #: The standings of the league.
+        self.standings = None
 
     def _get_information(self):
         """Returns information about the given league."""
-        return requests.get(API_URLS["league_classic"].format(self.id)).json()
+        return requests.get(API_URLS["league_classic"].format(self.league_id)).json()
 
     def get_standings(self):
         """Returns league standings for all teams in the league."""
@@ -51,7 +53,7 @@ class ClassicLeague(object):
 
         for page in itertools.count(start=1):
             url = "{}?ls-page={}".format(
-                API_URLS["league_classic"].format(self.id), page)
+                API_URLS["league_classic"].format(self.league_id), page)
             page_results = requests.get(url).json()["standings"]["results"]
 
             if page_results:
@@ -61,4 +63,4 @@ class ClassicLeague(object):
                 break
 
     def __str__(self):
-        return "{} - {}".format(self.name, self.id)
+        return "{} - {}".format(self.name, self.league_id)

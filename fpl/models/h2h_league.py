@@ -4,12 +4,12 @@ import requests
 from ..constants import API_URLS
 
 
-class H2HLeague(object):
+class H2HLeague():
     """
     A class representing a h2h league in the Fantasy Premier League.
     """
     def __init__(self, league_id, session=None):
-        self.id = league_id
+        self.league_id = league_id
         self._information = self._get_information()
         self._league = self._information["league"]
         #: Session for H2H fixtures
@@ -48,22 +48,25 @@ class H2HLeague(object):
         self.admin_entry = self._league["admin_entry"]
         #: The gameweek the league started in.
         self.started = self._league["start_event"]
+        #: The fixtures of the league.
+        self.fixtures = None
 
     def _get_information(self):
         """Returns information about the given league."""
-        return requests.get(API_URLS["league_h2h"].format(self.id)).json()
+        return requests.get(API_URLS["league_h2h"].format(
+            self.league_id)).json()
 
     def __str__(self):
-        return "{} - {}".format(self.name, self.id)
+        return "{} - {}".format(self.name, self.league_id)
 
     def get_fixtures(self):
         """Returns h2h results/fixtures for given league, login required."""
         if not self._session:
-            return []
+            return
 
         fixtures = []
         for page in itertools.count(start=1):
-            url = API_URLS["h2h"].format(self.id, page)
+            url = API_URLS["h2h"].format(self.league_id, page)
             page_results = self._session.get(url).json()["matches"]["results"]
 
             if page_results:

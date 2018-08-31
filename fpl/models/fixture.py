@@ -1,5 +1,3 @@
-import requests
-
 from ..utils import team_converter
 from .player import Player
 
@@ -11,10 +9,10 @@ def add_player(location, information):
     location.append({"player": player, "goals": goals})
 
 
-class Fixture(object):
+class Fixture():
     """A class representing fixtures in the Fantasy Premier League."""
     def __init__(self, fixture):
-        self.id = fixture["id"]
+        self.fixture_id = fixture["id"]
         self.kickoff_time_formatted = fixture["kickoff_time_formatted"]
         self.started = fixture["started"]
         self.event_day = fixture["event_day"]
@@ -34,6 +32,17 @@ class Fixture(object):
         self.gameweek = fixture["event"]
         self.team_a = team_converter(fixture["team_a"])
         self.team_h = team_converter(fixture["team_h"])
+
+        self.goalscorers = None
+        self.assisters = None
+        self.own_goalscorers = None
+        self.yellow_cards = None
+        self.red_cards = None
+        self.penalty_saves = None
+        self.penalty_misses = None
+        self.saves = None
+        self.bonus = None
+        self.bps = None
 
     def _get_players(self, metric):
         """Helper function that returns a dictionary containing players for the

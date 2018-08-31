@@ -1,16 +1,12 @@
 import unittest
-import warnings
 
 from fpl import FPL
-from fpl.models.fixture import Fixture
 from fpl.models.player import Player
 
 
-class UserTest(unittest.TestCase):
+class FixtureTest(unittest.TestCase):
     def setUp(self):
         self.fpl = FPL()
-        warnings.filterwarnings("ignore", category=ResourceWarning,
-                                message="unclosed.*<ssl.SSLSocket.*>")
         self.fixture = self.fpl.get_fixture(6)
 
     def test_get_goalscorers(self):

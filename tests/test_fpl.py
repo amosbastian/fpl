@@ -1,5 +1,4 @@
 import unittest
-import warnings
 
 from fpl import FPL
 from fpl.models.classic_league import ClassicLeague
@@ -14,8 +13,6 @@ from fpl.models.user import User
 class FPLTest(unittest.TestCase):
     def setUp(self):
         self.fpl = FPL()
-        warnings.filterwarnings("ignore", category=ResourceWarning,
-                                message="unclosed.*<ssl.SSLSocket.*>")
 
     def test_user(self):
         user = self.fpl.get_user("3523615")

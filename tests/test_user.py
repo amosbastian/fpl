@@ -1,5 +1,4 @@
 import unittest
-import warnings
 
 from fpl import FPL
 
@@ -7,21 +6,12 @@ from fpl import FPL
 class UserTest(unittest.TestCase):
     def setUp(self):
         self.fpl = FPL()
-        warnings.filterwarnings("ignore", category=ResourceWarning,
-                                message="unclosed.*<ssl.SSLSocket.*>")
         self.fpl.login()
         self.user = self.fpl.get_user("3808385")
 
     def test_history(self):
         history = self.user.history
         self.assertIsInstance(history, dict)
-        self.assertEqual(list(history.keys()), [
-            "chips",
-            "entry",
-            "leagues",
-            "season",
-            "history"
-        ])
 
     def test_season_history(self):
         season_history = self.user.season_history

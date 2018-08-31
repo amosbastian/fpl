@@ -1,3 +1,5 @@
+
+
 def team_converter(team_id):
     """Converts a team's ID to their actual name."""
     team_map = {
@@ -22,16 +24,15 @@ def team_converter(team_id):
         19: "West Ham",
         20: "Wolves"
     }
-    return team_map[team_id] 
+    return team_map[team_id]
 
 
 def position_converter(position):
     """Converts a player's `element_type` to their actual position."""
-    if position == 1:
-        return "Goalkeeper"
-    elif position == 2:
-        return "Defender"
-    elif position == 3:
-        return "Midfielder"
-    else:
-        return "Forward"
+    position_map = {
+        1: "Goalkeeper",
+        2: "Defender",
+        3: "Midfielder",
+        4: "Forward"
+    }
+    return position_map[position]

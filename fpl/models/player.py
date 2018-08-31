@@ -1,14 +1,28 @@
-from ..constants import API_URLS
-from ..utils import team_converter, position_converter
 import requests
 
+from ..constants import API_URLS
+from ..utils import team_converter, position_converter
 
-class Player(object):
+
+def get_additional(player_id):
+    """Returns additional information about the player with the given
+    player ID.
+
+    :param int player_id: A player's ID
+    """
+    players = requests.get(API_URLS["players"]).json()
+    for player in players:
+        if player["id"] == player_id:
+            return player
+    return []
+
+
+class Player():
     """A class representing a player in the Fantasy Premier League."""
     def __init__(self, player_id, additional=None):
-        self._id = player_id
+        self.player_id = player_id
         self._specific = self._get_specific()
-        self._additional = additional or self._get_additional(player_id)
+        self._additional = additional or get_additional(player_id)
 
         #: The amount of goals assisted by the player.
         self.assists = self._additional["assists"]
@@ -85,18 +99,7 @@ class Player(object):
 
     def _get_specific(self):
         """Returns the player with the specific player_id."""
-        return requests.get(API_URLS["player"].format(self._id)).json()
-
-    def _get_additional(self, player_id):
-        """Returns additional information about the player with the given
-        player ID.
-
-        :param int player_id: A player's ID
-        """
-        players = requests.get(API_URLS["players"]).json()
-        for player in players:
-            if player["id"] == player_id:
-                return player
+        return requests.get(API_URLS["player"].format(self.player_id)).json()
 
     @property
     def games_played(self):

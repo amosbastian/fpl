@@ -123,6 +123,7 @@ class FPL():
         for fixture in response:
             if fixture["id"] == fixture_id:
                 return Fixture(fixture)
+        return []
 
     @staticmethod
     def get_fixtures(gameweek=None):
