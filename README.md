@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://fpl.readthedocs.io/en/latest/">
+    <img src="https://i.imgur.com/ao1t2qN.png">
+  </a>
+</p>
+
 <h3 align="center">fpl</h3>
 <p align="center">
     A Python wrapper around the Fantasy Premier League API
