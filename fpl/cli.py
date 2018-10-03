@@ -86,7 +86,16 @@ def format_team(user):
     width = team_width([defenders, midfielders, forwards])
 
     for position in [goalkeeper, defenders, midfielders, forwards]:
-        player_string = " - ".join([player.name for player in position])
+        player_names = []
+        for player in position:
+            if player.is_captain:
+                player_names.append("{} (C)".format(player.name))
+            elif player.is_vice_captain:
+                player_names.append("{} (VC)".format(player.name))
+            else:
+                player_names.append(player.name)
+
+        player_string = " - ".join(player_names)
         formatted_string = "{:^{}}".format(player_string, width)
         click.echo(formatted_string)
 
