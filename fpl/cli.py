@@ -1,8 +1,9 @@
+import click
+import os
+
 from fpl import FPL
 from .utils import chip_converter
 from.constants import MYTEAM_FORMAT, PICKS_FORMAT
-import click
-import os
 
 
 fpl = FPL()
@@ -90,17 +91,24 @@ def available_chips(chips):
     return ", ".join(list(set(available) - set(used)))
 
 
+def split_by_position(team):
+    """Splits the list of list of players by their position."""
+    return [
+        get_starters(team[:11], "Goalkeeper"),
+        get_starters(team[:11], "Defender"),
+        get_starters(team[:11], "Midfielder"),
+        get_starters(team[:11], "Forward"),
+        team[-4:]
+    ]
+
+
 def format_myteam(user):
     """Formats the team and echoes it to the terminal."""
     team = user.my_team()
     players = sorted(get_picks(team), key=lambda x: x.team_position)
 
-    goalkeeper = get_starters(players[:11], "Goalkeeper")
-    defenders = get_starters(players[:11], "Defender")
-    midfielders = get_starters(players[:11], "Midfielder")
-    forwards = get_starters(players[:11], "Forward")
-    substitutes = players[-4:]
-
+    goalkeeper, defenders, midfielders, forwards, bench = split_by_position(
+        team)
     width = team_width([defenders, midfielders, forwards])
 
     for position in [goalkeeper, defenders, midfielders, forwards]:
@@ -113,7 +121,7 @@ def format_myteam(user):
         click.echo(formatted_string)
 
     click.echo("\nSubstitutes: {}".format(", ".join(
-        [player.name for player in substitutes])))
+        [player.name for player in bench])))
 
     free_transfers = max(0, 1 + user.free_transfers - user.gameweek_transfers)
     click.echo("\n{}FT / £{}m ITB / £{}m TV".format(
@@ -135,14 +143,11 @@ def myteam(user_id, email, password):
 
 def format_mypicks(user):
     user_information = user.picks[len(user.picks)]
-    picks = sorted(get_picks(user_information["picks"]),
-                   key=lambda x: x.team_position)
+    team = sorted(get_picks(user_information["picks"]),
+                  key=lambda x: x.team_position)
 
-    goalkeeper = get_starters(picks[:11], "Goalkeeper")
-    defenders = get_starters(picks[:11], "Defender")
-    midfielders = get_starters(picks[:11], "Midfielder")
-    forwards = get_starters(picks[:11], "Forward")
-    substitutes = sorted(picks, key=lambda x: x.team_position)[-4:]
+    goalkeeper, defenders, midfielders, forwards, bench = split_by_position(
+        team)
 
     width = team_width([defenders, midfielders, forwards], True)
 
@@ -158,7 +163,7 @@ def format_mypicks(user):
 
     click.echo("\nSubstitutes: {}".format(", ".join(
         ["{} {}".format(player.gameweek_points, player.name)
-            for player in substitutes])))
+            for player in bench])))
 
 
 @cli.command()
