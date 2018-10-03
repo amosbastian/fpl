@@ -1,4 +1,5 @@
 from fpl import FPL
+from .utils import chip_converter
 import click
 import os
 
@@ -56,8 +57,24 @@ def team_width(positions):
     return width
 
 
-def format_team(team):
+def used_chips(chips):
+    """Returns formatted string of used chips."""
+    if not chips:
+        return "NONE."
+    used = ["{} (GW {})".format(chip_converter(chip["name"], chip["event"]))]
+    return ", ".join(used)
+
+
+def available_chips(chips):
+    """Returns formatted string of available chips."""
+    available = ["WC", "TC", "BB", "FH"]
+    used = [chip_converter(chip["name"]) for chip in chips]
+    return ", ".join(list(set(available) - set(used)))
+
+
+def format_team(user):
     """Formats the team and echoes it to the terminal."""
+    team = user.my_team()
     players = get_myteam(team)
 
     goalkeeper = get_starters(players, "Goalkeeper")
@@ -76,6 +93,12 @@ def format_team(team):
     click.echo("\nSubstitutes: {}".format(", ".join(
         [player.name for player in substitutes])))
 
+    free_transfers = max(0, 1 + user.free_transfers - user.gameweek_transfers)
+    click.echo("\n{}FT / £{}m ITB / £{}m TV".format(
+        free_transfers, user.bank, user.team_value))
+    click.echo("Chips used: {}".format(used_chips(user.chips)))
+    click.echo("Chips available: {}".format(available_chips(user.chips)))
+
 
 @cli.command()
 @click.argument("user_id")
@@ -85,4 +108,4 @@ def format_team(team):
 def myteam(user_id, email, password):
     fpl.login(email, password)
     user = fpl.get_user(user_id)
-    format_team(user.my_team())
+    format_team(user)

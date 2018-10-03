@@ -36,3 +36,14 @@ def position_converter(position):
         4: "Forward"
     }
     return position_map[position]
+
+
+def chip_converter(chip):
+    """Converts a chip name to usable string."""
+    chip_map = {
+        "3xc": "TC",
+        "wildcard": "WC",
+        "bboost": "BB",
+        "freehit": "FH"
+    }
+    return chip_map[chip]
