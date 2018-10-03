@@ -1,5 +1,6 @@
 from fpl import FPL
 from .utils import chip_converter
+from.constants import MYTEAM_FORMAT, PICKS_FORMAT
 import click
 import os
 
@@ -21,13 +22,11 @@ def user(user_id):
 
 def get_starters(players, position):
     """Helper function that returns starting players in a given position."""
-    starters = [player for player in players if player.position == position and
-                not player.is_sub]
-
+    starters = [player for player in players if player.position == position]
     return starters
 
 
-def get_myteam(team):
+def get_picks(team):
     """Returns a list of players with the necessary information to format the
     team's formation properly.
     """
@@ -38,19 +37,38 @@ def get_myteam(team):
         for player in players:
             if player_data["element"] != player.player_id:
                 continue
-            player.is_sub = player_data["is_sub"]
-            player.is_captain = player_data["is_captain"]
-            player.is_vice_captain = player_data["is_vice_captain"]
+
+            player.role = ""
+            player.gameweek_points = (player.gameweek_points *
+                                      player_data["multiplier"])
             player.team_position = player_data["position"]
+
+            player.is_captain = player_data["is_captain"]
+            if player.is_captain:
+                player.role = " (C)"
+
+            player.is_vice_captain = player_data["is_vice_captain"]
+            if player.is_vice_captain:
+                player.role = " (VC)"
 
     return players
 
 
-def team_width(positions):
+def team_width(positions, points=False):
     """Returns the maximum string width of a team."""
     width = 0
+
     for position in positions:
-        position_width = len(" - ".join([player.name for player in position]))
+        if points:
+            player_names = [PICKS_FORMAT.format(
+                player.name, player.gameweek_points,
+                player.role) for player in position]
+        else:
+            player_names = [MYTEAM_FORMAT.format(
+                player.name, player.role) for player in position]
+
+        position_width = len(" - ".join(player_names))
+
         if position_width > width:
             width = position_width
 
@@ -72,28 +90,23 @@ def available_chips(chips):
     return ", ".join(list(set(available) - set(used)))
 
 
-def format_team(user):
+def format_myteam(user):
     """Formats the team and echoes it to the terminal."""
     team = user.my_team()
-    players = get_myteam(team)
+    players = sorted(get_picks(team), key=lambda x: x.team_position)
 
-    goalkeeper = get_starters(players, "Goalkeeper")
-    defenders = get_starters(players, "Defender")
-    midfielders = get_starters(players, "Midfielder")
-    forwards = get_starters(players, "Forward")
-    substitutes = sorted(players, key=lambda x: x.team_position)[-4:]
+    goalkeeper = get_starters(players[:11], "Goalkeeper")
+    defenders = get_starters(players[:11], "Defender")
+    midfielders = get_starters(players[:11], "Midfielder")
+    forwards = get_starters(players[:11], "Forward")
+    substitutes = players[-4:]
 
     width = team_width([defenders, midfielders, forwards])
 
     for position in [goalkeeper, defenders, midfielders, forwards]:
         player_names = []
         for player in position:
-            if player.is_captain:
-                player_names.append("{} (C)".format(player.name))
-            elif player.is_vice_captain:
-                player_names.append("{} (VC)".format(player.name))
-            else:
-                player_names.append(player.name)
+            player_names.append(MYTEAM_FORMAT.format(player.name, player.role))
 
         player_string = " - ".join(player_names)
         formatted_string = "{:^{}}".format(player_string, width)
@@ -117,4 +130,39 @@ def format_team(user):
 def myteam(user_id, email, password):
     fpl.login(email, password)
     user = fpl.get_user(user_id)
-    format_team(user)
+    format_myteam(user)
+
+
+def format_mypicks(user):
+    user_information = user.picks[len(user.picks)]
+    picks = sorted(get_picks(user_information["picks"]),
+                   key=lambda x: x.team_position)
+
+    goalkeeper = get_starters(picks[:11], "Goalkeeper")
+    defenders = get_starters(picks[:11], "Defender")
+    midfielders = get_starters(picks[:11], "Midfielder")
+    forwards = get_starters(picks[:11], "Forward")
+    substitutes = sorted(picks, key=lambda x: x.team_position)[-4:]
+
+    width = team_width([defenders, midfielders, forwards], True)
+
+    for position in [goalkeeper, defenders, midfielders, forwards]:
+        player_names = []
+        for player in position:
+            player_names.append(PICKS_FORMAT.format(
+                player.gameweek_points, player.name, player.role))
+
+        player_string = " - ".join(player_names)
+        formatted_string = "{:^{}}".format(player_string, width)
+        click.echo(formatted_string)
+
+    click.echo("\nSubstitutes: {}".format(", ".join(
+        ["{} {}".format(player.gameweek_points, player.name)
+            for player in substitutes])))
+
+
+@cli.command()
+@click.argument("user_id")
+def picks(user_id):
+    user = fpl.get_user(user_id)
+    format_mypicks(user)
