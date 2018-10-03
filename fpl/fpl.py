@@ -97,15 +97,18 @@ class FPL():
         return Player(player_id, additional=None)
 
     @staticmethod
-    def get_players():
+    def get_players(player_ids=None):
         """Returns a list of `Player` objects of all players currently playing
         for teams in the Premier League.
         """
+        if not player_ids:
+            player_ids = range(0, 600)
         players = []
         response = requests.get(API_URLS["players"])
         if response.status_code == 200:
             for player in response.json():
-                players.append(Player(player["id"], player))
+                if player["id"] in player_ids:
+                    players.append(Player(player["id"], player))
         else:
             print("Something went wrong, please try again later...")
             return []
