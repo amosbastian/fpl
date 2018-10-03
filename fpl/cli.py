@@ -102,23 +102,35 @@ def split_by_position(team):
     ]
 
 
-def format_myteam(user):
-    """Formats the team and echoes it to the terminal."""
-    team = user.my_team()
-    players = sorted(get_picks(team), key=lambda x: x.team_position)
+def team_printer(positions, formatter, points=False):
+    """Prints the team using the given formatter."""
+    width = team_width(positions[1:], points)
 
-    goalkeeper, defenders, midfielders, forwards, bench = split_by_position(
-        team)
-    width = team_width([defenders, midfielders, forwards])
-
-    for position in [goalkeeper, defenders, midfielders, forwards]:
+    for position in positions:
         player_names = []
         for player in position:
-            player_names.append(MYTEAM_FORMAT.format(player.name, player.role))
+            if points:
+                player_information = (
+                    player.gameweek_points, player.name, player.role)
+            else:
+                player_information = (player.name, player.role)
+
+            player_names.append(formatter.format(*player_information))
 
         player_string = " - ".join(player_names)
         formatted_string = "{:^{}}".format(player_string, width)
         click.echo(formatted_string)
+
+
+def format_myteam(user):
+    """Formats a user's team and echoes it to the terminal."""
+    team = user.my_team()
+    players = sorted(get_picks(team), key=lambda x: x.team_position)
+
+    goalkeeper, defenders, midfielders, forwards, bench = split_by_position(
+        players)
+
+    team_printer([goalkeeper, defenders, midfielders, forwards], MYTEAM_FORMAT)
 
     click.echo("\nSubstitutes: {}".format(", ".join(
         [player.name for player in bench])))
@@ -142,6 +154,7 @@ def myteam(user_id, email, password):
 
 
 def format_mypicks(user):
+    """Formats a user's picks and echoes it to the terminal."""
     user_information = user.picks[len(user.picks)]
     team = sorted(get_picks(user_information["picks"]),
                   key=lambda x: x.team_position)
@@ -149,17 +162,8 @@ def format_mypicks(user):
     goalkeeper, defenders, midfielders, forwards, bench = split_by_position(
         team)
 
-    width = team_width([defenders, midfielders, forwards], True)
-
-    for position in [goalkeeper, defenders, midfielders, forwards]:
-        player_names = []
-        for player in position:
-            player_names.append(PICKS_FORMAT.format(
-                player.gameweek_points, player.name, player.role))
-
-        player_string = " - ".join(player_names)
-        formatted_string = "{:^{}}".format(player_string, width)
-        click.echo(formatted_string)
+    team_printer([goalkeeper, defenders, midfielders, forwards],
+                 PICKS_FORMAT, True)
 
     click.echo("\nSubstitutes: {}".format(", ".join(
         ["{} {}".format(player.gameweek_points, player.name)
