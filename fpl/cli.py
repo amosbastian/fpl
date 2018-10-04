@@ -52,6 +52,13 @@ def get_picks(team):
             if player.is_vice_captain:
                 player.role = " (VC)"
 
+            if player.status in ["d", "u"]:
+                player.colour = "yellow"
+            elif player.status in ["i"]:
+                player.colour = "red"
+            else:
+                player.colour = None
+
     return players
 
 
@@ -108,6 +115,7 @@ def team_printer(positions, formatter, points=False):
 
     for position in positions:
         player_names = []
+        ansi_padding = 0
         for player in position:
             if points:
                 player_information = (
@@ -115,10 +123,13 @@ def team_printer(positions, formatter, points=False):
             else:
                 player_information = (player.name, player.role)
 
-            player_names.append(formatter.format(*player_information))
+            normal_string = formatter.format(*player_information)
+            ansi_string = click.style(normal_string, fg=player.colour)
+            player_names.append(ansi_string)
+            ansi_padding += len(ansi_string) - len(normal_string)
 
         player_string = " - ".join(player_names)
-        formatted_string = "{:^{}}".format(player_string, width)
+        formatted_string = "{:^{}}".format(player_string, width + ansi_padding)
         click.echo(formatted_string)
 
 
@@ -133,7 +144,8 @@ def format_myteam(user):
     team_printer([goalkeeper, defenders, midfielders, forwards], MYTEAM_FORMAT)
 
     click.echo("\nSubstitutes: {}".format(", ".join(
-        [player.name for player in bench])))
+        [click.style("{}".format(player.name), fg=player.colour)
+         for player in bench])))
 
     free_transfers = max(0, 1 + user.free_transfers - user.gameweek_transfers)
     click.echo("\n{}FT / £{}m ITB / £{}m TV".format(
@@ -166,8 +178,8 @@ def format_mypicks(user):
                  PICKS_FORMAT, True)
 
     click.echo("\nSubstitutes: {}".format(", ".join(
-        ["{} {}".format(player.gameweek_points, player.name)
-            for player in bench])))
+        [click.style("{} {}".format(player.gameweek_points, player.name),
+         fg=player.colour) for player in bench])))
 
 
 @cli.command()
