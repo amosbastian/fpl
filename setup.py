@@ -25,8 +25,10 @@ setup(
         "Source": "https://github.com/amosbastian/fpl"
     },
     install_requires=[
-        "requests",
         "Click",
+        "colorama",
+        "PTable",
+        "requests",
     ],
     entry_points="""
         [console_scripts]
