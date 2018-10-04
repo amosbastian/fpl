@@ -202,6 +202,9 @@ def format_mypicks(user):
         ["{} {}".format(player.gameweek_points, click.style(
             player.name, fg=player.colour)) for player in bench])))
 
+    click.echo("\nPoints: {}\nGameweek rank: {:,}".format(
+        user_information["entry_history"]["points"],
+        user_information["entry_history"]["rank"]))
     click.echo("Automatic substitutions: {}".format(
         automatic_substitutions(user_information, players)))
 
