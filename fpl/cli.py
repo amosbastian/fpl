@@ -165,21 +165,45 @@ def myteam(user_id, email, password):
     format_myteam(user)
 
 
+def automatic_substitutions(user_information, players):
+    """Formats automatic substitutions in a readable way."""
+    substitution_ids = [(player["element_in"], player["element_out"])
+                        for player in user_information["automatic_subs"]]
+
+    substitutions = []
+    for player_in_id, player_out_id in substitution_ids:
+        player_in = [player for player in players
+                     if player.player_id == player_in_id][0]
+        player_out = [player for player in players
+                      if player.player_id == player_out_id][0]
+
+        substitutions.append("{} {} -> {} {}".format(
+            player_out.gameweek_points,
+            click.style(player_out.name, fg=player_out.colour),
+            player_in.gameweek_points,
+            click.style(player_in.name, fg=player_in.colour)))
+
+    return ", ".join(substitutions)
+
+
 def format_mypicks(user):
     """Formats a user's picks and echoes it to the terminal."""
     user_information = user.picks[len(user.picks)]
-    team = sorted(get_picks(user_information["picks"]),
-                  key=lambda x: x.team_position)
+    players = sorted(get_picks(user_information["picks"]),
+                     key=lambda x: x.team_position)
 
     goalkeeper, defenders, midfielders, forwards, bench = split_by_position(
-        team)
+        players)
 
     team_printer([goalkeeper, defenders, midfielders, forwards],
                  PICKS_FORMAT, True)
 
     click.echo("\nSubstitutes: {}".format(", ".join(
-        [click.style("{} {}".format(player.gameweek_points, player.name),
-         fg=player.colour) for player in bench])))
+        ["{} {}".format(player.gameweek_points, click.style(
+            player.name, fg=player.colour)) for player in bench])))
+
+    click.echo("Automatic substitutions: {}".format(
+        automatic_substitutions(user_information, players)))
 
 
 @cli.command()
