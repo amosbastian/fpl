@@ -27,13 +27,7 @@ import os
 import requests
 
 from .constants import API_URLS
-from .models.classic_league import ClassicLeague
-from .models.fixture import Fixture
-from .models.gameweek import Gameweek
-from .models.h2h_league import H2HLeague
-from .models.player import Player
-from .models.team import Team
-from .models.user import User
+from fpl.models import *
 
 
 class FPL():
