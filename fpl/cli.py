@@ -7,7 +7,6 @@ from prettytable import PrettyTable
 from .utils import chip_converter
 from .constants import MYTEAM_FORMAT, PICKS_FORMAT
 
-
 fpl = FPL()
 
 
@@ -172,13 +171,18 @@ def format_myteam(user):
 
 @cli.command()
 @click.argument("user_id")
-@click.option("--email", prompt="Email address", envvar="FPL_EMAIL")
+@click.option("--email", prompt="Email address", envvar="FPL_EMAIL",
+              help="email address")
 @click.option("--password", prompt=True, hide_input=True,
-              envvar="FPL_PASSWORD")
+              envvar="FPL_PASSWORD", help="password")
 def myteam(user_id, email, password):
+    """Echoes a logged in user's team to the terminal."""
     fpl.login(email, password)
-    user = fpl.get_user(user_id)
-    format_myteam(user)
+    try:
+        user = fpl.get_user(user_id)
+        format_myteam(user)
+    except KeyError:
+        raise click.BadParameter("email address or password.")
 
 
 def automatic_substitutions(user_information, players):
@@ -250,5 +254,6 @@ def format_picks(user):
 @cli.command()
 @click.argument("user_id")
 def picks(user_id):
+    """Echoes a user's picks to the terminal."""
     user = fpl.get_user(user_id)
     format_picks(user)
