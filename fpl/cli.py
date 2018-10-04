@@ -2,8 +2,10 @@ import click
 import os
 
 from fpl import FPL
+from prettytable import PrettyTable
+
 from .utils import chip_converter
-from.constants import MYTEAM_FORMAT, PICKS_FORMAT
+from .constants import MYTEAM_FORMAT, PICKS_FORMAT
 
 
 fpl = FPL()
@@ -133,6 +135,24 @@ def team_printer(positions, formatter, points=False):
         click.echo(formatted_string)
 
 
+def myteam_table(user):
+    """Print user's myteam data in a pretty table."""
+    table = PrettyTable()
+    table.field_names = ["Key", "Value"]
+    table.add_row(["Overall points", "{:,}".format(user.overall_points)])
+    table.add_row(["Overall rank", "{:,}".format(user.overall_rank)])
+    table.add_row(["Gameweek points", user.gameweek_points])
+    table.add_row(["Squad value", "£{}m".format(user.team_value)])
+    table.add_row(["In the bank", "£{}m".format(user.bank)])
+    table.add_row(["Chips used", used_chips(user.chips)])
+    table.add_row(["Chips available", available_chips(user.chips)])
+
+    table.align["Key"] = "l"
+    table.align["Value"] = "r"
+
+    click.echo(str(table).split("\n", 2)[2])
+
+
 def format_myteam(user):
     """Formats a user's team and echoes it to the terminal."""
     team = user.my_team()
@@ -147,11 +167,7 @@ def format_myteam(user):
         [click.style("{}".format(player.name), fg=player.colour)
          for player in bench])))
 
-    free_transfers = max(0, 1 + user.free_transfers - user.gameweek_transfers)
-    click.echo("\n{}FT / £{}m ITB / £{}m TV".format(
-        free_transfers, user.bank, user.team_value))
-    click.echo("Chips used: {}".format(used_chips(user.chips)))
-    click.echo("Chips available: {}".format(available_chips(user.chips)))
+    myteam_table(user)
 
 
 @cli.command()
@@ -186,7 +202,33 @@ def automatic_substitutions(user_information, players):
     return ", ".join(substitutions)
 
 
-def format_mypicks(user):
+def picks_table(user, user_information, players):
+    """Print user's picks data in a pretty table."""
+    table = PrettyTable()
+    table.field_names = ["Key", "Value"]
+    table.add_row(["Gamweek points", user.gameweek_points])
+    table.add_row(["Gameweek rank", "{:,}".format(user.overall_rank)])
+
+    gameweek_transfers = user_information["entry_history"]["event_transfers"]
+    point_hit = user_information["entry_history"]["event_transfers_cost"]
+    if point_hit < 0:
+        table.add_row(["Gameweek transfers", "{} ({})".format(
+            gameweek_transfers, point_hit)])
+    else:
+        table.add_row(["Gameweek transfers", gameweek_transfers])
+
+    table.add_row(["Points on bench", user_information["entry_history"][
+        "points_on_bench"]])
+    table.add_row(["Automatic substitutions", automatic_substitutions(
+        user_information, players)])
+
+    table.align["Key"] = "l"
+    table.align["Value"] = "r"
+
+    click.echo(str(table).split("\n", 2)[2])
+
+
+def format_picks(user):
     """Formats a user's picks and echoes it to the terminal."""
     user_information = user.picks[len(user.picks)]
     players = sorted(get_picks(user_information["picks"]),
@@ -202,15 +244,11 @@ def format_mypicks(user):
         ["{} {}".format(player.gameweek_points, click.style(
             player.name, fg=player.colour)) for player in bench])))
 
-    click.echo("\nPoints: {}\nGameweek rank: {:,}".format(
-        user_information["entry_history"]["points"],
-        user_information["entry_history"]["rank"]))
-    click.echo("Automatic substitutions: {}".format(
-        automatic_substitutions(user_information, players)))
+    picks_table(user, user_information, players)
 
 
 @cli.command()
 @click.argument("user_id")
 def picks(user_id):
     user = fpl.get_user(user_id)
-    format_mypicks(user)
+    format_picks(user)
