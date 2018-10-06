@@ -8,6 +8,7 @@ from fpl.models.h2h_league import H2HLeague
 from fpl.models.player import Player
 from fpl.models.team import Team
 from fpl.models.user import User
+from pymongo import MongoClient
 
 
 class FPLTest(unittest.TestCase):
@@ -73,6 +74,16 @@ class FPLTest(unittest.TestCase):
         h2h_league = self.fpl.get_h2h_league("760869")
         self.assertIsInstance(h2h_league, H2HLeague)
 
+    def test_update_mongodb(self):
+        self.fpl.update_mongodb()
+        client = MongoClient()
+        database = client.fpl
+
+        teams = database.teams.find()
+        self.assertEqual(teams.count(), 20)
+
+        player = database.players.find_one({"player_id": 1})
+        self.assertEqual(player["player_id"], 1)
 
 if __name__ == '__main__':
     unittest.main()

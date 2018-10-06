@@ -27,7 +27,14 @@ import os
 import requests
 
 from .constants import API_URLS
-from fpl.models import *
+from .models.classic_league import ClassicLeague
+from .models.fixture import Fixture
+from .models.gameweek import Gameweek
+from .models.h2h_league import H2HLeague
+from .models.player import Player
+from .models.team import Team
+from .models.user import User
+from pymongo import MongoClient
 
 
 class FPL():
@@ -196,3 +203,37 @@ class FPL():
         session.post(login_url, data=payload)
 
         self.session = session
+
+    def update_mongodb(self):
+        """Updates or creates a MongoDB database with the collection players and
+        teams.
+        """
+        client = MongoClient()
+        database = client.fpl
+
+        def update_teams():
+            """Updates all teams of the Fantasy Premier League."""
+            database_teams = database.teams
+            teams = FPL.get_teams()
+
+            for team in teams:
+                team = {k: v for k, v in vars(team).items()
+                        if not k.startswith("_")}
+
+                database_teams.update({"team_id": team["team_id"]},
+                                      team, upsert=True)
+
+        def update_players():
+            """Updates all players of the Fantasy Premier League."""
+            database_players = database.players
+            players = FPL.get_players()
+
+            for player in players:
+                player = {k: v for k, v in vars(player).items()
+                          if not k.startswith("_")}
+
+                database_players.update({"player_id": player["player_id"]},
+                                        player, upsert=True)
+
+        update_teams()
+        update_players()

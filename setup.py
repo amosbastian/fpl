@@ -1,9 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="fpl",
     version="0.5.3",
-    packages=["fpl", "fpl.models"],
+    packages=find_packages(),
     description="A Python wrapper for the Fantasy Premier League API",
     url="https://github.com/amosbastian/fpl",
     author="amosbastian",
@@ -29,6 +29,7 @@ setup(
         "colorama",
         "PTable",
         "requests",
+        "pymongo",
     ],
     entry_points="""
         [console_scripts]
