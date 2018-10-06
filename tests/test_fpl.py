@@ -85,5 +85,10 @@ class FPLTest(unittest.TestCase):
         player = database.players.find_one({"player_id": 1})
         self.assertEqual(player["player_id"], 1)
 
+    def test_get_points_against(self):
+        points_against = self.test_get_points_against()
+        self.assertIsInstance(points_against, dict)
+        self.assertEqual(len(points_against), 20)
+
 if __name__ == '__main__':
     unittest.main()
