@@ -12,3 +12,6 @@ install:
 
 script:
   - python -m unittest discover tests/
+
+services:
+  - mongodb
