@@ -7,7 +7,7 @@ from .player import Player
 class Team():
     """A class representing a real team in the Fantasy Premier League."""
     def __init__(self, team_id):
-        self._id = team_id
+        self.team_id = team_id
         self._information = self._get_information()
 
         #: The name of the team, e.g. "Arsenal".
@@ -66,7 +66,7 @@ class Team():
 
     def _get_information(self):
         response = requests.get(API_URLS["teams"]).json()
-        return response[self._id - 1]
+        return response[self.team_id - 1]
 
     def __str__(self):
         return self.name

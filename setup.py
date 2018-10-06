@@ -29,6 +29,7 @@ setup(
         "colorama",
         "PTable",
         "requests",
+        "pymongo",
     ],
     entry_points="""
         [console_scripts]
