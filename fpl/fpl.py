@@ -35,6 +35,7 @@ from .models.player import Player
 from .models.team import Team
 from .models.user import User
 from pymongo import MongoClient
+from .utils import team_converter
 
 
 class FPL():
@@ -205,8 +206,8 @@ class FPL():
         self.session = session
 
     def update_mongodb(self):
-        """Updates or creates a MongoDB database with the collection players and
-        teams.
+        """Updates or creates a MongoDB database with the collection players
+        and teams.
         """
         client = MongoClient()
         database = client.fpl
@@ -237,3 +238,44 @@ class FPL():
 
         update_teams()
         update_players()
+
+    def get_points_against(self, players=None):
+        """Returns a dictionary containing the points scored against
+        all teams in the Premier League, split by position.
+        """
+        if not players:
+            players = self.get_players()
+
+        points_against = {}
+
+        for player in players:
+            position = player["position"].lower()
+            for fixture in player["history"]:
+                if fixture["minutes"] == 0:
+                    continue
+
+                points = fixture["total_points"]
+                opponent = team_converter(fixture["opponent_team"])
+                location = "H" if fixture["was_home"] else "A"
+
+                points_against.setdefault(
+                    opponent,
+                    {
+                        "all": {"H": [], "A": []},
+                        "goalkeeper": {"H": [], "A": []},
+                        "defender": {"H": [], "A": []},
+                        "midfielder": {"H": [], "A": []},
+                        "forward": {"H": [], "A": []}
+                    }
+                )
+
+                points_against[opponent]["all"][location].append(points)
+                points_against[opponent][position][location].append(points)
+
+        return points_against
+
+    def FDR(self):
+        """Creates a new Fixture Difficulty Ranking (FDR) based on the amount
+        of points each team concedes in Fantasy Premier League terms.
+        """
+        pass
