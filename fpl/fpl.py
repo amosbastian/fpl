@@ -236,8 +236,16 @@ class FPL():
                 database_players.replace_one(
                     {"player_id": player["player_id"]}, player, upsert=True)
 
+        def update_fdr():
+            """Updates the FDR of each team in the Fantasy Premier League."""
+            team_fdr = self.FDR(mongodb=True)
+            for team_name, fdr in team_fdr.items():
+                team = database.teams.update_one(
+                    {"name": team_name}, {"$set": {"FDR": fdr}}, upsert=True)
+
         update_teams()
         update_players()
+        update_fdr()
 
     def get_points_against(self, players=None):
         """Returns a dictionary containing the points scored against
