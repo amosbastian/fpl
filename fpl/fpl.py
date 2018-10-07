@@ -200,7 +200,10 @@ class FPL():
         }
 
         login_url = "https://users.premierleague.com/accounts/login/"
-        session.post(login_url, data=payload)
+        response = session.post(login_url, data=payload)
+
+        if "Incorrect email or password" in response.text:
+            raise ValueError("Incorrect email or password!")
 
         self.session = session
 

@@ -141,8 +141,12 @@ class User():
             raise "User must be logged in."
 
         response = self._session.get(API_URLS["user_team"].format(
-            self.user_id))
-        return response.json()["picks"]
+            self.user_id)).json()
+
+        if response == {"details": "You cannot view this entry"}:
+            raise ValueError("User ID does not match provided email address!")
+
+        return response["picks"]
 
     def team(self, gameweek=None):
         """Returns a list of all of the user's teams so far, or the user's team
