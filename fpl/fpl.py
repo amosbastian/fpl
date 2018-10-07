@@ -35,7 +35,7 @@ from .models.player import Player
 from .models.team import Team
 from .models.user import User
 from pymongo import MongoClient
-from .utils import team_converter
+from .utils import team_converter, scale, average
 
 
 class FPL():
@@ -274,8 +274,68 @@ class FPL():
 
         return points_against
 
-    def FDR(self):
+    def FDR(self, mongodb=False):
         """Creates a new Fixture Difficulty Ranking (FDR) based on the amount
         of points each team concedes in Fantasy Premier League terms.
         """
-        pass
+        if mongodb:
+            client = MongoClient()
+            database = client.fpl
+            players = database.players.find()
+        else:
+            players = self.get_players()
+
+        def average_points_against(points_against):
+            """Averages the points scored against all teams per position."""
+            for team, positions in points_against.items():
+                for position in positions.values():
+                    position["H"] = average(position["H"])
+                    position["A"] = average(position["A"])
+
+                points_against[team] = positions
+
+            return points_against
+
+        def get_extrema(points_against):
+            """Returns the extrema for each position and location."""
+            averages = {}
+            for team, positions in points_against.items():
+                for position, average in positions.items():
+                    averages.setdefault(position, {"H": [], "A": []})
+                    averages[position]["H"].append(average["H"])
+                    averages[position]["A"].append(average["A"])
+
+            for position, locations in averages.items():
+                min_h = min(locations["H"])
+                min_a = min(locations["A"])
+                max_h = max(locations["H"])
+                max_a = max(locations["A"])
+                averages[position]["H"] = [min_h, max_h]
+                averages[position]["A"] = [min_a, max_a]
+
+            return averages
+
+        def calculate_fdr(average_points, extrema):
+            """Returns a dictionary containing the FDR for each team, which is
+            calculated by scaling the average points conceded per position
+            between 1.0 and 5.0 using the given extrema.
+            """
+            for team, positions in average_points.items():
+                for position, locations in positions.items():
+                    min_h, max_h = extrema[position]["H"]
+                    min_a, max_a = extrema[position]["A"]
+
+                    fdr_h = scale(locations["H"], 5.0, 1.0, min_h, max_h)
+                    fdr_a = scale(locations["A"], 5.0, 1.0, min_a, max_a)
+
+                    average_points[team][position]["H"] = fdr_h
+                    average_points[team][position]["A"] = fdr_a
+
+            return average_points
+
+        points_against = self.get_points_against(players)
+        average_points = average_points_against(points_against)
+        extrema = get_extrema(average_points)
+        fdr = calculate_fdr(average_points, extrema)
+
+        return fdr
