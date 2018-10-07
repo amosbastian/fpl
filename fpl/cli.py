@@ -168,12 +168,28 @@ def format_myteam(user):
     myteam_table(user)
 
 
+def get_account_data(index):
+    """Returns account information of the first account found in the SQLite
+    database.
+
+    1: user ID
+    2: email address
+    3: password
+    """
+    cursor = connection.cursor()
+    accounts = cursor.execute("SELECT * from accounts").fetchall()
+    return accounts[0][index]
+
+
 @cli.command()
-@click.argument("user_id")
+@click.argument("user_id", default=get_account_data(1))
 @click.option("--email", prompt="Email address", envvar="FPL_EMAIL",
-              help="FPL email address")
+              default=get_account_data(2), help="FPL email address",
+              show_default="email saved in SQLite database")
 @click.option("--password", prompt=True, hide_input=True,
-              envvar="FPL_PASSWORD", help="FPL password")
+              envvar="FPL_PASSWORD", default=get_account_data(3),
+              help="FPL password",
+              show_default="password saved in SQLite database")
 def myteam(user_id, email, password):
     """Echoes a logged in user's team to the terminal."""
     fpl.login(email, password)
@@ -358,7 +374,6 @@ def deleteaccount(email):
 def listaccounts():
     """Lists all imported FPL accounts."""
     cursor = connection.cursor()
-
     accounts = cursor.execute("SELECT * from accounts").fetchall()
 
     if not accounts:
