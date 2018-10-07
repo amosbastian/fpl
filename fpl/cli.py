@@ -1,25 +1,24 @@
 import click
 import os
+import requests
+import sqlite3
 
+from appdirs import user_data_dir
 from fpl import FPL
 from prettytable import PrettyTable
 
 from .utils import chip_converter
-from .constants import MYTEAM_FORMAT, PICKS_FORMAT
+from .constants import MYTEAM_FORMAT, PICKS_FORMAT, API_URLS
 
 fpl = FPL()
+data_directory = user_data_dir("fpl", "fpl")
+sql_file = os.path.join(data_directory, "fpl.sqlite")
+connection = sqlite3.connect(sql_file)
 
 
 @click.group()
 def cli():
     pass
-
-
-@cli.command()
-@click.argument("user_id")
-def user(user_id):
-    user = fpl.get_user(user_id)
-    click.echo(user)
 
 
 def get_starters(players, position):
@@ -169,12 +168,28 @@ def format_myteam(user):
     myteam_table(user)
 
 
+def get_account_data(index):
+    """Returns account information of the first account found in the SQLite
+    database.
+
+    1: user ID
+    2: email address
+    3: password
+    """
+    cursor = connection.cursor()
+    accounts = cursor.execute("SELECT * from accounts").fetchall()
+    return accounts[0][index]
+
+
 @cli.command()
-@click.argument("user_id")
+@click.argument("user_id", default=get_account_data(1))
 @click.option("--email", prompt="Email address", envvar="FPL_EMAIL",
-              help="email address")
+              default=get_account_data(2), help="FPL email address",
+              show_default="email saved in SQLite database")
 @click.option("--password", prompt=True, hide_input=True,
-              envvar="FPL_PASSWORD", help="password")
+              envvar="FPL_PASSWORD", default=get_account_data(3),
+              help="FPL password",
+              show_default="password saved in SQLite database")
 def myteam(user_id, email, password):
     """Echoes a logged in user's team to the terminal."""
     fpl.login(email, password)
@@ -257,3 +272,119 @@ def picks(user_id):
     """Echoes a user's picks to the terminal."""
     user = fpl.get_user(user_id)
     format_picks(user)
+
+
+@cli.command()
+@click.option("--user_id", prompt="User ID", help="user's FPL ID")
+@click.option("--email", prompt="Email address", envvar="FPL_EMAIL",
+              help="FPL email address")
+@click.option("--password", prompt=True, hide_input=True,
+              envvar="FPL_PASSWORD", help="FPL password")
+def importaccount(user_id, email, password):
+    """Imports an FPL account."""
+    if not os.path.isdir(data_directory):
+        os.makedirs(data_directory)
+
+    def table_exists():
+        """Returns True if `accounts` table exists, otherwise False."""
+        query = ("SELECT name FROM sqlite_master "
+                 "WHERE type='table' AND name='accounts'")
+        try:
+            cursor = connection.cursor()
+            cursor.execute(query)
+            return True if cursor.fetchone() else False
+        except sqlite3.OperationalError:
+            return False
+
+    def create_table():
+        """Creates the `accounts` table."""
+        query = ("CREATE TABLE accounts ("
+                 "id integer PRIMARY KEY,"
+                 "user_id integer,"
+                 "email text,"
+                 "password text)")
+        cursor = connection.cursor()
+        cursor.execute(query)
+        connection.commit()
+
+    def account_exists(user_id):
+        """Checks if account with user_id already exists in the `accounts`
+        table.
+
+        :param int user_id: user's FPL ID
+        """
+        query = ("SELECT user_id from accounts WHERE user_id=?", (user_id,))
+        cursor = connection.cursor()
+        cursor.execute(*query)
+        account = cursor.fetchone()
+        if account:
+            return True
+        else:
+            return False
+
+    def add_account(user_id, email, password):
+        """Add a new account to the `accounts` table.
+
+        :param int user_id: user's FPL ID
+        :param string email: user's FPL email address
+        :param string password: user's FPL password
+        """
+        if account_exists(user_id):
+            raise ValueError("Account with user ID {} already exists!".format(
+                user_id))
+
+        # Check if log in possible with provided email and password
+        try:
+            fpl.login(email, password)
+        except ValueError as error:
+            click.echo(error)
+            return
+
+        # Use my_team function to determine if user ID is associated to email
+        user = fpl.get_user(user_id)
+        try:
+            user.my_team()
+        except ValueError as error:
+            click.echo(error)
+            return
+
+        query = ("INSERT INTO accounts (user_id, email, password) "
+                 "VALUES (?, ?, ?)", (user_id, email, password))
+        cursor = connection.cursor()
+        cursor.execute(*query)
+        connection.commit()
+
+    if not table_exists():
+        create_table()
+
+    add_account(user_id, email, password)
+
+
+@cli.command()
+@click.argument("email")
+def deleteaccount(email):
+    """Deletes an imported FPL account."""
+    query = ("DELETE FROM accounts WHERE email=?", (email,))
+    cursor = connection.cursor()
+    cursor.execute(*query)
+    connection.commit()
+
+
+@cli.command()
+def listaccounts():
+    """Lists all imported FPL accounts."""
+    cursor = connection.cursor()
+    accounts = cursor.execute("SELECT * from accounts").fetchall()
+
+    if not accounts:
+        click.echo("No accounts found.")
+        return
+
+    table = PrettyTable()
+    table.field_names = ["User ID", "Email"]
+
+    for account in accounts:
+        table.add_row([account[1], account[2]])
+
+    table.align["User ID"] = "l"
+    click.echo(table)

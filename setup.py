@@ -30,6 +30,7 @@ setup(
         "PTable",
         "requests",
         "pymongo",
+        "appdirs",
     ],
     entry_points="""
         [console_scripts]

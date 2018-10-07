@@ -202,7 +202,10 @@ class FPL():
         }
 
         login_url = "https://users.premierleague.com/accounts/login/"
-        session.post(login_url, data=payload)
+        response = session.post(login_url, data=payload)
+
+        if "Incorrect email or password" in response.text:
+            raise ValueError("Incorrect email or password!")
 
         self.session = session
 
@@ -264,8 +267,9 @@ class FPL():
                            for position, difficulty in opponent["FDR"].items()}
                     fixture["FDR"] = fdr
 
-                database.teams.update_one(
-                    team, {"$set": {"fixtures": fixtures}}, upsert=True)
+                database.teams.update_one({"_id": team["_id"]},
+                                          {"$set": {"fixtures": fixtures}},
+                                          upsert=True)
 
         update_teams()
         update_players()
