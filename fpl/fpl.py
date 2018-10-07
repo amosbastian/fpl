@@ -221,8 +221,8 @@ class FPL():
                 team = {k: v for k, v in vars(team).items()
                         if not k.startswith("_")}
 
-                database_teams.update({"team_id": team["team_id"]},
-                                      team, upsert=True)
+                database_teams.replace_one(
+                    {"team_id": team["team_id"]}, team, upsert=True)
 
         def update_players():
             """Updates all players of the Fantasy Premier League."""
@@ -233,8 +233,8 @@ class FPL():
                 player = {k: v for k, v in vars(player).items()
                           if not k.startswith("_")}
 
-                database_players.update({"player_id": player["player_id"]},
-                                        player, upsert=True)
+                database_players.replace_one(
+                    {"player_id": player["player_id"]}, player, upsert=True)
 
         update_teams()
         update_players()
@@ -244,7 +244,10 @@ class FPL():
         all teams in the Premier League, split by position.
         """
         if not players:
-            players = self.get_players()
+            players = []
+            for player in self.get_players():
+                players.append({k: v for k, v in vars(player).items()
+                               if not k.startswith("_")})
 
         points_against = {}
 
