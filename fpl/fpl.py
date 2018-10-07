@@ -27,6 +27,7 @@ import os
 import requests
 
 from .constants import API_URLS
+from datetime import datetime
 from .models.classic_league import ClassicLeague
 from .models.fixture import Fixture
 from .models.gameweek import Gameweek
@@ -214,6 +215,7 @@ class FPL():
 
         def update_teams():
             """Updates all teams of the Fantasy Premier League."""
+            print("{} - updating teams.".format(datetime.now()))
             database_teams = database.teams
             teams = FPL.get_teams()
 
@@ -226,6 +228,7 @@ class FPL():
 
         def update_players():
             """Updates all players of the Fantasy Premier League."""
+            print("{} - updating players.".format(datetime.now()))
             database_players = database.players
             players = FPL.get_players()
 
@@ -236,8 +239,38 @@ class FPL():
                 database_players.replace_one(
                     {"player_id": player["player_id"]}, player, upsert=True)
 
+        def update_fdr():
+            """Updates the FDR of each team in the Fantasy Premier League."""
+            print("{} - updating FDR.".format(datetime.now()))
+            team_fdr = self.FDR(mongodb=True)
+            for team_name, fdr in team_fdr.items():
+                team = database.teams.update_one(
+                    {"name": team_name}, {"$set": {"FDR": fdr}}, upsert=True)
+
+        def update_fixtures():
+            """Updates the fixtures of each team, which includes the FDR of
+            that specific fixture.
+            """
+            print("{} - updating fixtures.".format(datetime.now()))
+            for team in database.teams.find():
+                # Find one player of each team and use them to get the fixtures
+                player = database.players.find_one({"team": team["name"]})
+                fixtures = player["fixtures"]
+                for fixture in fixtures:
+                    location = "H" if fixture["is_home"] else "A"
+                    opponent = database.teams.find_one(
+                        {"name": fixture["opponent_name"]})
+                    fdr = {position: difficulty[location]
+                           for position, difficulty in opponent["FDR"].items()}
+                    fixture["FDR"] = fdr
+
+                database.teams.update_one(
+                    team, {"$set": {"fixtures": fixtures}}, upsert=True)
+
         update_teams()
         update_players()
+        update_fdr()
+        update_fixtures()
 
     def get_points_against(self, players=None):
         """Returns a dictionary containing the points scored against

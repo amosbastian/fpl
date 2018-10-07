@@ -64,6 +64,14 @@ class Team():
                        if player["team_code"] == self.code]
         self.players = players
 
+    def get_fixtures(self):
+        """Sets the team's fixtures equal to that of one of its player's
+        fixtures."""
+        if not self.players:
+            self.get_players()
+        player = self.players[0]
+        self.fixtures = player.fixtures
+
     def _get_information(self):
         response = requests.get(API_URLS["teams"]).json()
         return response[self.team_id - 1]
