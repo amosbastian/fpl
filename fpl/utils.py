@@ -47,3 +47,17 @@ def chip_converter(chip):
         "freehit": "FH"
     }
     return chip_map[chip]
+
+
+def scale(value, upper, lower, min_, max_):
+    """Scales value between upper and lower values, depending on the given
+    minimun and maximum value.
+    """
+    numerator = ((lower - upper) * float((value - min_)))
+    denominator = float((max_ - min_))
+    return numerator / denominator + upper
+
+
+def average(iterable):
+    """Returns the average value of the iterable."""
+    return sum(iterable) / float(len(iterable))
