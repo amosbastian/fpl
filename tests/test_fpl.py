@@ -85,5 +85,34 @@ class FPLTest(unittest.TestCase):
         player = database.players.find_one({"player_id": 1})
         self.assertEqual(player["player_id"], 1)
 
+    def test_get_points_against(self):
+        points_against = self.fpl.get_points_against()
+        self.assertIsInstance(points_against, dict)
+        self.assertEqual(len(points_against), 20)
+
+    def test_FDR(self):
+        def test_main(fdr):
+            self.assertIsInstance(fdr, dict)
+            self.assertEqual(len(fdr), 20)
+
+            location_extrema = {"H": [], "A": []}
+            for team, positions in fdr.items():
+                for location in positions.values():
+                    location_extrema["H"].append(location["H"])
+                    location_extrema["A"].append(location["A"])
+
+            self.assertEqual(max(location_extrema["H"]), 5.0)
+            self.assertEqual(min(location_extrema["H"]), 1.0)
+            self.assertEqual(max(location_extrema["A"]), 5.0)
+            self.assertEqual(min(location_extrema["A"]), 1.0)
+
+        def test_default():
+            fdr = self.fpl.FDR()
+            test_main(fdr)
+
+        def test_mongodb():
+            fdr = self.fpl.FDR(True)
+            test_main(fdr)
+
 if __name__ == '__main__':
     unittest.main()
