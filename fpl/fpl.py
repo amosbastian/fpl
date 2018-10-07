@@ -267,8 +267,9 @@ class FPL():
                            for position, difficulty in opponent["FDR"].items()}
                     fixture["FDR"] = fdr
 
-                database.teams.update_one(
-                    team, {"$set": {"fixtures": fixtures}}, upsert=True)
+                database.teams.update_one({"_id": team["_id"]},
+                                          {"$set": {"fixtures": fixtures}},
+                                          upsert=True)
 
         update_teams()
         update_players()
