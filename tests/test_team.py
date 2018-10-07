@@ -21,5 +21,10 @@ class TeamTest(unittest.TestCase):
         self.assertIsInstance(self.team.players, list)
         self.assertIsInstance(self.team.players[0], Player)
 
+    def test_get_fixtures(self):
+        self.team.get_fixtures()
+        self.assertIsInstance(self.team.fixtures, list)
+        self.assertTrue(len(self.team.fixtures) > 0)
+
 if __name__ == '__main__':
     unittest.main()

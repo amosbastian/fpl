@@ -84,8 +84,8 @@ class FPLTest(unittest.TestCase):
         team = database.teams.find_one({"team_id": 1})
         self.assertIsInstance(team["fixtures"], list)
         self.assertTrue("FDR" in team.keys())
-        self.assertTrue(len(team["fixtures"] > 0))
-        self.assertTrue("FDR" in team["fixtures"])
+        self.assertTrue(len(team["fixtures"]) > 0)
+        self.assertTrue("FDR" in team["fixtures"][0].keys())
 
         player = database.players.find_one({"player_id": 1})
         self.assertEqual(player["player_id"], 1)
