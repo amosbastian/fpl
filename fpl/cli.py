@@ -178,7 +178,9 @@ def get_account_data(index):
     """
     cursor = connection.cursor()
     accounts = cursor.execute("SELECT * from accounts").fetchall()
-    return accounts[0][index]
+    if accounts:
+        return accounts[0][index]
+    return ""
 
 
 @cli.command()
