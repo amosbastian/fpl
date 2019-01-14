@@ -97,6 +97,9 @@ class Player():
         #: The amount of yellow cards the player has received.
         self.yellow_cards = self._additional["yellow_cards"]
 
+        self.ep_this = self._additional["ep_this"]
+        self.ep_next = self._additional["ep_next"]
+
     def _get_specific(self):
         """Returns the player with the specific player_id."""
         return requests.get(API_URLS["player"].format(self.player_id)).json()
