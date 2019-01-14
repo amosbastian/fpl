@@ -22,7 +22,8 @@ def team_converter(team_id):
         17: "Spurs",
         18: "Watford",
         19: "West Ham",
-        20: "Wolves"
+        20: "Wolves",
+	None: None
     }
     return team_map[team_id]
 
