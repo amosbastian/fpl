@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="fpl",
-    version="0.5.5",
+    version="0.6.0",
     packages=find_packages(),
     description="A Python wrapper for the Fantasy Premier League API",
     url="https://github.com/amosbastian/fpl",
