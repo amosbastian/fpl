@@ -13,10 +13,9 @@ def valid_gameweek(gameweek):
 
 class User():
     """A class representing a user of the Fantasy Premier League."""
-    def __init__(self, user_id, session):
-        self.user_id = user_id
+    def __init__(self, user_information, session):
         self._session = session
-        self._information = self._get_information()
+        self._information = user_information
         self._entry = self._information["entry"]
 
         #: The user's first name.
@@ -71,10 +70,6 @@ class User():
 
         #: Account deletion status.
         self.deleted = self._entry["deleted"]
-
-    def _get_information(self):
-        """Returns some general information about the user."""
-        return requests.get(API_URLS["user_cup"].format(self.user_id)).json()
 
     @property
     def history(self):

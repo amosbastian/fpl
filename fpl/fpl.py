@@ -23,11 +23,15 @@ Fantasy Premier League API:
 * /teams
 * /transfers
 """
+import asyncio
 import os
+from datetime import datetime
+
+import aiohttp
 import requests
+from pymongo import MongoClient
 
 from .constants import API_URLS
-from datetime import datetime
 from .models.classic_league import ClassicLeague
 from .models.fixture import Fixture
 from .models.gameweek import Gameweek
@@ -35,22 +39,31 @@ from .models.h2h_league import H2HLeague
 from .models.player import Player
 from .models.team import Team
 from .models.user import User
-from pymongo import MongoClient
-from .utils import team_converter, scale, average
+from .utils import average, scale, team_converter
+
+session = aiohttp.ClientSession()
 
 
 class FPL():
     """The FPL class."""
-    def __init__(self):
-        self.session = None
+    async def _fetch(self, url):
+        async with session.get(url) as response:
+            assert response.status == 200
+            return await response.json()
 
-    def get_user(self, user_id):
-        """Returns a `User` object containing information about the user with
-        the given `user_id`.
+    async def get_user(self, user_id, json=False):
+        """Returns a `User` object or JSON containing information about the
+        user with the given `user_id`.
 
         :param string user_id: A user's id
+        :param boolean json: Flag for returning JSON or User object
         """
-        return User(user_id, session=self.session)
+        url = API_URLS["user_cup"].format(user_id)
+        user = await self._fetch(url)
+
+        if json:
+            return user
+        return User(user, session=session)
 
     @staticmethod
     def get_teams():
@@ -176,7 +189,7 @@ class FPL():
 
         :param string league_id: A league's id
         """
-        return H2HLeague(league_id, session=self.session)
+        return H2HLeague(league_id, session=session)
 
     def login(self, email=None, password=None):
         """Returns a requests session with FPL login authentication.
@@ -207,7 +220,7 @@ class FPL():
         if "Incorrect email or password" in response.text:
             raise ValueError("Incorrect email or password!")
 
-        self.session = session
+        session = session
 
     def update_mongodb(self):
         """Updates or creates a MongoDB database with the collection players

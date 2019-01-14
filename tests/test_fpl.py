@@ -1,4 +1,7 @@
+import asyncio
 import unittest
+
+from pymongo import MongoClient
 
 from fpl import FPL
 from fpl.models.classic_league import ClassicLeague
@@ -8,7 +11,10 @@ from fpl.models.h2h_league import H2HLeague
 from fpl.models.player import Player
 from fpl.models.team import Team
 from fpl.models.user import User
-from pymongo import MongoClient
+
+
+def _run(coroutine):
+    return asyncio.get_event_loop().run_until_complete(coroutine)
 
 
 class FPLTest(unittest.TestCase):
@@ -16,8 +22,11 @@ class FPLTest(unittest.TestCase):
         self.fpl = FPL()
 
     def test_user(self):
-        user = self.fpl.get_user("3523615")
+        user = _run(self.fpl.get_user("3523615"))
         self.assertIsInstance(user, User)
+
+        user = _run(self.fpl.get_user("3523615", True))
+        self.assertIsInstance(user, dict)
 
     def test_team(self):
         team = self.fpl.get_team(1)
