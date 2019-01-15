@@ -51,7 +51,7 @@ class FPL():
             assert response.status == 200
             return await response.json()
 
-    async def get_user(self, user_id, json=False):
+    async def get_user(self, user_id, return_json=False):
         """Returns a `User` object or JSON containing information about the
         user with the given `user_id`.
 
@@ -61,16 +61,21 @@ class FPL():
         url = API_URLS["user_cup"].format(user_id)
         user = await self._fetch(url)
 
-        if json:
+        if return_json:
             return user
         return User(user, session=session)
 
-    @staticmethod
-    def get_teams():
-        """Returns a list of `Team` objects of the teams currently
+    async def get_teams(self, return_json=False):
+        """Returns a list JSON or `Team` objects of the teams currently
         participating in the Premier League.
         """
-        return[Team(team_id) for team_id in range(1, 21)]
+        url = API_URLS["teams"]
+        teams = await self._fetch(url)
+
+        if return_json:
+            return teams
+
+        return[Team(team_information) for team_information in teams]
 
     @staticmethod
     def get_team(team_id):

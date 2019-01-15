@@ -33,10 +33,15 @@ class FPLTest(unittest.TestCase):
         self.assertIsInstance(team, Team)
 
     def test_teams(self):
-        teams = self.fpl.get_teams()
+        teams = _run(self.fpl.get_teams())
         self.assertIsInstance(teams, list)
         self.assertEqual(len(teams), 20)
         self.assertIsInstance(teams[0], Team)
+
+        teams = _run(self.fpl.get_teams(True))
+        self.assertIsInstance(teams, list)
+        self.assertEqual(len(teams), 20)
+        self.assertIsInstance(teams[0], dict)
 
     def test_player(self):
         player = self.fpl.get_player(1)
