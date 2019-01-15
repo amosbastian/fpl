@@ -111,9 +111,15 @@ class FPLTest(unittest.TestCase):
         self.assertIsInstance(fixtures[0], dict)
 
     def test_gameweeks(self):
-        gameweeks = self.fpl.get_gameweeks()
+        gameweeks = _run(self.fpl.get_gameweeks())
         self.assertIsInstance(gameweeks, list)
         self.assertEqual(len(gameweeks), 38)
+        self.assertIsInstance(gameweeks[0], Gameweek)
+
+        gameweeks = _run(self.fpl.get_gameweeks([1, 2, 3], return_json=True))
+        self.assertIsInstance(gameweeks, list)
+        self.assertEqual(len(gameweeks), 3)
+        self.assertIsInstance(gameweeks[0], dict)
 
     def test_gameweek(self):
         gameweek = self.fpl.get_gameweek("20")

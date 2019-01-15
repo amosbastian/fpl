@@ -172,8 +172,8 @@ class FPL():
         return Player(player)
 
     async def get_players(self, player_ids=[], return_json=False):
-        """Returns a list of `Player` or JSON objects of all players currently
-        part of the Fantasy Premier League.
+        """Returns a list of `Player` or JSON objects of either all players or
+        players with the given IDs.
 
         :param list player_ids: A list of player IDs
         :param boolean return_json: Flag for returning JSON
@@ -229,10 +229,35 @@ class FPL():
 
         return [Fixture(fixture) for fixture in fixtures]
 
-    @staticmethod
-    def get_gameweeks():
-        """Returns a list `Gameweek` objects."""
-        return [Gameweek(gameweek_id) for gameweek_id in range(1, 39)]
+    async def get_gameweeks(self, gameweek_ids=[], return_json=False):
+        """Returns a list `Gameweek` or JSON objects of either all gameweeks
+        or the gameweeks with the given IDs.
+
+        :param list gameweek_ids: A list of gameweek IDs
+        :param boolean return_json: Flag for returning JSON
+        """
+
+        if not gameweek_ids:
+            gameweek_ids = range(1, 39)
+
+        static_gameweeks = await self._fetch(API_URLS["gameweeks"])
+
+        tasks = [asyncio.ensure_future(
+                 self._fetch(API_URLS["gameweek_live"].format(gameweek_id)))
+                 for gameweek_id in gameweek_ids]
+
+        live_gameweeks = await asyncio.gather(*tasks)
+
+        for live_gameweek in live_gameweeks:
+            live_id = live_gameweek["fixtures"][0]["event"]
+            static_gameweek = next(gameweek for gameweek in static_gameweeks
+                                   if gameweek["id"] == live_id)
+            live_gameweek.update(static_gameweek)
+
+        if return_json:
+            return live_gameweeks
+
+        return [Gameweek(gameweek) for gameweek in live_gameweeks]
 
     @staticmethod
     def get_gameweek(gameweek_id):
