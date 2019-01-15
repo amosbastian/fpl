@@ -65,19 +65,23 @@ class FPL():
             return user
         return User(user, session=session)
 
-    async def get_teams(self, return_json=False):
+    async def get_teams(self, team_ids=[], return_json=False):
         """Returns a list JSON or `Team` objects of the teams currently
         participating in the Premier League.
 
+        :param list team_ids: List containing the IDs of desired teams
         :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["teams"]
         teams = await self._fetch(url)
 
+        if team_ids:
+            teams = [team for team in teams if team["id"] in team_ids]
+
         if return_json:
             return teams
 
-        return[Team(team_information) for team_information in teams]
+        return [Team(team_information) for team_information in teams]
 
     async def get_team(self, team_id, return_json=False):
         """Returns a `Team` object or JSON containing information about the

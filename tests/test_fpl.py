@@ -41,10 +41,16 @@ class FPLTest(unittest.TestCase):
         self.assertEqual(len(teams), 20)
         self.assertIsInstance(teams[0], Team)
 
-        teams = _run(self.fpl.get_teams(True))
+        teams = _run(self.fpl.get_teams(return_json=True))
         self.assertIsInstance(teams, list)
         self.assertEqual(len(teams), 20)
         self.assertIsInstance(teams[0], dict)
+
+        teams = _run(self.fpl.get_teams(team_ids=[1, 2, 3]))
+        self.assertIsInstance(teams, list)
+        self.assertEqual(len(teams), 3)
+        self.assertIsInstance(teams[0], Team)
+        self.assertListEqual([team.id for team in teams], [1, 2, 3])
 
     def test_player(self):
         player = self.fpl.get_player(1)
