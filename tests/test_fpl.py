@@ -122,8 +122,12 @@ class FPLTest(unittest.TestCase):
         self.assertIsInstance(gameweeks[0], dict)
 
     def test_gameweek(self):
-        gameweek = self.fpl.get_gameweek("20")
+        gameweek = _run(self.fpl.get_gameweek(20))
         self.assertIsInstance(gameweek, Gameweek)
+        self.assertEqual(gameweek.id, 20)
+
+        gameweek = _run(self.fpl.get_gameweek(20, return_json=True))
+        self.assertIsInstance(gameweek, dict)
 
     def test_game_settings(self):
         game_settings = self.fpl.game_settings()

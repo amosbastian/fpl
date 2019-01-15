@@ -259,13 +259,24 @@ class FPL():
 
         return [Gameweek(gameweek) for gameweek in live_gameweeks]
 
-    @staticmethod
-    def get_gameweek(gameweek_id):
-        """Returns a `Gameweek` object of the specified gameweek.
+    async def get_gameweek(self, gameweek_id, return_json=False):
+        """Returns a `Gameweek` or JSON object of the specified gameweek.
 
         :param int gameweek_id: A gameweek's id.
         """
-        return Gameweek(gameweek_id)
+
+        static_gameweeks = await self._fetch(API_URLS["gameweeks"])
+        static_gameweek = next(gameweek for gameweek in static_gameweeks if
+                               gameweek["id"] == gameweek_id)
+        live_gameweek = await self._fetch(API_URLS["gameweek_live"].format(
+            gameweek_id))
+
+        live_gameweek.update(static_gameweek)
+
+        if return_json:
+            return live_gameweek
+
+        return Gameweek(live_gameweek)
 
     @staticmethod
     def game_settings():
