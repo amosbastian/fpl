@@ -36,7 +36,7 @@ from .models.classic_league import ClassicLeague
 from .models.fixture import Fixture
 from .models.gameweek import Gameweek
 from .models.h2h_league import H2HLeague
-from .models.player import Player
+from .models.player import Player, PlayerSummary
 from .models.team import Team
 from .models.user import User
 from .utils import average, scale, team_converter
@@ -121,31 +121,74 @@ class FPL():
 
         return Team(teams[team_id + 1])
 
-    @staticmethod
-    def get_player(player_id):
-        """Returns the `Player` object with the given `player_id`.
+    async def get_player_summary(self, player_id, return_json=False):
+        """Returns a `PlayerSummary` or JSON object with the given `player_id`
 
         :param int player_id: A player's ID
+        :param boolean return_json: Flag for returning JSON
         """
-        return Player(player_id, additional=None)
+        url = API_URLS["player"].format(player_id)
+        player_summary = await self._fetch(url)
 
-    @staticmethod
-    def get_players(player_ids=None):
-        """Returns a list of `Player` objects of all players currently playing
-        for teams in the Premier League.
+        if return_json:
+            return player_summary
+
+        return PlayerSummary(player_summary)
+
+    async def get_player_summaries(self, player_ids=[], return_json=False):
+        """Returns a list of `PlayerSummary` or JSON objects with the given
+        `player_ids`
+
+        :param list player_ids: A list of player IDs
+        :param boolean return_json: Flag for returning JSON
         """
-        if not player_ids:
-            player_ids = range(0, 600)
-        players = []
-        response = requests.get(API_URLS["players"])
-        if response.status_code == 200:
-            for player in response.json():
-                if player["id"] in player_ids:
-                    players.append(Player(player["id"], player))
-        else:
-            print("Something went wrong, please try again later...")
-            return []
-        return players
+        tasks = [asyncio.ensure_future(
+                 self._fetch(API_URLS["player"].format(player_id)))
+                 for player_id in player_ids]
+
+        player_summaries = await asyncio.gather(*tasks)
+
+        if return_json:
+            return player_summaries
+
+        return [PlayerSummary(player_summary)
+                for player_summary in player_summaries]
+
+    async def get_player(self, player_id, return_json=False):
+        """Returns a `Player` or JSON object with the given `player_id`.
+
+        :param int player_id: A player's ID
+        :param boolean return_json: Flag for returning JSON
+        """
+        url = API_URLS["players"]
+        players = await self._fetch(url)
+
+        player = next(player for player in players
+                      if player["id"] == player_id)
+
+        if return_json:
+            return player
+
+        return Player(player)
+
+    async def get_players(self, player_ids=[], return_json=False):
+        """Returns a list of `Player` or JSON objects of all players currently
+        part of the Fantasy Premier League.
+
+        :param list player_ids: A list of player IDs
+        :param boolean return_json: Flag for returning JSON
+        """
+        url = API_URLS["players"]
+        players = await self._fetch(url)
+
+        if player_ids:
+            players = [player for player in players
+                       if player["id"] in player_ids]
+
+        if return_json:
+            return players
+
+        return [Player(player) for player in players]
 
     @staticmethod
     def get_fixture(fixture_id, gameweek=None):

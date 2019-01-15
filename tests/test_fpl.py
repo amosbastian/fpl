@@ -8,7 +8,7 @@ from fpl.models.classic_league import ClassicLeague
 from fpl.models.fixture import Fixture
 from fpl.models.gameweek import Gameweek
 from fpl.models.h2h_league import H2HLeague
-from fpl.models.player import Player
+from fpl.models.player import Player, PlayerSummary
 from fpl.models.team import Team
 from fpl.models.user import User
 
@@ -52,14 +52,40 @@ class FPLTest(unittest.TestCase):
         self.assertIsInstance(teams[0], Team)
         self.assertListEqual([team.id for team in teams], [1, 2, 3])
 
+    def test_player_summary(self):
+        player_summary = _run(self.fpl.get_player_summary(123))
+        self.assertIsInstance(player_summary, PlayerSummary)
+
+        player_summary = _run(self.fpl.get_player_summary(123, True))
+        self.assertIsInstance(player_summary, dict)
+
+    def test_player_summaries(self):
+        player_summaries = _run(self.fpl.get_player_summaries([1, 2, 3]))
+        self.assertIsInstance(player_summaries, list)
+        self.assertIsInstance(player_summaries[0], PlayerSummary)
+        self.assertEqual(len(player_summaries), 3)
+
+        player_summaries = _run(self.fpl.get_player_summaries([1, 2, 3], True))
+        self.assertIsInstance(player_summaries[0], dict)
+
     def test_player(self):
-        player = self.fpl.get_player(1)
+        player = _run(self.fpl.get_player(1))
         self.assertIsInstance(player, Player)
 
+        player = _run(self.fpl.get_player(1, True))
+        self.assertIsInstance(player, dict)
+
     def test_players(self):
-        players = self.fpl.get_players()
+        players = _run(self.fpl.get_players())
         self.assertIsInstance(players, list)
         self.assertIsInstance(players[0], Player)
+
+        players = _run(self.fpl.get_players(return_json=True))
+        self.assertIsInstance(players, list)
+        self.assertIsInstance(players[0], dict)
+
+        players = _run(self.fpl.get_players([1, 2, 3]))
+        self.assertEqual(len(players), 3)
 
     def test_fixture(self):
         fixture = self.fpl.get_fixture(6)
