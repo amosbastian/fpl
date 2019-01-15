@@ -88,10 +88,12 @@ class FPLTest(unittest.TestCase):
         self.assertEqual(len(players), 3)
 
     def test_fixture(self):
-        fixture = self.fpl.get_fixture(6)
+        fixture = _run(self.fpl.get_fixture(6))
         self.assertIsInstance(fixture, Fixture)
-        fixture = self.fpl.get_fixture(6, gameweek=1)
+        fixture = _run(self.fpl.get_fixture(6, gameweek=1))
         self.assertIsInstance(fixture, Fixture)
+        fixture = _run(self.fpl.get_fixture(6, gameweek=1, return_json=True))
+        self.assertIsInstance(fixture, dict)
 
     def test_fixtures(self):
         fixtures = self.fpl.get_fixtures()

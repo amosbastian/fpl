@@ -190,19 +190,26 @@ class FPL():
 
         return [Player(player) for player in players]
 
-    @staticmethod
-    def get_fixture(fixture_id, gameweek=None):
-        """Returns the fixture with the given ID."""
-        if gameweek:
-            response = requests.get(API_URLS["gameweek_fixtures"].format(
-                gameweek)).json()
-        else:
-            response = requests.get(API_URLS["fixtures"]).json()
+    async def get_fixture(self, fixture_id, gameweek=None, return_json=False):
+        """Returns the specific fixture with the given ID.
 
-        for fixture in response:
-            if fixture["id"] == fixture_id:
-                return Fixture(fixture)
-        return []
+        :param int fixture_id: The fixture's ID
+        :param int gameweek: The gameweek the fixture is in
+        :param boolean return_json: Flag for returning JSON
+        """
+        if gameweek:
+            fixtures = await self._fetch(API_URLS["gameweek_fixtures"].format(
+                gameweek))
+        else:
+            fixtures = await self._fetch(API_URLS["fixtures"])
+
+        fixture = next(fixture for fixture in fixtures
+                       if fixture["id"] == fixture_id)
+
+        if return_json:
+            return fixture
+
+        return Fixture(fixture)
 
     @staticmethod
     def get_fixtures(gameweek=None):
