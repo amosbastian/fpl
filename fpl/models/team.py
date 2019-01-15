@@ -9,6 +9,7 @@ class Team():
     def __init__(self, team_information):
         self._information = team_information
 
+        self.id = self._information["id"]
         #: The name of the team, e.g. "Arsenal".
         self.name = self._information["name"]
         #: The team's code.

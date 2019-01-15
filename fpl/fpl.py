@@ -56,7 +56,7 @@ class FPL():
         user with the given `user_id`.
 
         :param string user_id: A user's id
-        :param boolean json: Flag for returning JSON or User object
+        :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["user_cup"].format(user_id)
         user = await self._fetch(url)
@@ -68,6 +68,8 @@ class FPL():
     async def get_teams(self, return_json=False):
         """Returns a list JSON or `Team` objects of the teams currently
         participating in the Premier League.
+
+        :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["teams"]
         teams = await self._fetch(url)
@@ -77,12 +79,12 @@ class FPL():
 
         return[Team(team_information) for team_information in teams]
 
-    @staticmethod
-    def get_team(team_id):
-        """Returns a `Team` object containing information about the team with
-        the given `team_id`.
+    async def get_team(self, team_id, return_json=False):
+        """Returns a `Team` object or JSON containing information about the
+        team with the given `team_id`.
 
         :param int team_id: A team's id
+        :param boolean return_json: Flag for returning JSON
 
         .. code-block:: none
 
@@ -107,7 +109,13 @@ class FPL():
             19 - West Ham
             20 - Wolves
         """
-        return Team(team_id)
+        url = API_URLS["teams"]
+        teams = await self._fetch(url)
+
+        if return_json:
+            return teams[team_id + 1]
+
+        return Team(teams[team_id + 1])
 
     @staticmethod
     def get_player(player_id):
