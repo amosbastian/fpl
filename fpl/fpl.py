@@ -211,18 +211,23 @@ class FPL():
 
         return Fixture(fixture)
 
-    @staticmethod
-    def get_fixtures(gameweek=None):
+    async def get_fixtures(self, gameweek=None, return_json=False):
         """Returns all possible fixtures, or all fixtures of a specific
         gameweek.
+
+        :param int gameweek: The gameweek the fixture is in
+        :param boolean return_json: Flag for returning JSON
         """
         if gameweek:
-            response = requests.get(API_URLS["gameweek_fixtures"].format(
-                gameweek)).json()
+            fixtures = await self._fetch(API_URLS["gameweek_fixtures"].format(
+                gameweek))
         else:
-            response = requests.get(API_URLS["fixtures"]).json()
+            fixtures = await self._fetch(API_URLS["fixtures"])
 
-        return [Fixture(fixture) for fixture in response]
+        if return_json:
+            return fixtures
+
+        return [Fixture(fixture) for fixture in fixtures]
 
     @staticmethod
     def get_gameweeks():

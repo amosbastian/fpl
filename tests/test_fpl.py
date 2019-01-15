@@ -90,19 +90,25 @@ class FPLTest(unittest.TestCase):
     def test_fixture(self):
         fixture = _run(self.fpl.get_fixture(6))
         self.assertIsInstance(fixture, Fixture)
+
         fixture = _run(self.fpl.get_fixture(6, gameweek=1))
         self.assertIsInstance(fixture, Fixture)
+
         fixture = _run(self.fpl.get_fixture(6, gameweek=1, return_json=True))
         self.assertIsInstance(fixture, dict)
 
     def test_fixtures(self):
-        fixtures = self.fpl.get_fixtures()
+        fixtures = _run(self.fpl.get_fixtures())
         self.assertIsInstance(fixtures, list)
         self.assertIsInstance(fixtures[0], Fixture)
-        fixtures = self.fpl.get_fixtures(gameweek=1)
+
+        fixtures = _run(self.fpl.get_fixtures(gameweek=1))
         self.assertEqual(len(fixtures), 10)
         self.assertIsInstance(fixtures, list)
         self.assertIsInstance(fixtures[0], Fixture)
+
+        fixtures = _run(self.fpl.get_fixtures(gameweek=1, return_json=True))
+        self.assertIsInstance(fixtures[0], dict)
 
     def test_gameweeks(self):
         gameweeks = self.fpl.get_gameweeks()
