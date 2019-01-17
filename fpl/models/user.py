@@ -1,7 +1,7 @@
 import requests
 
 from ..constants import API_URLS
-from ..utils import team_converter
+from ..utils import team_converter, fetch
 
 
 def valid_gameweek(gameweek):
@@ -130,13 +130,13 @@ class User():
 
         return picks
 
-    def my_team(self):
+    async def my_team(self):
         """Returns a logged in user's current team."""
         if not self._session:
             raise "User must be logged in."
 
-        response = self._session.get(API_URLS["user_team"].format(
-            self.id)).json()
+        response = await fetch(
+            self._session, API_URLS["user_team"].format(self.id))
 
         if response == {"details": "You cannot view this entry"}:
             raise ValueError("User ID does not match provided email address!")
