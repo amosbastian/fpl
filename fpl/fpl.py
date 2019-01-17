@@ -50,7 +50,7 @@ class FPL():
         self.session = session
 
     async def _fetch(self, url):
-        async with session.get(url) as response:
+        async with self.session.get(url) as response:
             assert response.status == 200
             return await response.json()
 
@@ -317,7 +317,7 @@ class FPL():
 
         return H2HLeague(league, session=self.session)
 
-    def login(self, email=None, password=None):
+    async def login(self, email=None, password=None):
         """Returns a requests session with FPL login authentication.
 
         :param string user: email
@@ -327,13 +327,14 @@ class FPL():
             email = os.environ["FPL_EMAIL"]
             password = os.environ["FPL_PASSWORD"]
 
-        session = requests.Session()
-
-        session.get("https://fantasy.premierleague.com/")
-        csrftoken = session.cookies["csrftoken"]
+        url = "https://fantasy.premierleague.com/"
+        await self.session.get(url)
+        filtered = self.session.cookie_jar.filter_cookies(url)
+        assert filtered["csrftoken"]
+        csrf_token = filtered["csrftoken"].value
 
         payload = {
-            "csrfmiddlewaretoken": csrftoken,
+            "csrfmiddlewaretoken": csrf_token,
             "login": email,
             "password": password,
             "app": "plfpl-web",
@@ -341,12 +342,11 @@ class FPL():
         }
 
         login_url = "https://users.premierleague.com/accounts/login/"
-        response = session.post(login_url, data=payload)
-
-        if "Incorrect email or password" in response.text:
-            raise ValueError("Incorrect email or password!")
-
-        self.session = session
+        async with self.session.post(login_url, data=payload) as response:
+            response_text = await response.text()
+            print(response_text)
+            if "Incorrect email or password" in response_text:
+                raise ValueError("Incorrect email or password!")
 
     def update_mongodb(self):
         """Updates or creates a MongoDB database with the collection players

@@ -17,7 +17,7 @@ class User():
         self._session = session
         self._information = user_information
         self._entry = self._information["entry"]
-
+        self.id = self._entry["id"]
         #: The user's first name.
         self.first_name = self._entry["player_first_name"]
         #: The user's second name.
@@ -75,7 +75,7 @@ class User():
     def history(self):
         """Returns a dictionary containing the history of the user."""
         return requests.get(API_URLS["user_history"].format(
-            self.user_id)).json()
+            self.id)).json()
 
     @property
     def season_history(self):
@@ -121,7 +121,7 @@ class User():
         picks = {}
         for gameweek in range(1, 39):
             team = requests.get(API_URLS["user_picks"].format(
-                self.user_id, gameweek))
+                self.id, gameweek))
 
             if team.status_code == 404:
                 return picks
@@ -136,7 +136,7 @@ class User():
             raise "User must be logged in."
 
         response = self._session.get(API_URLS["user_team"].format(
-            self.user_id)).json()
+            self.id)).json()
 
         if response == {"details": "You cannot view this entry"}:
             raise ValueError("User ID does not match provided email address!")
@@ -231,7 +231,7 @@ class User():
         the user has made so far.
         """
         return requests.get(API_URLS["user_transfers"].format(
-            self.user_id)).json()
+            self.id)).json()
 
     @property
     def wildcards(self):
