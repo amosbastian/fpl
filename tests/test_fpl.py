@@ -134,8 +134,12 @@ class FPLTest(unittest.TestCase):
         self.assertIsInstance(game_settings, dict)
 
     def test_classic_league(self):
-        classic_league = self.fpl.get_classic_league("890172")
+        classic_league = _run(self.fpl.get_classic_league("890172"))
         self.assertIsInstance(classic_league, ClassicLeague)
+
+        classic_league = _run(
+            self.fpl.get_classic_league("890172", return_json=True))
+        self.assertIsInstance(classic_league, dict)
 
     def test_h2h_league(self):
         h2h_league = self.fpl.get_h2h_league("760869")

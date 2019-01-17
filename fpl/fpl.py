@@ -262,7 +262,8 @@ class FPL():
     async def get_gameweek(self, gameweek_id, return_json=False):
         """Returns a `Gameweek` or JSON object of the specified gameweek.
 
-        :param int gameweek_id: A gameweek's id.
+        :param int gameweek_id: A gameweek's id
+        :param boolean return_json: Flag for returning JSON
         """
 
         static_gameweeks = await self._fetch(API_URLS["gameweeks"])
@@ -278,19 +279,26 @@ class FPL():
 
         return Gameweek(live_gameweek)
 
-    @staticmethod
-    def game_settings():
+    async def game_settings(self):
         """Returns a dictionary containing the Fantasy Premier League's rules.
         """
-        return requests.get(API_URLS["settings"]).json()
+        settings = await self._fetch(API_URLS["settings"])
+        return settings
 
-    @staticmethod
-    def get_classic_league(league_id):
-        """Returns a `ClassicLeague` object with the given `league_id`.
+    async def get_classic_league(self, league_id, return_json=False):
+        """Returns a `ClassicLeague` or JSON  object with the given
+        `league_id`.
 
         :param string league_id: A league's id
+        :param boolean return_json: Flag for returning JSON
         """
-        return ClassicLeague(league_id)
+        url = API_URLS["league_classic"].format(league_id)
+        league = await self._fetch(url)
+
+        if return_json:
+            return league
+
+        return ClassicLeague(league)
 
     def get_h2h_league(self, league_id):
         """Returns a `H2HLeague` object with the given `league_id`.

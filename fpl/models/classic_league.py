@@ -6,14 +6,12 @@ from ..constants import API_URLS
 
 class ClassicLeague():
     """A class representing a classic league in the Fantasy Premier League."""
-    def __init__(self, league_id):
-        self.league_id = league_id
-        self._information = self._get_information()
-        self._league = self._information["league"]
+    def __init__(self, league_information):
+        self._league = league_information["league"]
+        self.id = self._league["id"]
 
         #: A dictionary containing information about new entries to the league.
-        self.new_entries = self._information["new_entries"]
-
+        self.new_entries = league_information["new_entries"]
         #: The name of the league.
         self.name = self._league["name"]
         #: The shortname of the league.
@@ -42,10 +40,6 @@ class ClassicLeague():
         self.started = self._league["start_event"]
         #: The standings of the league.
         self.standings = None
-
-    def _get_information(self):
-        """Returns information about the given league."""
-        return requests.get(API_URLS["league_classic"].format(self.league_id)).json()
 
     def get_standings(self):
         """Returns league standings for all teams in the league."""
