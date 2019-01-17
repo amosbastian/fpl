@@ -39,7 +39,7 @@ from .models.h2h_league import H2HLeague
 from .models.player import Player, PlayerSummary
 from .models.team import Team
 from .models.user import User
-from .utils import average, scale, team_converter
+from .utils import average, scale, team_converter, fetch
 
 session = aiohttp.ClientSession()
 
@@ -49,11 +49,6 @@ class FPL():
     def __init__(self):
         self.session = session
 
-    async def _fetch(self, url):
-        async with self.session.get(url) as response:
-            assert response.status == 200
-            return await response.json()
-
     async def get_user(self, user_id, return_json=False):
         """Returns a `User` object or JSON containing information about the
         user with the given `user_id`.
@@ -62,7 +57,7 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["user_cup"].format(user_id)
-        user = await self._fetch(url)
+        user = await fetch(self.session, url)
 
         if return_json:
             return user
@@ -76,7 +71,7 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["teams"]
-        teams = await self._fetch(url)
+        teams = await fetch(self.session, url)
 
         if team_ids:
             teams = [team for team in teams if team["id"] in team_ids]
@@ -117,7 +112,7 @@ class FPL():
             20 - Wolves
         """
         url = API_URLS["teams"]
-        teams = await self._fetch(url)
+        teams = await fetch(self.session, url)
 
         if return_json:
             return teams[team_id + 1]
@@ -131,7 +126,7 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["player"].format(player_id)
-        player_summary = await self._fetch(url)
+        player_summary = await fetch(self.session, url)
 
         if return_json:
             return player_summary
@@ -146,7 +141,7 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         tasks = [asyncio.ensure_future(
-                 self._fetch(API_URLS["player"].format(player_id)))
+                 fetch(self.session, API_URLS["player"].format(player_id)))
                  for player_id in player_ids]
 
         player_summaries = await asyncio.gather(*tasks)
@@ -164,7 +159,7 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["players"]
-        players = await self._fetch(url)
+        players = await fetch(self.session, url)
 
         player = next(player for player in players
                       if player["id"] == player_id)
@@ -182,7 +177,7 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["players"]
-        players = await self._fetch(url)
+        players = await fetch(self.session, url)
 
         if player_ids:
             players = [player for player in players
@@ -201,10 +196,10 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         if gameweek:
-            fixtures = await self._fetch(API_URLS["gameweek_fixtures"].format(
-                gameweek))
+            fixtures = await fetch(
+                self.session, API_URLS["gameweek_fixtures"].format(gameweek))
         else:
-            fixtures = await self._fetch(API_URLS["fixtures"])
+            fixtures = await fetch(self.session, API_URLS["fixtures"])
 
         fixture = next(fixture for fixture in fixtures
                        if fixture["id"] == fixture_id)
@@ -222,10 +217,10 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         if gameweek:
-            fixtures = await self._fetch(API_URLS["gameweek_fixtures"].format(
-                gameweek))
+            fixtures = await fetch(
+                self.session, API_URLS["gameweek_fixtures"].format(gameweek))
         else:
-            fixtures = await self._fetch(API_URLS["fixtures"])
+            fixtures = await fetch(self.session, API_URLS["fixtures"])
 
         if return_json:
             return fixtures
@@ -243,10 +238,11 @@ class FPL():
         if not gameweek_ids:
             gameweek_ids = range(1, 39)
 
-        static_gameweeks = await self._fetch(API_URLS["gameweeks"])
+        static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
 
         tasks = [asyncio.ensure_future(
-                 self._fetch(API_URLS["gameweek_live"].format(gameweek_id)))
+                 fetch(self.session,
+                       API_URLS["gameweek_live"].format(gameweek_id)))
                  for gameweek_id in gameweek_ids]
 
         live_gameweeks = await asyncio.gather(*tasks)
@@ -269,11 +265,11 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
 
-        static_gameweeks = await self._fetch(API_URLS["gameweeks"])
+        static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
         static_gameweek = next(gameweek for gameweek in static_gameweeks if
                                gameweek["id"] == gameweek_id)
-        live_gameweek = await self._fetch(API_URLS["gameweek_live"].format(
-            gameweek_id))
+        live_gameweek = await fetch(
+            self.session, API_URLS["gameweek_live"].format(gameweek_id))
 
         live_gameweek.update(static_gameweek)
 
@@ -285,7 +281,7 @@ class FPL():
     async def game_settings(self):
         """Returns a dictionary containing the Fantasy Premier League's rules.
         """
-        settings = await self._fetch(API_URLS["settings"])
+        settings = await fetch(self.session, API_URLS["settings"])
         return settings
 
     async def get_classic_league(self, league_id, return_json=False):
@@ -296,7 +292,7 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["league_classic"].format(league_id)
-        league = await self._fetch(url)
+        league = await fetch(self.session, url)
 
         if return_json:
             return league
@@ -310,7 +306,7 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         url = API_URLS["league_h2h"].format(league_id)
-        league = await self._fetch(url)
+        league = await fetch(self.session, url)
 
         if return_json:
             return league
@@ -344,7 +340,6 @@ class FPL():
         login_url = "https://users.premierleague.com/accounts/login/"
         async with self.session.post(login_url, data=payload) as response:
             response_text = await response.text()
-            print(response_text)
             if "Incorrect email or password" in response_text:
                 raise ValueError("Incorrect email or password!")
 
