@@ -1,8 +1,6 @@
 import asyncio
 import unittest
 
-from pymongo import MongoClient
-
 from fpl import FPL
 from fpl.models.classic_league import ClassicLeague
 from fpl.models.fixture import Fixture
@@ -156,27 +154,6 @@ class FPLTest(unittest.TestCase):
         my_team = _run(user.my_team())
         self.assertIsInstance(my_team, list)
 
-    def test_update_mongodb(self):
-        self.fpl.update_mongodb()
-        client = MongoClient()
-        database = client.fpl
-
-        teams = database.teams.find()
-        self.assertEqual(teams.count(), 20)
-        team = database.teams.find_one({"team_id": 1})
-        self.assertIsInstance(team["fixtures"], list)
-        self.assertTrue("FDR" in team.keys())
-        self.assertTrue(len(team["fixtures"]) > 0)
-        self.assertTrue("FDR" in team["fixtures"][0].keys())
-
-        player = database.players.find_one({"player_id": 1})
-        self.assertEqual(player["player_id"], 1)
-
-    def test_get_points_against(self):
-        points_against = self.fpl.get_points_against()
-        self.assertIsInstance(points_against, dict)
-        self.assertEqual(len(points_against), 20)
-
     def test_FDR(self):
         def test_main(fdr):
             self.assertIsInstance(fdr, dict)
@@ -197,9 +174,6 @@ class FPLTest(unittest.TestCase):
             fdr = self.fpl.FDR()
             test_main(fdr)
 
-        def test_mongodb():
-            fdr = self.fpl.FDR(True)
-            test_main(fdr)
 
 if __name__ == '__main__':
     unittest.main()

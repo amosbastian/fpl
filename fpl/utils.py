@@ -1,8 +1,15 @@
 
 async def fetch(session, url):
-    async with session.get(url) as response:
-        assert response.status == 200
-        return await response.json()
+    while True:
+        try:
+            async with session.get(url) as response:
+                assert response.status == 200
+                return await response.json()
+            await session.close()
+        except Exception as error:
+            print(error)
+
+    session.close()
 
 
 def team_converter(team_id):

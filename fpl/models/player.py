@@ -38,11 +38,11 @@ class Player():
         #: The amount of penalties the player has missed.
         self.penalties_missed = player["penalties_missed"]
         #: The type of player the player is (1, 2, 3 or 4).
-        player_type = player["element_type"]
+        self.player_type = player["element_type"]
         #: The amount of points a player has scored this season.
         self.points = player["total_points"]
         #: The position that the player plays in.
-        self.position = position_converter(player_type)
+        self.position = position_converter(self.player_type)
         #: The amount of points the player scores per game on average.
         self.ppg = player["points_per_game"]
         #: The player's current price.
