@@ -130,7 +130,7 @@ class FPLTest(unittest.TestCase):
         self.assertIsInstance(gameweek, dict)
 
     def test_game_settings(self):
-        game_settings = self.fpl.game_settings()
+        game_settings = _run(self.fpl.game_settings())
         self.assertIsInstance(game_settings, dict)
 
     def test_classic_league(self):
@@ -147,6 +147,14 @@ class FPLTest(unittest.TestCase):
 
         h2h_league = _run(self.fpl.get_h2h_league("760869", True))
         self.assertIsInstance(h2h_league, dict)
+
+    def test_login(self):
+        with self.assertRaises(ValueError):
+            _run(self.fpl.login(123, 123))
+        _run(self.fpl.login())
+        user = _run(self.fpl.get_user(3808385))
+        my_team = _run(user.my_team())
+        self.assertIsInstance(my_team, list)
 
     def test_update_mongodb(self):
         self.fpl.update_mongodb()
