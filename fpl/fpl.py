@@ -46,6 +46,9 @@ session = aiohttp.ClientSession()
 
 class FPL():
     """The FPL class."""
+    def __init__(self):
+        self.session = session
+
     async def _fetch(self, url):
         async with session.get(url) as response:
             assert response.status == 200
@@ -300,12 +303,19 @@ class FPL():
 
         return ClassicLeague(league)
 
-    def get_h2h_league(self, league_id):
+    async def get_h2h_league(self, league_id, return_json=False):
         """Returns a `H2HLeague` object with the given `league_id`.
 
         :param string league_id: A league's id
+        :param boolean return_json: Flag for returning JSON
         """
-        return H2HLeague(league_id, session=session)
+        url = API_URLS["league_h2h"].format(league_id)
+        league = await self._fetch(url)
+
+        if return_json:
+            return league
+
+        return H2HLeague(league, session=self.session)
 
     def login(self, email=None, password=None):
         """Returns a requests session with FPL login authentication.
@@ -336,7 +346,7 @@ class FPL():
         if "Incorrect email or password" in response.text:
             raise ValueError("Incorrect email or password!")
 
-        session = session
+        self.session = session
 
     def update_mongodb(self):
         """Updates or creates a MongoDB database with the collection players

@@ -8,15 +8,14 @@ class H2HLeague():
     """
     A class representing a h2h league in the Fantasy Premier League.
     """
-    def __init__(self, league_id, session=None):
-        self.league_id = league_id
-        self._information = self._get_information()
-        self._league = self._information["league"]
+    def __init__(self, league_information, session=None):
+        self._league = league_information["league"]
+        self.id = self._league["id"]
         #: Session for H2H fixtures
         self._session = session
 
         #: A dictionary containing information about new entries to the league.
-        self.new_entries = self._information["new_entries"]
+        self.new_entries = league_information["new_entries"]
 
         #: The name of the league.
         self.name = self._league["name"]
@@ -50,11 +49,6 @@ class H2HLeague():
         self.started = self._league["start_event"]
         #: The fixtures of the league.
         self.fixtures = None
-
-    def _get_information(self):
-        """Returns information about the given league."""
-        return requests.get(API_URLS["league_h2h"].format(
-            self.league_id)).json()
 
     def __str__(self):
         return "{} - {}".format(self.name, self.league_id)

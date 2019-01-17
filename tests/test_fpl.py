@@ -142,8 +142,11 @@ class FPLTest(unittest.TestCase):
         self.assertIsInstance(classic_league, dict)
 
     def test_h2h_league(self):
-        h2h_league = self.fpl.get_h2h_league("760869")
+        h2h_league = _run(self.fpl.get_h2h_league("760869"))
         self.assertIsInstance(h2h_league, H2HLeague)
+
+        h2h_league = _run(self.fpl.get_h2h_league("760869", True))
+        self.assertIsInstance(h2h_league, dict)
 
     def test_update_mongodb(self):
         self.fpl.update_mongodb()
