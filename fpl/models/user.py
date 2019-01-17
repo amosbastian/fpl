@@ -1,7 +1,7 @@
-import requests
+import asyncio
 
 from ..constants import API_URLS
-from ..utils import team_converter, fetch
+from ..utils import fetch, team_converter
 
 
 def valid_gameweek(gameweek):
@@ -71,62 +71,73 @@ class User():
         #: Account deletion status.
         self.deleted = self._entry["deleted"]
 
-    @property
-    def history(self):
+    async def get_history(self):
         """Returns a dictionary containing the history of the user."""
-        return requests.get(API_URLS["user_history"].format(
-            self.id)).json()
+        return await fetch(self._session, API_URLS["user_history"].format(
+            self.id))
 
-    @property
-    def season_history(self):
+    async def get_season_history(self):
         """Returns a list containing information about each of the seasons the
         user has participated in.
         """
-        return self.history["season"]
+        try:
+            history = self.history
+        except:
+            history = await self.get_history()
+        return history["season"]
 
-    @property
-    def chips(self):
+    async def get_chips_history(self):
         """Returns a list containing information about the usage of the
         player's chips.
         """
-        return self.history["chips"]
+        try:
+            history = self.history
+        except:
+            history = await self.get_history()
+        return history["chips"]
 
-    @property
-    def leagues(self):
+    async def get_leagues(self):
         """Returns a dictionary containing information about all the leagues
         that the user is participating in.
         """
-        return self.history["leagues"]
+        try:
+            history = self.history
+        except:
+            history = await self.get_history()
+        return history["leagues"]
 
-    @property
-    def classic(self):
+    async def get_classic_leagues(self):
         """Returns a list containing information about all the classic leagues
         that the user is currently participating in.
         """
-        return self.leagues["classic"]
+        try:
+            leagues = self.leagues
+        except:
+            leagues = await self.get_leagues()
+        return leagues["classic"]
 
-    @property
-    def h2h(self):
+    async def get_h2h_leagues(self):
         """Returns a list containing information about all the h2h leagues that
         the user is currently participating in.
         """
-        return self.leagues["h2h"]
+        try:
+            leagues = self.leagues
+        except:
+            leagues = await self.get_leagues()
+        return leagues["h2h"]
 
-    @property
-    def picks(self):
+    async def get_picks(self):
         """Returns a dictionary containing information about the user's chip
         usage, automatic substitutions and picks, alongside general
         information about each gameweek.
         """
-        picks = {}
-        for gameweek in range(1, 39):
-            team = requests.get(API_URLS["user_picks"].format(
-                self.id, gameweek))
+        until = self.current_gameweek + 1
+        tasks = [asyncio.ensure_future(
+                 fetch(self._session,
+                       API_URLS["user_picks"].format(self.id, gw)))
+                 for gw in range(1, until)]
 
-            if team.status_code == 404:
-                return picks
-
-            picks[gameweek] = team.json()
+        picks = await asyncio.gather(*tasks)
 
         return picks
 
@@ -143,124 +154,138 @@ class User():
 
         return response["picks"]
 
-    def team(self, gameweek=None):
+    async def get_team(self, gameweek=None):
         """Returns a list of all of the user's teams so far, or the user's team
         in the specified gameweek.
 
         :param int gameweek: A gameweek (1-38)
         """
+        try:
+            picks = self.picks
+        except:
+            picks = await self.get_picks()
+
         if gameweek:
             valid_gameweek(gameweek)
-            return self.picks[gameweek]["picks"]
+            return picks[gameweek]["picks"]
 
         teams = []
-        for gameweek_id in range(1, 39):
-            try:
-                team = self.picks[gameweek_id]["picks"]
-                teams.append(team)
-            except KeyError:
-                return teams
+        for gameweek_id in range(1, self.current_gameweek):
+            team = picks[gameweek_id]["picks"]
+            teams.append(team)
 
         return teams
 
-    def chip(self, gameweek=None):
+    async def get_chips(self, gameweek=None):
         """Returns a list of chips used by the user so far, or the chip used
         by the user in the specified gameweek.
 
         :param int gameweek: A gameweek (1-38)
         """
+        try:
+            picks = self.picks
+        except:
+            picks = await self.get_picks()
+
         if gameweek:
             valid_gameweek(gameweek)
-            return self.picks[gameweek]["active_chip"]
+            return picks[gameweek]["active_chip"]
 
         active_chips = []
-        for gameweek_id in range(1, 39):
-            try:
-                active_chip = self.picks[gameweek_id]["active_chip"]
-                active_chips.append(active_chip)
-            except KeyError:
-                return active_chips
+        for gameweek_id in range(1, self.current_gameweek):
+            active_chip = picks[gameweek_id]["active_chip"]
+            active_chips.append(active_chip)
 
         return active_chips
 
-    def automatic_substitutions(self, gameweek=None):
+    async def get_automatic_substitutions(self, gameweek=None):
         """Returns a list of all automatic substitions made for the user so
         far, or the automatic substitutions made for the user in the specified
         gameweek.
 
         :param int gameweek: A gameweek (1-38)
         """
+        try:
+            picks = self.picks
+        except:
+            picks = await self.get_picks()
+
         if gameweek:
             valid_gameweek(gameweek)
-            return self.picks[gameweek]["automatic_subs"]
+            return picks[gameweek]["automatic_subs"]
 
         automatic_substitutions = []
-        for gameweek_id in range(1, 39):
-            try:
-                automatic_substitution = self.picks[
-                    gameweek_id]["automatic_subs"]
-                automatic_substitutions.append(automatic_substitution)
-            except KeyError:
-                return automatic_substitutions
+        for gameweek_id in range(1, self.current_gameweek):
+            automatic_substitution = picks[gameweek_id]["automatic_subs"]
+            automatic_substitutions.append(automatic_substitution)
 
         return automatic_substitutions
 
-    def gameweek_history(self, gameweek=None):
+    async def get_gameweek_history(self, gameweek=None):
         """Returns a list of the user's history per gameweek, or the history
         of a specific gameweek.
 
         :param int gameweek: A gameweek (1-38)
         """
+        try:
+            picks = self.picks
+        except:
+            picks = await self.get_picks()
+
         if gameweek:
             valid_gameweek(gameweek)
-            return self.picks[gameweek]["entry_history"]
+            return picks[gameweek]["entry_history"]
 
         histories = []
-        for gameweek_id in range(1, 39):
-            try:
-                history = self.picks[gameweek_id]["entry_history"]
-                histories.append(history)
-            except KeyError:
-                return histories
+        for gameweek_id in range(1, self.current_gameweek):
+            history = picks[gameweek_id]["entry_history"]
+            histories.append(history)
 
-        return history
+        return histories
 
-    @property
-    def transfers(self):
+    async def get_transfers(self):
         """Returns a dictionary containing information about all the transfers
         the user has made so far.
         """
-        return requests.get(API_URLS["user_transfers"].format(
-            self.id)).json()
+        return await fetch(self._session, API_URLS["user_transfers"].format(
+            self.id))
 
-    @property
-    def wildcards(self):
+    async def get_wildcards(self):
         """Returns a list containing information about the usage of the
         player's wildcard(s).
         """
-        return self.transfers["wildcards"]
+        try:
+            transfers = self.transfers
+        except:
+            transfers = await self.get_transfers()
 
-    def transfer_history(self, gameweek=None):
+        return transfers["wildcards"]
+
+    async def get_transfer_history(self, gameweek=None):
         """Returns a list containing information about the user's transfer
         history.
 
         :param int gameweek: A gameweek (1-38)
         """
+        try:
+            transfers = self.transfers
+        except:
+            transfers = await self.get_transfers()
+
         if gameweek:
             valid_gameweek(gameweek)
-            transfers = [transfer for transfer in self.transfers["history"]
+            transfers = [transfer for transfer in transfers["history"]
                          if transfer["event"] == gameweek]
             return transfers
 
-        return self.transfers["history"]
+        return transfers["history"]
 
-    @property
-    def watchlist(self):
+    def get_watchlist(self):
         """Returns the user's watchlist."""
         if not self._session:
             raise "User must be logged in."
 
-        return self._session.get(API_URLS["watchlist"]).json()
+        return fetch(self._session, API_URLS["watchlist"])
 
     def __str__(self):
         return "{} {} - {}".format(

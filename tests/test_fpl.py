@@ -9,10 +9,7 @@ from fpl.models.h2h_league import H2HLeague
 from fpl.models.player import Player, PlayerSummary
 from fpl.models.team import Team
 from fpl.models.user import User
-
-
-def _run(coroutine):
-    return asyncio.get_event_loop().run_until_complete(coroutine)
+from fpl.utils import _run
 
 
 class FPLTest(unittest.TestCase):
@@ -177,7 +174,6 @@ class FPLTest(unittest.TestCase):
         def test_default():
             fdr = self.fpl.FDR()
             test_main(fdr)
-
 
 if __name__ == '__main__':
     unittest.main()

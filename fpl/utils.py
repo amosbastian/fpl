@@ -1,3 +1,4 @@
+import asyncio
 
 async def fetch(session, url):
     while True:
@@ -8,8 +9,6 @@ async def fetch(session, url):
             await session.close()
         except Exception as error:
             pass
-
-    session.close()
 
 
 def team_converter(team_id):
@@ -74,3 +73,7 @@ def scale(value, upper, lower, min_, max_):
 def average(iterable):
     """Returns the average value of the iterable."""
     return sum(iterable) / float(len(iterable))
+
+
+def _run(coroutine):
+    return asyncio.get_event_loop().run_until_complete(coroutine)

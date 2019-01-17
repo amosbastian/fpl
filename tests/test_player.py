@@ -1,12 +1,13 @@
 import unittest
 
 from fpl import FPL
+from fpl.utils import _run
 
 
 class FPLTest(unittest.TestCase):
     def setUp(self):
         self.fpl = FPL()
-        self.player = self.fpl.get_player(1)
+        self.player = _run(self.fpl.get_player(1))
 
     def test_games_played(self):
         pass
