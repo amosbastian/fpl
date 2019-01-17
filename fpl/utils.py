@@ -7,7 +7,7 @@ async def fetch(session, url):
                 return await response.json()
             await session.close()
         except Exception as error:
-            print(error)
+            pass
 
     session.close()
 

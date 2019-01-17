@@ -390,8 +390,6 @@ class FPL():
         """Creates a new Fixture Difficulty Ranking (FDR) based on the amount
         of points each team concedes in Fantasy Premier League terms.
         """
-        players = self.get_players()
-
         def average_points_against(points_against):
             """Averages the points scored against all teams per position."""
             for team, positions in points_against.items():
@@ -440,7 +438,7 @@ class FPL():
 
             return average_points
 
-        points_against = self.get_points_against(players)
+        points_against = await self.get_points_against()
         average_points = average_points_against(points_against)
         extrema = get_extrema(average_points)
         fdr = calculate_fdr(average_points, extrema)

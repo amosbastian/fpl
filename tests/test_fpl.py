@@ -154,6 +154,10 @@ class FPLTest(unittest.TestCase):
         my_team = _run(user.my_team())
         self.assertIsInstance(my_team, list)
 
+    def test_points_against(self):
+        points_against = _run(self.fpl.get_points_against())
+        self.assertIsInstance(points_against, dict)
+
     def test_FDR(self):
         def test_main(fdr):
             self.assertIsInstance(fdr, dict)
