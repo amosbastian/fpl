@@ -159,8 +159,7 @@ class FPL():
         :param int player_id: A player's ID
         :param boolean return_json: Flag for returning JSON
         """
-        url = API_URLS["players"]
-        players = await fetch(self.session, url)
+        players = await fetch(self.session, API_URLS["players"])
 
         player = next(player for player in players
                       if player["id"] == player_id)
@@ -175,24 +174,25 @@ class FPL():
 
         return Player(player)
 
-    async def get_players(self, player_ids=[], return_json=False):
+    async def get_players(self, player_ids=[], include_summary=False,
+                          return_json=False):
         """Returns a list of `Player` or JSON objects of either all players or
         players with the given IDs.
 
         :param list player_ids: A list of player IDs
         :param boolean return_json: Flag for returning JSON
         """
-        url = API_URLS["players"]
-        players = await fetch(self.session, url)
+        players = await fetch(self.session, API_URLS["players"])
 
-        if player_ids:
-            players = [player for player in players
-                       if player["id"] in player_ids]
+        if not player_ids:
+            player_ids = [player["id"] for player in players]
 
-        if return_json:
-            return players
+        tasks = [asyncio.ensure_future(
+                 self.get_player(player_id, include_summary, return_json))
+                 for player_id in player_ids]
+        players = await asyncio.gather(*tasks)
 
-        return [Player(player) for player in players]
+        return players
 
     async def get_fixture(self, fixture_id, gameweek=None, return_json=False):
         """Returns the specific fixture with the given ID.
