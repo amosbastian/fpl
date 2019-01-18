@@ -20,7 +20,10 @@ class User():
         self.leagues = user_information["leagues"]
 
     async def get_gameweek_history(self, gameweek=None):
-        """Returns a list containing the gameweek history of the user."""
+        """Returns a list containing the gameweek history of the user.
+
+        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        """
         if hasattr(self, "_history"):
             history = self._history
         else:
@@ -48,7 +51,10 @@ class User():
         return history["season"]
 
     async def get_chips_history(self, gameweek=None):
-        """Returns a list containing the chip history of the user."""
+        """Returns a list containing the chip history of the user.
+
+        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        """
         if hasattr(self, "_history"):
             history = self._history
         else:
@@ -65,7 +71,10 @@ class User():
         return history["chips"]
 
     async def get_picks(self, gameweek=None):
-        """Returns a list containing the user's picks each gameweek."""
+        """Returns a list containing the user's picks each gameweek.
+
+        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        """
         if hasattr(self, "_picks"):
             picks = self._picks
         else:
@@ -84,7 +93,10 @@ class User():
         return [pick["picks"] for pick in picks]
 
     async def get_active_chips(self, gameweek=None):
-        """Returns a list containing the user's active chips each gameweek."""
+        """Returns a list containing the user's active chips each gameweek.
+
+        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        """
         if hasattr(self, "_picks"):
             picks = self._picks
         else:
@@ -104,7 +116,10 @@ class User():
 
     async def get_automatic_substitutions(self, gameweek=None):
         """Returns a list containing the user's automatic substitutions each
-        gameweek."""
+        gameweek.
+
+        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        """
         if hasattr(self, "_picks"):
             picks = self._picks
         else:
@@ -123,7 +138,10 @@ class User():
         return [pick["automatic_subs"] for pick in picks]
 
     async def get_team(self):
-        """Returns a logged in user's current team."""
+        """Returns a logged in user's current team.
+
+        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        """
         if not self._session:
             raise "User must be logged in."
 
@@ -138,6 +156,8 @@ class User():
     async def get_transfers(self, gameweek=None):
         """Returns a list containing information about all the transfers the
         user has made so far.
+
+        :gameweek (`int`, optional): The gameweek. Defaults to None.
         """
         if hasattr(self, "_transfers"):
             return self._transfers["history"]
