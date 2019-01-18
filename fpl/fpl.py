@@ -53,7 +53,7 @@ class FPL():
         user with the given `user_id`.
 
         :param string user_id: A user's id
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
         url = API_URLS["user"].format(user_id)
         user = await fetch(self.session, url)
@@ -67,7 +67,7 @@ class FPL():
         participating in the Premier League.
 
         :param list team_ids: List containing the IDs of desired teams
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
         url = API_URLS["teams"]
         teams = await fetch(self.session, url)
@@ -86,7 +86,7 @@ class FPL():
         team with the given `team_id`.
 
         :param int team_id: A team's id
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
 
         .. code-block:: none
 
@@ -123,7 +123,7 @@ class FPL():
         """Returns a `PlayerSummary` or JSON object with the given `player_id`
 
         :param int player_id: A player's ID
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
         url = API_URLS["player"].format(player_id)
         player_summary = await fetch(self.session, url)
@@ -138,7 +138,7 @@ class FPL():
         `player_ids`
 
         :param list player_ids: A list of player IDs
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
         tasks = [asyncio.ensure_future(
                  fetch(self.session, API_URLS["player"].format(player_id)))
@@ -157,7 +157,9 @@ class FPL():
         """Returns a `Player` or JSON object with the given `player_id`.
 
         :param int player_id: A player's ID
-        :param boolean return_json: Flag for returning JSON
+        :param list players: A list of players
+        :param boolean include_summary: include player's summary if True
+        :param boolean return_json: return dict if True, otherwise Player
         """
         if not players:
             players = await fetch(self.session, API_URLS["players"])
@@ -181,7 +183,8 @@ class FPL():
         players with the given IDs.
 
         :param list player_ids: A list of player IDs
-        :param boolean return_json: Flag for returning JSON
+        :param boolean include_summary: include player's summary if True
+        :param boolean return_json: return dict if True, otherwise Player
         """
         players = await fetch(self.session, API_URLS["players"])
         if not player_ids:
@@ -200,7 +203,7 @@ class FPL():
 
         :param int fixture_id: The fixture's ID
         :param int gameweek: The gameweek the fixture is in
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
         if gameweek:
             fixtures = await fetch(
@@ -221,7 +224,7 @@ class FPL():
         gameweek.
 
         :param int gameweek: The gameweek the fixture is in
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
         if gameweek:
             fixtures = await fetch(
@@ -239,7 +242,7 @@ class FPL():
         or the gameweeks with the given IDs.
 
         :param list gameweek_ids: A list of gameweek IDs
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
 
         if not gameweek_ids:
@@ -269,7 +272,7 @@ class FPL():
         """Returns a `Gameweek` or JSON object of the specified gameweek.
 
         :param int gameweek_id: A gameweek's id
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
 
         static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
@@ -296,7 +299,7 @@ class FPL():
         `league_id`.
 
         :param string league_id: A league's id
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
         url = API_URLS["league_classic"].format(league_id)
         league = await fetch(self.session, url)
@@ -310,7 +313,7 @@ class FPL():
         """Returns a `H2HLeague` object with the given `league_id`.
 
         :param string league_id: A league's id
-        :param boolean return_json: Flag for returning JSON
+        :param boolean return_json: return dict if True, otherwise Player
         """
         url = API_URLS["league_h2h"].format(league_id)
         league = await fetch(self.session, url)
