@@ -87,6 +87,10 @@ class FPLTest(unittest.TestCase):
         players = _run(self.fpl.get_players([1, 2, 3]))
         self.assertEqual(len(players), 3)
 
+        players = _run(self.fpl.get_players([1, 2, 3], True))
+        self.assertEqual(len(players), 3)
+        self.assertIsInstance(players[0].fixtures, list)
+
     def test_fixture(self):
         fixture = _run(self.fpl.get_fixture(6))
         self.assertIsInstance(fixture, Fixture)

@@ -152,14 +152,15 @@ class FPL():
         return [PlayerSummary(player_summary)
                 for player_summary in player_summaries]
 
-    async def get_player(self, player_id, include_summary=False,
+    async def get_player(self, player_id, players=None, include_summary=False,
                          return_json=False):
         """Returns a `Player` or JSON object with the given `player_id`.
 
         :param int player_id: A player's ID
         :param boolean return_json: Flag for returning JSON
         """
-        players = await fetch(self.session, API_URLS["players"])
+        if not players:
+            players = await fetch(self.session, API_URLS["players"])
 
         player = next(player for player in players
                       if player["id"] == player_id)
@@ -183,12 +184,12 @@ class FPL():
         :param boolean return_json: Flag for returning JSON
         """
         players = await fetch(self.session, API_URLS["players"])
-
         if not player_ids:
             player_ids = [player["id"] for player in players]
 
         tasks = [asyncio.ensure_future(
-                 self.get_player(player_id, include_summary, return_json))
+                 self.get_player(
+                     player_id, players, include_summary, return_json))
                  for player_id in player_ids]
         players = await asyncio.gather(*tasks)
 
@@ -353,20 +354,11 @@ class FPL():
         """Returns a dictionary containing the points scored against
         all teams in the Premier League, split by position.
         """
-        players = await self.get_players(return_json=True)
-        player_ids = [player["id"] for player in players]
-        player_summaries = await self.get_player_summaries(
-            player_ids, return_json=True)
+        players = await self.get_players(
+            include_summary=True, return_json=True)
         points_against = {}
 
         for player in players:
-            try:
-                player_summary = next(
-                    summary for summary in player_summaries
-                    if summary["history"][0]["element"] == player["id"])
-            except Exception:
-                continue
-            player.update(player_summary)
             position = position_converter(player["element_type"]).lower()
 
             for fixture in player["history"]:
@@ -391,7 +383,7 @@ class FPL():
                 points_against[opponent]["all"][location].append(points)
                 points_against[opponent][position][location].append(points)
 
-        # await self.session.close()
+        await self.session.close()
         return points_against
 
     async def FDR(self):
