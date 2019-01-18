@@ -78,7 +78,8 @@ class FPL():
         if return_json:
             return teams
 
-        return [Team(team_information) for team_information in teams]
+        return [Team(team_information, self.session)
+                for team_information in teams]
 
     async def get_team(self, team_id, return_json=False):
         """Returns a `Team` object or JSON containing information about the
@@ -116,7 +117,7 @@ class FPL():
         if return_json:
             return teams[team_id + 1]
 
-        return Team(teams[team_id + 1])
+        return Team(teams[team_id + 1], self.session)
 
     async def get_player_summary(self, player_id, return_json=False):
         """Returns a `PlayerSummary` or JSON object with the given `player_id`
