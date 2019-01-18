@@ -55,7 +55,7 @@ class FPL():
         :param string user_id: A user's id
         :param boolean return_json: Flag for returning JSON
         """
-        url = API_URLS["user_cup"].format(user_id)
+        url = API_URLS["user"].format(user_id)
         user = await fetch(self.session, url)
 
         if return_json:
