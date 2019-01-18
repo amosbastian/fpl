@@ -1,9 +1,7 @@
-import requests
-
 from ..constants import API_URLS
 from ..utils import fetch
-from .player import Player
 from .fixture import Fixture
+from .player import Player
 
 
 class Team():

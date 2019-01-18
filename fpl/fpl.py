@@ -152,7 +152,8 @@ class FPL():
         return [PlayerSummary(player_summary)
                 for player_summary in player_summaries]
 
-    async def get_player(self, player_id, return_json=False):
+    async def get_player(self, player_id, include_summary=False,
+                         return_json=False):
         """Returns a `Player` or JSON object with the given `player_id`.
 
         :param int player_id: A player's ID
@@ -163,6 +164,11 @@ class FPL():
 
         player = next(player for player in players
                       if player["id"] == player_id)
+
+        if include_summary:
+            player_summary = await self.get_player_summary(
+                player["id"], return_json=True)
+            player.update(player_summary)
 
         if return_json:
             return player

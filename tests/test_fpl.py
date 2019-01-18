@@ -67,8 +67,13 @@ class FPLTest(unittest.TestCase):
         player = _run(self.fpl.get_player(1))
         self.assertIsInstance(player, Player)
 
-        player = _run(self.fpl.get_player(1, True))
+        player = _run(self.fpl.get_player(1, return_json=True))
         self.assertIsInstance(player, dict)
+
+        player_with_summary = _run(
+            self.fpl.get_player(1, include_summary=True))
+
+        self.assertIsInstance(player_with_summary.fixtures, list)
 
     def test_players(self):
         players = _run(self.fpl.get_players())
@@ -148,8 +153,8 @@ class FPLTest(unittest.TestCase):
             _run(self.fpl.login(123, 123))
         _run(self.fpl.login())
         user = _run(self.fpl.get_user(3808385))
-        my_team = _run(user.my_team())
-        self.assertIsInstance(my_team, list)
+        team = _run(user.get_team())
+        self.assertIsInstance(team, list)
 
     def test_points_against(self):
         points_against = _run(self.fpl.get_points_against())
