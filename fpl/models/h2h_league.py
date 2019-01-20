@@ -1,5 +1,4 @@
 import asyncio
-import itertools
 
 from ..constants import API_URLS
 from ..utils import fetch, get_current_gameweek

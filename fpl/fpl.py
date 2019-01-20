@@ -307,7 +307,7 @@ class FPL():
         if return_json:
             return league
 
-        return ClassicLeague(league)
+        return ClassicLeague(league, session=self.session)
 
     async def get_h2h_league(self, league_id, return_json=False):
         """Returns a `H2HLeague` object with the given `league_id`.
