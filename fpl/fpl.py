@@ -24,6 +24,7 @@ Fantasy Premier League API:
 * /transfers
 """
 import asyncio
+import itertools
 import os
 from datetime import datetime
 
@@ -198,20 +199,23 @@ class FPL():
 
         return players
 
-    async def get_fixture(self, fixture_id, gameweek=None, return_json=False):
-        """Returns the specific fixture with the given ID.
+    async def get_fixture(self, fixture_id, return_json=False):
+        """Returns the fixture with the given `fixture_id`.
 
         :param int fixture_id: The fixture's ID
-        :param int gameweek: The gameweek the fixture is in
         :param boolean return_json: return dict if True, otherwise Player
         """
-        if gameweek:
-            fixtures = await fetch(
-                self.session, API_URLS["gameweek_fixtures"].format(gameweek))
-        else:
-            fixtures = await fetch(self.session, API_URLS["fixtures"])
+        fixtures = await fetch(self.session, API_URLS["fixtures"])
 
         fixture = next(fixture for fixture in fixtures
+                       if fixture["id"] == fixture_id)
+        fixture_gameweek = fixture["event"]
+
+        gameweek_fixtures = await fetch(
+            self.session,
+            API_URLS["gameweek_fixtures"].format(fixture_gameweek))
+
+        fixture = next(fixture for fixture in gameweek_fixtures
                        if fixture["id"] == fixture_id)
 
         if return_json:
@@ -219,18 +223,60 @@ class FPL():
 
         return Fixture(fixture)
 
-    async def get_fixtures(self, gameweek=None, return_json=False):
-        """Returns all possible fixtures, or all fixtures of a specific
-        gameweek.
+    async def get_fixtures_by_id(self, fixture_ids, return_json=False):
+        """Returns a list of all fixtures with IDs included in the
+        `fixture_ids` list.
 
-        :param int gameweek: The gameweek the fixture is in
-        :param boolean return_json: return dict if True, otherwise Player
+        :param list fixture_ids: A list of fixture IDs
+        :param boolean return_json: return dict if True, otherwise Fixture
         """
-        if gameweek:
-            fixtures = await fetch(
-                self.session, API_URLS["gameweek_fixtures"].format(gameweek))
-        else:
-            fixtures = await fetch(self.session, API_URLS["fixtures"])
+        fixtures = await fetch(self.session, API_URLS["fixtures"])
+        fixture_gameweeks = set(fixture["event"] for fixture in fixtures
+                                if fixture["id"] in fixture_ids)
+        tasks = [asyncio.ensure_future(
+                 fetch(self.session,
+                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                 for gameweek in fixture_gameweeks]
+
+        gameweek_fixtures = await asyncio.gather(*tasks)
+        merged_fixtures = list(itertools.chain(*gameweek_fixtures))
+
+        fixtures = [fixture for fixture in merged_fixtures
+                    if fixture["id"] in fixture_ids]
+
+        if return_json:
+            return fixtures
+
+        return [Fixture(fixture) for fixture in fixtures]
+
+    async def get_fixtures_by_gameweek(self, gameweek, return_json=False):
+        """Returns a list of all fixtures of a given gameweek.
+
+        :param int gameweek: A gameweek
+        :param boolean return_json: return dict if True, otherwise Fixture
+        """
+        fixtures = await fetch(self.session,
+                               API_URLS["gameweek_fixtures"].format(gameweek))
+
+        if return_json:
+            return fixtures
+
+        return [Fixture(fixture) for fixture in fixtures]
+
+    async def get_fixtures(self, return_json=False):
+        """Returns a list of all fixtures.
+
+        :param list fixture_ids: A list of fixture IDs
+        :param boolean return_json: return dict if True, otherwise Fixture
+        """
+        gameweeks = range(1, 39)
+        tasks = [asyncio.ensure_future(
+                 fetch(self.session,
+                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                 for gameweek in gameweeks]
+
+        gameweek_fixtures = await asyncio.gather(*tasks)
+        fixtures = list(itertools.chain(*gameweek_fixtures))
 
         if return_json:
             return fixtures

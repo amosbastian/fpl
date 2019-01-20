@@ -95,23 +95,41 @@ class FPLTest(unittest.TestCase):
         fixture = _run(self.fpl.get_fixture(6))
         self.assertIsInstance(fixture, Fixture)
 
-        fixture = _run(self.fpl.get_fixture(6, gameweek=1))
-        self.assertIsInstance(fixture, Fixture)
-
-        fixture = _run(self.fpl.get_fixture(6, gameweek=1, return_json=True))
+        fixture = _run(self.fpl.get_fixture(6, return_json=True))
         self.assertIsInstance(fixture, dict)
+
+    def test_fixtures_by_id(self):
+        fixtures = _run(self.fpl.get_fixtures_by_id([100, 200, 300]))
+        self.assertIsInstance(fixtures, list)
+        self.assertIsInstance(fixtures[0], Fixture)
+
+        fixtures = _run(
+            self.fpl.get_fixtures_by_id([100, 200, 300], return_json=True))
+        self.assertIsInstance(fixtures, list)
+        self.assertIsInstance(fixtures[0], dict)
+
+        fixture_ids = [fixture["id"] for fixture in fixtures]
+        self.assertListEqual([100, 200, 300], fixture_ids)
+
+    def test_fixtures_by_gameweek(self):
+        for gameweek in range(1, 39):
+            fixtures = _run(self.fpl.get_fixtures_by_gameweek(gameweek))
+            self.assertEqual(len(fixtures), 10)
+            self.assertIsInstance(fixtures, list)
+            self.assertIsInstance(fixtures[0], Fixture)
+            # self.assertEqual(fixtures[0].event, gameweek)
+
+            fixtures = _run(
+                self.fpl.get_fixtures_by_gameweek(gameweek, return_json=True))
+            self.assertIsInstance(fixtures[0], dict)
 
     def test_fixtures(self):
         fixtures = _run(self.fpl.get_fixtures())
+        self.assertEqual(len(fixtures), 380)
         self.assertIsInstance(fixtures, list)
         self.assertIsInstance(fixtures[0], Fixture)
 
-        fixtures = _run(self.fpl.get_fixtures(gameweek=1))
-        self.assertEqual(len(fixtures), 10)
-        self.assertIsInstance(fixtures, list)
-        self.assertIsInstance(fixtures[0], Fixture)
-
-        fixtures = _run(self.fpl.get_fixtures(gameweek=1, return_json=True))
+        fixtures = _run(self.fpl.get_fixtures(return_json=True))
         self.assertIsInstance(fixtures[0], dict)
 
     def test_gameweeks(self):
