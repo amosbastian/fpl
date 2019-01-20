@@ -237,38 +237,8 @@ class FPL():
 
         return [Fixture(fixture) for fixture in fixtures]
 
-    async def get_gameweeks(self, gameweek_ids=[], return_json=False):
-        """Returns a list `Gameweek` or JSON objects of either all gameweeks
-        or the gameweeks with the given IDs.
-
-        :param list gameweek_ids: A list of gameweek IDs
-        :param boolean return_json: return dict if True, otherwise Player
-        """
-
-        if not gameweek_ids:
-            gameweek_ids = range(1, 39)
-
-        static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
-
-        tasks = [asyncio.ensure_future(
-                 fetch(self.session,
-                       API_URLS["gameweek_live"].format(gameweek_id)))
-                 for gameweek_id in gameweek_ids]
-
-        live_gameweeks = await asyncio.gather(*tasks)
-
-        for live_gameweek in live_gameweeks:
-            live_id = live_gameweek["fixtures"][0]["event"]
-            static_gameweek = next(gameweek for gameweek in static_gameweeks
-                                   if gameweek["id"] == live_id)
-            live_gameweek.update(static_gameweek)
-
-        if return_json:
-            return live_gameweeks
-
-        return [Gameweek(gameweek) for gameweek in live_gameweeks]
-
-    async def get_gameweek(self, gameweek_id, return_json=False):
+    async def get_gameweek(self, gameweek_id, include_live=False,
+                           return_json=False):
         """Returns a `Gameweek` or JSON object of the specified gameweek.
 
         :param int gameweek_id: A gameweek's id
@@ -287,6 +257,25 @@ class FPL():
             return live_gameweek
 
         return Gameweek(live_gameweek)
+
+    async def get_gameweeks(self, gameweek_ids=[], include_live=False,
+                            return_json=False):
+        """Returns a list `Gameweek` or JSON objects of either all gameweeks
+        or the gameweeks with the given IDs.
+
+        :param list gameweek_ids: A list of gameweek IDs
+        :param boolean return_json: return dict if True, otherwise Player
+        """
+
+        if not gameweek_ids:
+            gameweek_ids = range(1, 39)
+
+        tasks = [asyncio.ensure_future(
+                 self.get_gameweek(gameweek_id, include_live, return_json))
+                 for gameweek_id in gameweek_ids]
+
+        gameweeks = await asyncio.gather(*tasks)
+        return gameweeks
 
     async def game_settings(self):
         """Returns a dictionary containing the Fantasy Premier League's rules.
