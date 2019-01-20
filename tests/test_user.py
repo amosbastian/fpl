@@ -56,8 +56,8 @@ class UserTest(unittest.TestCase):
         self.assertIsInstance(automatic_substitutions, list)
 
     def test_team(self):
-        my_team = _run(self.user.get_team())
-        self.assertIsInstance(my_team, list)
+        team = _run(self.user.get_team())
+        self.assertIsInstance(team, list)
 
     def test_transfers(self):
         transfers = _run(self.user.get_transfers())

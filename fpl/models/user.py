@@ -195,5 +195,5 @@ class User():
         return await fetch(self._session, API_URLS["watchlist"])
 
     def __str__(self):
-        return "{} {} - {}".format(
-            self.first_name, self.second_name, self.region_name)
+        return (f"{self.player_first_name} {self.player_last_name} - "
+                f"{self.player_region_name}")

@@ -386,7 +386,6 @@ class FPL():
                 points_against[opponent]["all"][location].append(points)
                 points_against[opponent][position][location].append(points)
 
-        await self.session.close()
         return points_against
 
     async def FDR(self):
