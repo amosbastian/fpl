@@ -2,82 +2,53 @@ import unittest
 
 from fpl import FPL
 from fpl.models.player import Player
+from fpl.utils import _run
 
 
 class FixtureTest(unittest.TestCase):
     def setUp(self):
         self.fpl = FPL()
-        self.fixture = self.fpl.get_fixture(6)
+        self.fixture = _run(self.fpl.get_fixture(6))
 
     def test_get_goalscorers(self):
-        self.fixture.get_goalscorers()
-        self.assertIsInstance(self.fixture.goalscorers, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.goalscorers[location]:
-                self.assertIsInstance(player["player"], Player)
+        goalscorers = self.fixture.get_goalscorers()
+        self.assertIsInstance(goalscorers, dict)
 
     def test_get_assisters(self):
-        self.fixture.get_assisters()
-        self.assertIsInstance(self.fixture.assisters, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.assisters[location]:
-                self.assertIsInstance(player["player"], Player)
+        assisters = self.fixture.get_assisters()
+        self.assertIsInstance(assisters, dict)
 
     def test_get_own_goalscorers(self):
-        self.fixture.get_own_goalscorers()
-        self.assertIsInstance(self.fixture.own_goalscorers, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.own_goalscorers[location]:
-                self.assertIsInstance(player["player"], Player)
+        own_goalscorers = self.fixture.get_own_goalscorers()
+        self.assertIsInstance(own_goalscorers, dict)
 
     def test_get_yellow_cards(self):
-        self.fixture.get_yellow_cards()
-        self.assertIsInstance(self.fixture.yellow_cards, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.yellow_cards[location]:
-                self.assertIsInstance(player["player"], Player)
+        yellow_cards = self.fixture.get_yellow_cards()
+        self.assertIsInstance(yellow_cards, dict)
 
     def test_get_red_cards(self):
-        self.fixture.get_red_cards()
-        self.assertIsInstance(self.fixture.red_cards, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.red_cards[location]:
-                self.assertIsInstance(player["player"], Player)
+        red_cards = self.fixture.get_red_cards()
+        self.assertIsInstance(red_cards, dict)
 
     def test_get_penalty_saves(self):
-        self.fixture.get_penalty_saves()
-        self.assertIsInstance(self.fixture.penalty_saves, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.penalty_saves[location]:
-                self.assertIsInstance(player["player"], Player)
+        penalty_saves = self.fixture.get_penalty_saves()
+        self.assertIsInstance(penalty_saves, dict)
 
     def test_get_penalty_misses(self):
-        self.fixture.get_penalty_misses()
-        self.assertIsInstance(self.fixture.penalty_misses, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.penalty_misses[location]:
-                self.assertIsInstance(player["player"], Player)
+        penalty_misses = self.fixture.get_penalty_misses()
+        self.assertIsInstance(penalty_misses, dict)
 
     def test_get_saves(self):
-        self.fixture.get_saves()
-        self.assertIsInstance(self.fixture.saves, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.saves[location]:
-                self.assertIsInstance(player["player"], Player)
+        saves = self.fixture.get_saves()
+        self.assertIsInstance(saves, dict)
 
     def test_get_bonus(self):
-        self.fixture.get_bonus()
-        self.assertIsInstance(self.fixture.bonus, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.bonus[location]:
-                self.assertIsInstance(player["player"], Player)
+        bonus = self.fixture.get_bonus()
+        self.assertIsInstance(bonus, dict)
 
     def test_get_bps(self):
-        self.fixture.get_bps()
-        self.assertIsInstance(self.fixture.bps, dict)
-        for location in ["away", "home"]:
-            for player in self.fixture.bps[location]:
-                self.assertIsInstance(player["player"], Player)
+        bps = self.fixture.get_bps()
+        self.assertIsInstance(bps, dict)
 
 if __name__ == '__main__':
     unittest.main()
