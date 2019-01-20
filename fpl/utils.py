@@ -11,6 +11,17 @@ async def fetch(session, url):
             pass
 
 
+async def get_current_gameweek(session):
+    """Returns the current gameweek.
+
+    :param aiohttp.ClientSession session: A logged in user's session
+    """
+    dynamic = await fetch(
+        session, "https://fantasy.premierleague.com/drf/bootstrap-dynamic")
+
+    return dynamic["entry"]["current_event"]
+
+
 def team_converter(team_id):
     """Converts a team's ID to their actual name."""
     team_map = {
