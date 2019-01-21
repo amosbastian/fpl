@@ -51,7 +51,7 @@ class FPL():
         user with the given `user_id`.
 
         :param string user_id: A user's id
-        :param boolean return_json: return dict if True, otherwise Player
+        :param boolean return_json: return dict if True, otherwise User
         """
         url = API_URLS["user"].format(user_id)
         user = await fetch(self.session, url)
@@ -65,7 +65,7 @@ class FPL():
         participating in the Premier League.
 
         :param list team_ids: List containing the IDs of desired teams
-        :param boolean return_json: return dict if True, otherwise Player
+        :param boolean return_json: return dict if True, otherwise Team
         """
         url = API_URLS["teams"]
         teams = await fetch(self.session, url)
@@ -200,7 +200,7 @@ class FPL():
         """Returns the fixture with the given `fixture_id`.
 
         :param int fixture_id: The fixture's ID
-        :param boolean return_json: return dict if True, otherwise Player
+        :param boolean return_json: return dict if True, otherwise Fixture
         """
         fixtures = await fetch(self.session, API_URLS["fixtures"])
 
@@ -285,7 +285,7 @@ class FPL():
         """Returns a `Gameweek` or JSON object of the specified gameweek.
 
         :param int gameweek_id: A gameweek's id
-        :param boolean return_json: return dict if True, otherwise Player
+        :param boolean return_json: return dict if True, otherwise Gameweek
         """
 
         static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
@@ -307,7 +307,7 @@ class FPL():
         or the gameweeks with the given IDs.
 
         :param list gameweek_ids: A list of gameweek IDs
-        :param boolean return_json: return dict if True, otherwise Player
+        :param boolean return_json: return dict if True, otherwise Gameweek
         """
 
         if not gameweek_ids:
@@ -331,7 +331,7 @@ class FPL():
         `league_id`.
 
         :param string league_id: A league's id
-        :param boolean return_json: return dict if True, otherwise Player
+        :param boolean return_json: return dict if True, otherwise ClassicLeague
         """
         url = API_URLS["league_classic"].format(league_id)
         league = await fetch(self.session, url)
@@ -345,7 +345,7 @@ class FPL():
         """Returns a `H2HLeague` object with the given `league_id`.
 
         :param string league_id: A league's id
-        :param boolean return_json: return dict if True, otherwise Player
+        :param boolean return_json: return dict if True, otherwise H2HLeague
         """
         url = API_URLS["league_h2h"].format(league_id)
         league = await fetch(self.session, url)
