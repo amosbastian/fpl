@@ -23,7 +23,7 @@ class Team():
             players = await fetch(self.session, API_URLS["players"])
 
         team_players = [player for player in players
-                        if player["team_code"] == self.id]
+                        if player["team"] == self.id]
         self.players = team_players
 
         if return_json:
@@ -41,6 +41,8 @@ class Team():
 
         if not hasattr(self, "players"):
             await self.get_players()
+
+        print(self.players)
 
         player = self.players[0]
         url = API_URLS["player"].format(player["id"])

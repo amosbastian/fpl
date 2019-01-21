@@ -41,12 +41,10 @@ from .models.team import Team
 from .models.user import User
 from .utils import average, fetch, position_converter, scale, team_converter
 
-session = aiohttp.ClientSession()
-
 
 class FPL():
     """The FPL class."""
-    def __init__(self):
+    def __init__(self, session):
         self.session = session
 
     async def get_user(self, user_id, return_json=False):
@@ -481,3 +479,6 @@ class FPL():
         fdr = calculate_fdr(average_points, extrema)
 
         return fdr
+
+    async def _close(self):
+        await self.session.lose()

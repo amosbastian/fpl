@@ -1,7 +1,4 @@
-import requests
-
 from ..constants import API_URLS
-from .player import Player
 
 
 class Gameweek():

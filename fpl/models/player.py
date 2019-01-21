@@ -8,6 +8,7 @@ class Player():
         for k, v in player_information.items():
             setattr(self, k, v)
 
+    @property
     def games_played(self):
         """Returns the amount of games a player has played in."""
         return sum([1 for fixture in self.fixtures if fixture["minutes"] > 0])
@@ -18,7 +19,7 @@ class Player():
         """
         if self.minutes == 0:
             return 0
-        return self.points / float(self.minutes)
+        return self.total_points / float(self.minutes)
 
     def __str__(self):
         return "{} - {} - {}".format(self.name, self.position, self.team)
