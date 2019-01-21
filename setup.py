@@ -13,7 +13,6 @@ setup(
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7"
     ],
@@ -22,6 +21,14 @@ setup(
         "Documentation": "http://fpl.readthedocs.io/en/latest/",
         "Source": "https://github.com/amosbastian/fpl"
     },
+    install_requires=[
+        "Click",
+        "colorama",
+        "PTable",
+        "appdirs",
+        "aiohttp",
+        "pytest-aiohttp",
+    ],
     entry_points="""
         [console_scripts]
         fpl=fpl.cli:cli

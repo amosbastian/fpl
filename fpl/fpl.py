@@ -29,7 +29,6 @@ import os
 from datetime import datetime
 
 import aiohttp
-import requests
 
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
