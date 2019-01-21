@@ -1,54 +1,40 @@
-import unittest
+class TestFixture(object):
+    def test_get_goalscorers(self, loop, fixture):
+        goalscorers = fixture.get_goalscorers()
+        assert isinstance(goalscorers, dict)
 
-from fpl import FPL
-from fpl.models.player import Player
-from fpl.utils import _run
+    def test_get_assisters(self, loop, fixture):
+        assisters = fixture.get_assisters()
+        assert isinstance(assisters, dict)
 
+    def test_get_own_goalscorers(self, loop, fixture):
+        own_goalscorers = fixture.get_own_goalscorers()
+        assert isinstance(own_goalscorers, dict)
 
-class FixtureTest(unittest.TestCase):
-    def setUp(self):
-        self.fpl = FPL()
-        self.fixture = _run(self.fpl.get_fixture(6))
+    def test_get_yellow_cards(self, loop, fixture):
+        yellow_cards = fixture.get_yellow_cards()
+        assert isinstance(yellow_cards, dict)
 
-    def test_get_goalscorers(self):
-        goalscorers = self.fixture.get_goalscorers()
-        self.assertIsInstance(goalscorers, dict)
+    def test_get_red_cards(self, loop, fixture):
+        red_cards = fixture.get_red_cards()
+        assert isinstance(red_cards, dict)
 
-    def test_get_assisters(self):
-        assisters = self.fixture.get_assisters()
-        self.assertIsInstance(assisters, dict)
+    def test_get_penalty_saves(self, loop, fixture):
+        penalty_saves = fixture.get_penalty_saves()
+        assert isinstance(penalty_saves, dict)
 
-    def test_get_own_goalscorers(self):
-        own_goalscorers = self.fixture.get_own_goalscorers()
-        self.assertIsInstance(own_goalscorers, dict)
+    def test_get_penalty_misses(self, loop, fixture):
+        penalty_misses = fixture.get_penalty_misses()
+        assert isinstance(penalty_misses, dict)
 
-    def test_get_yellow_cards(self):
-        yellow_cards = self.fixture.get_yellow_cards()
-        self.assertIsInstance(yellow_cards, dict)
+    def test_get_saves(self, loop, fixture):
+        saves = fixture.get_saves()
+        assert isinstance(saves, dict)
 
-    def test_get_red_cards(self):
-        red_cards = self.fixture.get_red_cards()
-        self.assertIsInstance(red_cards, dict)
+    def test_get_bonus(self, loop, fixture):
+        bonus = fixture.get_bonus()
+        assert isinstance(bonus, dict)
 
-    def test_get_penalty_saves(self):
-        penalty_saves = self.fixture.get_penalty_saves()
-        self.assertIsInstance(penalty_saves, dict)
-
-    def test_get_penalty_misses(self):
-        penalty_misses = self.fixture.get_penalty_misses()
-        self.assertIsInstance(penalty_misses, dict)
-
-    def test_get_saves(self):
-        saves = self.fixture.get_saves()
-        self.assertIsInstance(saves, dict)
-
-    def test_get_bonus(self):
-        bonus = self.fixture.get_bonus()
-        self.assertIsInstance(bonus, dict)
-
-    def test_get_bps(self):
-        bps = self.fixture.get_bps()
-        self.assertIsInstance(bps, dict)
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_get_bps(self, loop, fixture):
+        bps = fixture.get_bps()
+        assert isinstance(bps, dict)

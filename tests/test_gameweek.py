@@ -1,21 +1,6 @@
-import unittest
+class TestGameweek(object):
+    def test_gameweek(self, loop, gameweek):
+        assert gameweek.__str__() == "Gameweek 6 - 22 Sep 11:30"
 
-from fpl import FPL
-from fpl.models.player import Player
-from fpl.utils import _run
-
-
-class GameweekTest(unittest.TestCase):
-    def setUp(self):
-        self.fpl = FPL()
-        self.gameweek = _run(self.fpl.get_gameweek(1))
-
-    def test_gameweek(self):
-        self.assertEqual(
-            self.gameweek.__str__(), "Gameweek 1 - 10 Aug 19:00")
-
-    def test_fixtures(self):
-        self.assertIsInstance(self.gameweek.fixtures, list)
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_fixtures(self, loop, gameweek):
+        assert isinstance(gameweek.fixtures, list)

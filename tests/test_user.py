@@ -1,78 +1,62 @@
-import unittest
+class TestUser(object):
+    async def test_gameweek_history(self, loop, user):
+        history = await user.get_gameweek_history()
+        assert isinstance(history, list)
 
-from fpl import FPL
-from fpl.utils import _run
+        history = await user.get_gameweek_history(1)
+        assert isinstance(history, dict)
 
+    async def test_season_history(self, loop, user):
+        season_history = await user.get_season_history()
+        assert isinstance(season_history, list)
 
-class UserTest(unittest.TestCase):
-    def setUp(self):
-        self.fpl = FPL()
-        _run(self.fpl.login())
-        self.user = _run(self.fpl.get_user("3808385"))
+    async def test_chips_history(self, loop, user):
+        chips = await user.get_chips_history()
+        assert isinstance(chips, list)
 
-    def test_gameweek_history(self):
-        history = _run(self.user.get_gameweek_history())
-        self.assertIsInstance(history, list)
+    async def test_leagues(self, loop, user):
+        leagues = user.leagues
+        assert isinstance(leagues, dict)
 
-        history = _run(self.user.get_gameweek_history(1))
-        self.assertIsInstance(history, dict)
+    async def test_picks(self, loop, user):
+        picks = await user.get_picks()
+        assert isinstance(picks, list)
+        assert len(picks) == user.current_event
 
-    def test_season_history(self):
-        season_history = _run(self.user.get_season_history())
-        self.assertIsInstance(season_history, list)
+        picks = await user.get_picks(1)
+        assert isinstance(picks, list)
 
-    def test_chips_history(self):
-        chips = _run(self.user.get_chips_history())
-        self.assertIsInstance(chips, list)
+    async def test_active_chips(self, loop, user):
+        active_chips = await user.get_active_chips()
+        assert isinstance(active_chips, list)
+        assert len(active_chips) == user.current_event
 
-    def test_leagues(self):
-        leagues = self.user.leagues
-        self.assertIsInstance(leagues, dict)
+        active_chips = await user.get_active_chips(1)
+        assert isinstance(active_chips, list)
 
-    def test_picks(self):
-        picks = _run(self.user.get_picks())
-        self.assertIsInstance(picks, list)
-        self.assertEqual(len(picks), self.user.current_event)
+    async def test_automatic_substitutions(self, loop, user):
+        automatic_substitutions = await user.get_automatic_substitutions()
+        assert isinstance(automatic_substitutions, list)
+        assert len(automatic_substitutions) == user.current_event
 
-        picks = _run(self.user.get_picks(1))
-        self.assertIsInstance(picks, list)
+        automatic_substitutions = await user.get_automatic_substitutions(1)
+        assert isinstance(automatic_substitutions, list)
 
-    def test_active_chips(self):
-        active_chips = _run(self.user.get_active_chips())
-        self.assertIsInstance(active_chips, list)
-        self.assertEqual(len(active_chips), self.user.current_event)
+    async def test_team(self, loop, user):
+        team = await user.get_team()
+        assert isinstance(team, list)
 
-        active_chips = _run(self.user.get_active_chips(1))
-        self.assertIsInstance(active_chips, list)
+    async def test_transfers(self, loop, user):
+        transfers = await user.get_transfers()
+        assert isinstance(transfers, list)
 
-    def test_automatic_substitutions(self):
-        automatic_substitutions = _run(self.user.get_automatic_substitutions())
-        self.assertIsInstance(automatic_substitutions, list)
-        self.assertEqual(len(automatic_substitutions),
-                         self.user.current_event)
+        transfers = await user.get_transfers(1)
+        assert isinstance(transfers, list)
 
-        automatic_substitutions = _run(
-            self.user.get_automatic_substitutions(1))
-        self.assertIsInstance(automatic_substitutions, list)
+    async def test_wildcards(self, loop, user):
+        wildcards = await user.get_wildcards()
+        assert isinstance(wildcards, list)
 
-    def test_team(self):
-        team = _run(self.user.get_team())
-        self.assertIsInstance(team, list)
-
-    def test_transfers(self):
-        transfers = _run(self.user.get_transfers())
-        self.assertIsInstance(transfers, list)
-
-        transfers = _run(self.user.get_transfers(1))
-        self.assertIsInstance(transfers, list)
-
-    def test_wildcards(self):
-        wildcards = _run(self.user.get_wildcards())
-        self.assertIsInstance(wildcards, list)
-
-    def test_watchlist(self):
-        watchlist = _run(self.user.get_watchlist())
-        self.assertIsInstance(watchlist, list)
-
-if __name__ == '__main__':
-    unittest.main()
+    async def test_watchlist(self, loop, user):
+        watchlist = await user.get_watchlist()
+        assert isinstance(watchlist, list)
