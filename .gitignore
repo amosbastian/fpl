@@ -21,3 +21,4 @@ docs/_templates/
 .idea/
 .vscode/
 test.py
+test_pa.py

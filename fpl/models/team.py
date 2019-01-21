@@ -1,80 +1,60 @@
-import requests
-
 from ..constants import API_URLS
+from ..utils import fetch
+from .fixture import Fixture
 from .player import Player
 
 
 class Team():
     """A class representing a real team in the Fantasy Premier League."""
-    def __init__(self, team_id):
-        self.team_id = team_id
-        self._information = self._get_information()
+    def __init__(self, team_information, session):
+        self.session = session
+        for k, v in team_information.items():
+            setattr(self, k, v)
 
-        #: The name of the team, e.g. "Arsenal".
-        self.name = self._information["name"]
-        #: The team's code.
-        self.code = self._information["code"]
-        #: The short name of the team, e.g. "ARS".
-        self.short_name = self._information["short_name"]
-        #: The team's unavailability.
-        self.unavailable = self._information["unavailable"]
-        #: Strength of the team.
-        self.strength = self._information["strength"]
-        #: The team's position in the table.
-        self.position = self._information["position"]
-        #: Amount of games played.
-        self.played = self._information["played"]
-        #: Amount of games won.
-        self.won = self._information["win"]
-        #: Amount of games lost.
-        self.lost = self._information["loss"]
-        #: Amount of games drawn.
-        self.drawn = self._information["draw"]
-        #: Amount of points.
-        self.points = self._information["points"]
-        #: The team's form.
-        self.form = self._information["form"]
-        #: Team's overall strength at home.
-        self.strength_overall_home = self._information["strength_overall_home"]
-        #: Team's overall strength away from home.
-        self.strength_overall_away = self._information["strength_overall_away"]
-        #: Team's attacking strength at home.
-        self.strength_attack_home = self._information["strength_attack_home"]
-        #: Team's attacking strength away from home.
-        self.strength_attack_away = self._information["strength_attack_away"]
-        #: Team's defensive strength at home.
-        self.strength_defence_home = self._information["strength_defence_home"]
-        #: Team's defensive strength away from home.
-        self.strength_defence_away = self._information["strength_defence_away"]
-        #: A dictionary with information about the team's current fixture.
-        self.current_fixture = self._information["current_event_fixture"][0]
-        #: A dictionary with information about the team's next fixture.
-        self.next_fixture = self._information["next_event_fixture"][0]
-        #: The team's players.
-        self.players = None
-
-    def get_players(self):
+    async def get_players(self, return_json=False):
         """Sets the `players` property as a list of players that play for the
         team.
+
+        :param boolean return_json: Flag for returning JSON
         """
-        response = requests.get(API_URLS["players"])
-        if response.status_code == 200:
-            players = [Player(player["id"], player)
-                       for player in response.json()
-                       if player["team_code"] == self.code]
-        self.players = players
+        if hasattr(self, "players"):
+            players = self.players
+        else:
+            players = await fetch(self.session, API_URLS["players"])
 
-    def get_fixtures(self):
+        team_players = [player for player in players
+                        if player["team"] == self.id]
+        self.players = team_players
+
+        if return_json:
+            return team_players
+        return [Player(player) for player in team_players]
+
+    async def get_fixtures(self, return_json=False):
         """Sets the team's fixtures equal to that of one of its player's
-        fixtures."""
-        if not self.players:
-            self.get_players()
-        player = self.players[0]
-        self.fixtures = player.fixtures
+        fixtures.
 
-    def _get_information(self):
-        response = requests.get(API_URLS["teams"]).json()
-        return response[self.team_id - 1]
+        :param boolean return_json: Flag for returning JSON
+        """
+        if hasattr(self, "fixtures"):
+            return self.fixtures
+
+        if not hasattr(self, "players"):
+            await self.get_players()
+
+        print(self.players)
+
+        player = self.players[0]
+        url = API_URLS["player"].format(player["id"])
+        player_summary = await fetch(self.session, url)
+
+        self.fixtures = player_summary["fixtures"]
+
+        if return_json:
+            return self.fixtures
+
+        # TODO: create TeamFixture
+        return self.fixtures
 
     def __str__(self):
         return self.name

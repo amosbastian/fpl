@@ -23,48 +23,68 @@ Fantasy Premier League API:
 * /teams
 * /transfers
 """
+import asyncio
+import itertools
 import os
-import requests
+from datetime import datetime
+
+import aiohttp
 
 from .constants import API_URLS
-from datetime import datetime
 from .models.classic_league import ClassicLeague
 from .models.fixture import Fixture
 from .models.gameweek import Gameweek
 from .models.h2h_league import H2HLeague
-from .models.player import Player
+from .models.player import Player, PlayerSummary
 from .models.team import Team
 from .models.user import User
-from pymongo import MongoClient
-from .utils import team_converter, scale, average
+from .utils import average, fetch, position_converter, scale, team_converter
 
 
 class FPL():
     """The FPL class."""
-    def __init__(self):
-        self.session = None
+    def __init__(self, session):
+        self.session = session
 
-    def get_user(self, user_id):
-        """Returns a `User` object containing information about the user with
-        the given `user_id`.
+    async def get_user(self, user_id, return_json=False):
+        """Returns a `User` object or JSON containing information about the
+        user with the given `user_id`.
 
         :param string user_id: A user's id
+        :param boolean return_json: return dict if True, otherwise User
         """
-        return User(user_id, session=self.session)
+        url = API_URLS["user"].format(user_id)
+        user = await fetch(self.session, url)
 
-    @staticmethod
-    def get_teams():
-        """Returns a list of `Team` objects of the teams currently
+        if return_json:
+            return user
+        return User(user, session=self.session)
+
+    async def get_teams(self, team_ids=[], return_json=False):
+        """Returns a list JSON or `Team` objects of the teams currently
         participating in the Premier League.
-        """
-        return[Team(team_id) for team_id in range(1, 21)]
 
-    @staticmethod
-    def get_team(team_id):
-        """Returns a `Team` object containing information about the team with
-        the given `team_id`.
+        :param list team_ids: List containing the IDs of desired teams
+        :param boolean return_json: return dict if True, otherwise Team
+        """
+        url = API_URLS["teams"]
+        teams = await fetch(self.session, url)
+
+        if team_ids:
+            teams = [team for team in teams if team["id"] in team_ids]
+
+        if return_json:
+            return teams
+
+        return [Team(team_information, self.session)
+                for team_information in teams]
+
+    async def get_team(self, team_id, return_json=False):
+        """Returns a `Team` object or JSON containing information about the
+        team with the given `team_id`.
 
         :param int team_id: A team's id
+        :param boolean return_json: return dict if True, otherwise Player
 
         .. code-block:: none
 
@@ -89,96 +109,253 @@ class FPL():
             19 - West Ham
             20 - Wolves
         """
-        return Team(team_id)
+        url = API_URLS["teams"]
+        teams = await fetch(self.session, url)
 
-    @staticmethod
-    def get_player(player_id):
-        """Returns the `Player` object with the given `player_id`.
+        if return_json:
+            return teams[team_id + 1]
+
+        return Team(teams[team_id + 1], self.session)
+
+    async def get_player_summary(self, player_id, return_json=False):
+        """Returns a `PlayerSummary` or JSON object with the given `player_id`
 
         :param int player_id: A player's ID
+        :param boolean return_json: return dict if True, otherwise Player
         """
-        return Player(player_id, additional=None)
+        url = API_URLS["player"].format(player_id)
+        player_summary = await fetch(self.session, url)
 
-    @staticmethod
-    def get_players(player_ids=None):
-        """Returns a list of `Player` objects of all players currently playing
-        for teams in the Premier League.
+        if return_json:
+            return player_summary
+
+        return PlayerSummary(player_summary)
+
+    async def get_player_summaries(self, player_ids=[], return_json=False):
+        """Returns a list of `PlayerSummary` or JSON objects with the given
+        `player_ids`
+
+        :param list player_ids: A list of player IDs
+        :param boolean return_json: return dict if True, otherwise Player
         """
+        tasks = [asyncio.ensure_future(
+                 fetch(self.session, API_URLS["player"].format(player_id)))
+                 for player_id in player_ids]
+
+        player_summaries = await asyncio.gather(*tasks)
+
+        if return_json:
+            return player_summaries
+
+        return [PlayerSummary(player_summary)
+                for player_summary in player_summaries]
+
+    async def get_player(self, player_id, players=None, include_summary=False,
+                         return_json=False):
+        """Returns a `Player` or JSON object with the given `player_id`.
+
+        :param int player_id: A player's ID
+        :param list players: A list of players
+        :param boolean include_summary: include player's summary if True
+        :param boolean return_json: return dict if True, otherwise Player
+        """
+        if not players:
+            players = await fetch(self.session, API_URLS["players"])
+
+        player = next(player for player in players
+                      if player["id"] == player_id)
+
+        if include_summary:
+            player_summary = await self.get_player_summary(
+                player["id"], return_json=True)
+            player.update(player_summary)
+
+        if return_json:
+            return player
+
+        return Player(player)
+
+    async def get_players(self, player_ids=[], include_summary=False,
+                          return_json=False):
+        """Returns a list of `Player` or JSON objects of either all players or
+        players with the given IDs.
+
+        :param list player_ids: A list of player IDs
+        :param boolean include_summary: include player's summary if True
+        :param boolean return_json: return dict if True, otherwise Player
+        """
+        players = await fetch(self.session, API_URLS["players"])
         if not player_ids:
-            player_ids = range(0, 600)
-        players = []
-        response = requests.get(API_URLS["players"])
-        if response.status_code == 200:
-            for player in response.json():
-                if player["id"] in player_ids:
-                    players.append(Player(player["id"], player))
-        else:
-            print("Something went wrong, please try again later...")
-            return []
+            player_ids = [player["id"] for player in players]
+
+        tasks = [asyncio.ensure_future(
+                 self.get_player(
+                     player_id, players, include_summary, return_json))
+                 for player_id in player_ids]
+        players = await asyncio.gather(*tasks)
+
         return players
 
-    @staticmethod
-    def get_fixture(fixture_id, gameweek=None):
-        """Returns the fixture with the given ID."""
-        if gameweek:
-            response = requests.get(API_URLS["gameweek_fixtures"].format(
-                gameweek)).json()
-        else:
-            response = requests.get(API_URLS["fixtures"]).json()
+    async def get_fixture(self, fixture_id, return_json=False):
+        """Returns the fixture with the given `fixture_id`.
 
-        for fixture in response:
-            if fixture["id"] == fixture_id:
-                return Fixture(fixture)
-        return []
-
-    @staticmethod
-    def get_fixtures(gameweek=None):
-        """Returns all possible fixtures, or all fixtures of a specific
-        gameweek.
+        :param int fixture_id: The fixture's ID
+        :param boolean return_json: return dict if True, otherwise Fixture
         """
-        if gameweek:
-            response = requests.get(API_URLS["gameweek_fixtures"].format(
-                gameweek)).json()
-        else:
-            response = requests.get(API_URLS["fixtures"]).json()
+        fixtures = await fetch(self.session, API_URLS["fixtures"])
 
-        return [Fixture(fixture) for fixture in response]
+        fixture = next(fixture for fixture in fixtures
+                       if fixture["id"] == fixture_id)
+        fixture_gameweek = fixture["event"]
 
-    @staticmethod
-    def get_gameweeks():
-        """Returns a list `Gameweek` objects."""
-        return [Gameweek(gameweek_id) for gameweek_id in range(1, 39)]
+        gameweek_fixtures = await fetch(
+            self.session,
+            API_URLS["gameweek_fixtures"].format(fixture_gameweek))
 
-    @staticmethod
-    def get_gameweek(gameweek_id):
-        """Returns a `Gameweek` object of the specified gameweek.
+        fixture = next(fixture for fixture in gameweek_fixtures
+                       if fixture["id"] == fixture_id)
 
-        :param int gameweek_id: A gameweek's id.
+        if return_json:
+            return fixture
+
+        return Fixture(fixture)
+
+    async def get_fixtures_by_id(self, fixture_ids, return_json=False):
+        """Returns a list of all fixtures with IDs included in the
+        `fixture_ids` list.
+
+        :param list fixture_ids: A list of fixture IDs
+        :param boolean return_json: return dict if True, otherwise Fixture
         """
-        return Gameweek(gameweek_id)
+        fixtures = await fetch(self.session, API_URLS["fixtures"])
+        fixture_gameweeks = set(fixture["event"] for fixture in fixtures
+                                if fixture["id"] in fixture_ids)
+        tasks = [asyncio.ensure_future(
+                 fetch(self.session,
+                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                 for gameweek in fixture_gameweeks]
 
-    @staticmethod
-    def game_settings():
+        gameweek_fixtures = await asyncio.gather(*tasks)
+        merged_fixtures = list(itertools.chain(*gameweek_fixtures))
+
+        fixtures = [fixture for fixture in merged_fixtures
+                    if fixture["id"] in fixture_ids]
+
+        if return_json:
+            return fixtures
+
+        return [Fixture(fixture) for fixture in fixtures]
+
+    async def get_fixtures_by_gameweek(self, gameweek, return_json=False):
+        """Returns a list of all fixtures of a given gameweek.
+
+        :param int gameweek: A gameweek
+        :param boolean return_json: return dict if True, otherwise Fixture
+        """
+        fixtures = await fetch(self.session,
+                               API_URLS["gameweek_fixtures"].format(gameweek))
+
+        if return_json:
+            return fixtures
+
+        return [Fixture(fixture) for fixture in fixtures]
+
+    async def get_fixtures(self, return_json=False):
+        """Returns a list of all fixtures.
+
+        :param list fixture_ids: A list of fixture IDs
+        :param boolean return_json: return dict if True, otherwise Fixture
+        """
+        gameweeks = range(1, 39)
+        tasks = [asyncio.ensure_future(
+                 fetch(self.session,
+                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                 for gameweek in gameweeks]
+
+        gameweek_fixtures = await asyncio.gather(*tasks)
+        fixtures = list(itertools.chain(*gameweek_fixtures))
+
+        if return_json:
+            return fixtures
+
+        return [Fixture(fixture) for fixture in fixtures]
+
+    async def get_gameweek(self, gameweek_id, include_live=False,
+                           return_json=False):
+        """Returns a `Gameweek` or JSON object of the specified gameweek.
+
+        :param int gameweek_id: A gameweek's id
+        :param boolean return_json: return dict if True, otherwise Gameweek
+        """
+
+        static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
+        static_gameweek = next(gameweek for gameweek in static_gameweeks if
+                               gameweek["id"] == gameweek_id)
+        live_gameweek = await fetch(
+            self.session, API_URLS["gameweek_live"].format(gameweek_id))
+
+        live_gameweek.update(static_gameweek)
+
+        if return_json:
+            return live_gameweek
+
+        return Gameweek(live_gameweek)
+
+    async def get_gameweeks(self, gameweek_ids=[], include_live=False,
+                            return_json=False):
+        """Returns a list `Gameweek` or JSON objects of either all gameweeks
+        or the gameweeks with the given IDs.
+
+        :param list gameweek_ids: A list of gameweek IDs
+        :param boolean return_json: return dict if True, otherwise Gameweek
+        """
+
+        if not gameweek_ids:
+            gameweek_ids = range(1, 39)
+
+        tasks = [asyncio.ensure_future(
+                 self.get_gameweek(gameweek_id, include_live, return_json))
+                 for gameweek_id in gameweek_ids]
+
+        gameweeks = await asyncio.gather(*tasks)
+        return gameweeks
+
+    async def game_settings(self):
         """Returns a dictionary containing the Fantasy Premier League's rules.
         """
-        return requests.get(API_URLS["settings"]).json()
+        settings = await fetch(self.session, API_URLS["settings"])
+        return settings
 
-    @staticmethod
-    def get_classic_league(league_id):
-        """Returns a `ClassicLeague` object with the given `league_id`.
+    async def get_classic_league(self, league_id, return_json=False):
+        """Returns a `ClassicLeague` or JSON  object with the given
+        `league_id`.
 
         :param string league_id: A league's id
+        :param boolean return_json: return dict if True, otherwise ClassicLeague
         """
-        return ClassicLeague(league_id)
+        url = API_URLS["league_classic"].format(league_id)
+        league = await fetch(self.session, url)
 
-    def get_h2h_league(self, league_id):
+        if return_json:
+            return league
+
+        return ClassicLeague(league, session=self.session)
+
+    async def get_h2h_league(self, league_id, return_json=False):
         """Returns a `H2HLeague` object with the given `league_id`.
 
         :param string league_id: A league's id
+        :param boolean return_json: return dict if True, otherwise H2HLeague
         """
-        return H2HLeague(league_id, session=self.session)
+        url = API_URLS["league_h2h"].format(league_id)
+        league = await fetch(self.session, url)
 
-    def login(self, email=None, password=None):
+        if return_json:
+            return league
+
+        return H2HLeague(league, session=self.session)
+
+    async def login(self, email=None, password=None):
         """Returns a requests session with FPL login authentication.
 
         :param string user: email
@@ -188,13 +365,14 @@ class FPL():
             email = os.environ["FPL_EMAIL"]
             password = os.environ["FPL_PASSWORD"]
 
-        session = requests.Session()
-
-        session.get("https://fantasy.premierleague.com/")
-        csrftoken = session.cookies["csrftoken"]
+        url = "https://fantasy.premierleague.com/"
+        await self.session.get(url)
+        filtered = self.session.cookie_jar.filter_cookies(url)
+        assert filtered["csrftoken"]
+        csrf_token = filtered["csrftoken"].value
 
         payload = {
-            "csrfmiddlewaretoken": csrftoken,
+            "csrfmiddlewaretoken": csrf_token,
             "login": email,
             "password": password,
             "app": "plfpl-web",
@@ -202,94 +380,22 @@ class FPL():
         }
 
         login_url = "https://users.premierleague.com/accounts/login/"
-        response = session.post(login_url, data=payload)
+        async with self.session.post(login_url, data=payload) as response:
+            response_text = await response.text()
+            if "Incorrect email or password" in response_text:
+                raise ValueError("Incorrect email or password!")
 
-        if "Incorrect email or password" in response.text:
-            raise ValueError("Incorrect email or password!")
-
-        self.session = session
-
-    def update_mongodb(self):
-        """Updates or creates a MongoDB database with the collection players
-        and teams.
-        """
-        client = MongoClient()
-        database = client.fpl
-
-        def update_teams():
-            """Updates all teams of the Fantasy Premier League."""
-            print("{} - updating teams.".format(datetime.now()))
-            database_teams = database.teams
-            teams = FPL.get_teams()
-
-            for team in teams:
-                team = {k: v for k, v in vars(team).items()
-                        if not k.startswith("_")}
-
-                database_teams.replace_one(
-                    {"team_id": team["team_id"]}, team, upsert=True)
-
-        def update_players():
-            """Updates all players of the Fantasy Premier League."""
-            print("{} - updating players.".format(datetime.now()))
-            database_players = database.players
-            players = FPL.get_players()
-
-            for player in players:
-                player = {k: v for k, v in vars(player).items()
-                          if not k.startswith("_")}
-
-                database_players.replace_one(
-                    {"player_id": player["player_id"]}, player, upsert=True)
-
-        def update_fdr():
-            """Updates the FDR of each team in the Fantasy Premier League."""
-            print("{} - updating FDR.".format(datetime.now()))
-            team_fdr = self.FDR(mongodb=True)
-            for team_name, fdr in team_fdr.items():
-                team = database.teams.update_one(
-                    {"name": team_name}, {"$set": {"FDR": fdr}}, upsert=True)
-
-        def update_fixtures():
-            """Updates the fixtures of each team, which includes the FDR of
-            that specific fixture.
-            """
-            print("{} - updating fixtures.".format(datetime.now()))
-            for team in database.teams.find():
-                # Find one player of each team and use them to get the fixtures
-                player = database.players.find_one({"team": team["name"]})
-                fixtures = player["fixtures"]
-                for fixture in fixtures:
-                    location = "H" if fixture["is_home"] else "A"
-                    opponent = database.teams.find_one(
-                        {"name": fixture["opponent_name"]})
-                    fdr = {position: difficulty[location]
-                           for position, difficulty in opponent["FDR"].items()}
-                    fixture["FDR"] = fdr
-
-                database.teams.update_one({"_id": team["_id"]},
-                                          {"$set": {"fixtures": fixtures}},
-                                          upsert=True)
-
-        update_teams()
-        update_players()
-        update_fdr()
-        update_fixtures()
-
-    def get_points_against(self, players=None):
+    async def get_points_against(self):
         """Returns a dictionary containing the points scored against
         all teams in the Premier League, split by position.
         """
-        if not players:
-            players = []
-            for player in self.get_players():
-                players.append({k: v for k, v in vars(player).items()
-                               if not k.startswith("_")})
-
+        players = await self.get_players(
+            include_summary=True, return_json=True)
         points_against = {}
 
         for player in players:
-            position = player["position"].lower()
+            position = position_converter(player["element_type"]).lower()
+
             for fixture in player["history"]:
                 if fixture["minutes"] == 0:
                     continue
@@ -314,17 +420,10 @@ class FPL():
 
         return points_against
 
-    def FDR(self, mongodb=False):
+    async def FDR(self):
         """Creates a new Fixture Difficulty Ranking (FDR) based on the amount
         of points each team concedes in Fantasy Premier League terms.
         """
-        if mongodb:
-            client = MongoClient()
-            database = client.fpl
-            players = database.players.find()
-        else:
-            players = self.get_players()
-
         def average_points_against(points_against):
             """Averages the points scored against all teams per position."""
             for team, positions in points_against.items():
@@ -373,9 +472,12 @@ class FPL():
 
             return average_points
 
-        points_against = self.get_points_against(players)
+        points_against = await self.get_points_against()
         average_points = average_points_against(points_against)
         extrema = get_extrema(average_points)
         fdr = calculate_fdr(average_points, extrema)
 
         return fdr
+
+    async def _close(self):
+        await self.session.lose()

@@ -1,10 +1,15 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r") as f:
+    long_description = f.read()
+
 setup(
     name="fpl",
-    version="0.5.5",
+    version="0.6.0",
     packages=find_packages(),
     description="A Python wrapper for the Fantasy Premier League API",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/amosbastian/fpl",
     author="amosbastian",
     author_email="amosbastian@gmail.com",
@@ -13,11 +18,8 @@ setup(
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6"
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7"
     ],
     keywords="fpl fantasy premier league",
     project_urls={
@@ -28,9 +30,9 @@ setup(
         "Click",
         "colorama",
         "PTable",
-        "requests",
-        "pymongo",
         "appdirs",
+        "aiohttp",
+        "pytest-aiohttp",
     ],
     entry_points="""
         [console_scripts]

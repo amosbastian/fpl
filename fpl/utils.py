@@ -1,3 +1,25 @@
+import asyncio
+
+
+async def fetch(session, url):
+    while True:
+        try:
+            async with session.get(url) as response:
+                assert response.status == 200
+                return await response.json()
+        except Exception as error:
+            pass
+
+
+async def get_current_gameweek(session):
+    """Returns the current gameweek.
+
+    :param aiohttp.ClientSession session: A logged in user's session
+    """
+    dynamic = await fetch(
+        session, "https://fantasy.premierleague.com/drf/bootstrap-dynamic")
+
+    return dynamic["entry"]["current_event"]
 
 
 def team_converter(team_id):
@@ -23,7 +45,7 @@ def team_converter(team_id):
         18: "Watford",
         19: "West Ham",
         20: "Wolves",
-	None: None
+        None: None
     }
     return team_map[team_id]
 
