@@ -18,7 +18,7 @@
     <a href="https://pypi.org/project/fpl/" alt="Version">
         <img src="https://badge.fury.io/py/fpl.svg"/></a>
     <a href="https://pypi.org/project/fpl/" alt="Python version">
-        <img src="https://img.shields.io/badge/Python-2.7%2C%203.3%2B-blue.svg"/></a>
+        <img src="https://img.shields.io/badge/3.6%2B-blue.svg"/></a>
 </p>
 
 ## Installing fpl
