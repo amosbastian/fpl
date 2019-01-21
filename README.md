@@ -4,7 +4,6 @@
   </a>
 </p>
 
-<h3 align="center">fpl</h3>
 <p align="center">
     A Python wrapper around the Fantasy Premier League API
     <br>
@@ -18,7 +17,9 @@
     <a href="https://pypi.org/project/fpl/" alt="Version">
         <img src="https://badge.fury.io/py/fpl.svg"/></a>
     <a href="https://pypi.org/project/fpl/" alt="Python version">
-        <img src="https://img.shields.io/badge/3.6%2B-blue.svg"/></a>
+        <img src="https://img.shields.io/badge/Python-3.6%2B-blue.svg"/></a>
+    <a href="https://pepy.tech/project/fpl" alt="Downloads">
+        <img src="https://pepy.tech/badge/fpl"></a>
 </p>
 
 ## Installing fpl
