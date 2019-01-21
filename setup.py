@@ -13,25 +13,15 @@ setup(
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6"
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7"
     ],
     keywords="fpl fantasy premier league",
     project_urls={
         "Documentation": "http://fpl.readthedocs.io/en/latest/",
         "Source": "https://github.com/amosbastian/fpl"
     },
-    install_requires=[
-        "Click",
-        "colorama",
-        "PTable",
-        "requests",
-        "pymongo",
-        "appdirs",
-    ],
     entry_points="""
         [console_scripts]
         fpl=fpl.cli:cli
