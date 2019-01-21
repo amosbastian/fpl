@@ -1,10 +1,15 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r") as f:
+    long_description = f.read()
+
 setup(
     name="fpl",
     version="0.6.0",
     packages=find_packages(),
     description="A Python wrapper for the Fantasy Premier League API",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/amosbastian/fpl",
     author="amosbastian",
     author_email="amosbastian@gmail.com",
