@@ -1,5 +1,5 @@
 Team
 ================
 
-.. autoclass:: fpl.team.Team
+.. autoclass:: fpl.models.team.Team
    :members:

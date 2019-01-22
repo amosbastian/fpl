@@ -1,5 +1,5 @@
 Gameweek
 ================
 
-.. autoclass:: fpl.gameweek.Gameweek
+.. autoclass:: fpl.models.gameweek.Gameweek
    :members:

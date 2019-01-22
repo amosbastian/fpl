@@ -1,5 +1,5 @@
 ClassicLeague
 ================
 
-.. autoclass:: fpl.classic_league.ClassicLeague
+.. autoclass:: fpl.models.classic_league.ClassicLeague
    :members:
