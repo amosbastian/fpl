@@ -111,11 +111,12 @@ class FPL():
         """
         url = API_URLS["teams"]
         teams = await fetch(self.session, url)
+        team = next(team for team in teams if team["id"] == team_id)
 
         if return_json:
-            return teams[team_id + 1]
+            team
 
-        return Team(teams[team_id + 1], self.session)
+        return Team(team, self.session)
 
     async def get_player_summary(self, player_id, return_json=False):
         """Returns a `PlayerSummary` or JSON object with the given `player_id`

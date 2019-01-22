@@ -32,10 +32,10 @@ If you're interested in helping out the development of **fpl**, or have suggesti
     ...     async with aiohttp.ClientSession() as session:
     ...         fpl = FPL(session)
     ...         player = await fpl.get_player(302)
-    ...     print(player.web_name)
+    ...     print(player)
     ...
     >>> asyncio.run(main())
-    Pogba
+    Pogba - Midfielder - Man Utd
 
 With **fpl** you can easily use the Fantasy Premier League API in all your Python scripts, exactly how you expect it to work.
 

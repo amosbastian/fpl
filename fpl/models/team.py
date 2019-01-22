@@ -1,21 +1,39 @@
 from ..constants import API_URLS
 from ..utils import fetch
-from .fixture import Fixture
 from .player import Player
 
 
 class Team():
-    """A class representing a real team in the Fantasy Premier League."""
+    """A class representing a real team in the Fantasy Premier League.
+
+    Basic usage::
+
+      >>> from fpl import FPL
+      >>> import aiohttp
+      >>> import asyncio
+      >>>
+      >>> async def main():
+      ...     async with aiohttp.ClientSession() as session:
+      ...         fpl = FPL(session)
+      ...         team = await fpl.get_team(14)
+      ...     print(team)
+      ...
+      >>> asyncio.run(main())
+      Man Utd
+    """
     def __init__(self, team_information, session):
         self.session = session
         for k, v in team_information.items():
             setattr(self, k, v)
 
     async def get_players(self, return_json=False):
-        """Sets the `players` property as a list of players that play for the
-        team.
+        """Returns a list containing the players who play for the team.
 
-        :param boolean return_json: Flag for returning JSON
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            dicts, if ``False`` returns a list of Player objects. Defaults to
+            ``False``.
+        :type return_json: bool
+        :rtype: list
         """
         if hasattr(self, "players"):
             players = self.players
@@ -31,10 +49,13 @@ class Team():
         return [Player(player) for player in team_players]
 
     async def get_fixtures(self, return_json=False):
-        """Sets the team's fixtures equal to that of one of its player's
-        fixtures.
+        """Returns a list containing the team's fixtures.
 
-        :param boolean return_json: Flag for returning JSON
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            dicts, if ``False`` returns a list of TeamFixture objects.
+            Defaults to ``False``.
+        :type return_json: bool
+        :rtype: list
         """
         if hasattr(self, "fixtures"):
             return self.fixtures

@@ -5,7 +5,9 @@ from ..utils import team_converter, position_converter
 class Player():
     """A class representing a player in the Fantasy Premier League.
 
-    >>> from fpl import FPL
+    Basic usage::
+
+      >>> from fpl import FPL
       >>> import aiohttp
       >>> import asyncio
       >>>
