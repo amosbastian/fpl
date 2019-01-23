@@ -14,7 +14,8 @@ async def fetch(session, url):
 async def get_current_gameweek(session):
     """Returns the current gameweek.
 
-    :param aiohttp.ClientSession session: A logged in user's session
+    :param aiohttp.ClientSession session: A logged in user's session.
+    :rtype: int
     """
     dynamic = await fetch(
         session, "https://fantasy.premierleague.com/drf/bootstrap-dynamic")

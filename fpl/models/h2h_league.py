@@ -6,7 +6,22 @@ from ..utils import fetch, get_current_gameweek
 
 class H2HLeague():
     """
-    A class representing a h2h league in the Fantasy Premier League.
+    A class representing a H2H league in the Fantasy Premier League.
+
+    Basic usage::
+
+      >>> from fpl import FPL
+      >>> import aiohttp
+      >>> import asyncio
+      >>>
+      >>> async def main():
+      ...     async with aiohttp.ClientSession() as session:
+      ...         fpl = FPL(session)
+      ...         h2h_league = await fpl.get_h2h_league(760869)
+      ...     print(h2h_league)
+      ...
+      >>> asyncio.run(main())
+      League 760869 - 760869
     """
     def __init__(self, league_information, session=None):
         self._session = session
@@ -14,11 +29,16 @@ class H2HLeague():
         for k, v in league_information.items():
             setattr(self, k, v)
 
-    def __str__(self):
-        return f"{self.league['name']} - {self.league['id']}"
-
     async def get_fixtures(self, gameweek=None):
-        """Returns h2h results/fixtures for given league, login required."""
+        """Returns a list of fixtures / results of the H2H league.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/leagues-entries-and-h2h-matches/829116/?page=1
+
+        :param gameweek: (optional) The gameweek of the fixtures / results.
+        :type gameweek: string or int
+        :rtype: list
+        """
         if not self._session:
             return
 
@@ -36,3 +56,6 @@ class H2HLeague():
         fixtures = await asyncio.gather(*tasks)
 
         return fixtures
+
+    def __str__(self):
+        return f"{self.league['name']} - {self.league['id']}"

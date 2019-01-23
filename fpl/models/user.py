@@ -5,14 +5,32 @@ from ..utils import fetch
 
 
 def valid_gameweek(gameweek):
-    """Returns True if the gameweek is valid."""
+    """Returns True if the gameweek is valid.
+
+    :param gameweek: The gameweek.
+    :type gameweek: int or string
+    """
     if not isinstance(gameweek, int) and (gameweek < 1 or gameweek > 38):
         raise "Gameweek must be a number between 1 and 38."
     return True
 
 
 class User():
-    """A class representing a user of the Fantasy Premier League."""
+    """A class representing a user of the Fantasy Premier League.
+
+    >>> from fpl import FPL
+      >>> import aiohttp
+      >>> import asyncio
+      >>>
+      >>> async def main():
+      ...     async with aiohttp.ClientSession() as session:
+      ...         fpl = FPL(session)
+      ...         user = await fpl.get_user(3808385)
+      ...     print(user)
+      ...
+      >>> asyncio.run(main())
+      Amos Bastian - Netherlands
+    """
     def __init__(self, user_information, session):
         self._session = session
         for k, v in user_information["entry"].items():
@@ -22,7 +40,11 @@ class User():
     async def get_gameweek_history(self, gameweek=None):
         """Returns a list containing the gameweek history of the user.
 
-        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/history
+
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: list if gameweek is ``None``, otherwise dict.
         """
         if hasattr(self, "_history"):
             history = self._history
@@ -40,7 +62,13 @@ class User():
         return history["history"]
 
     async def get_season_history(self):
-        """Returns a list containing the seasonal history of the user."""
+        """Returns a list containing the seasonal history of the user.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/history
+
+        :rtype: list
+        """
         if hasattr(self, "_history"):
             history = self._history["season"]
         else:
@@ -53,7 +81,11 @@ class User():
     async def get_chips_history(self, gameweek=None):
         """Returns a list containing the chip history of the user.
 
-        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/history
+
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: list
         """
         if hasattr(self, "_history"):
             history = self._history
@@ -73,7 +105,11 @@ class User():
     async def get_picks(self, gameweek=None):
         """Returns a list containing the user's picks each gameweek.
 
-        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
+
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: list
         """
         if hasattr(self, "_picks"):
             picks = self._picks
@@ -95,7 +131,11 @@ class User():
     async def get_active_chips(self, gameweek=None):
         """Returns a list containing the user's active chips each gameweek.
 
-        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
+
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: list
         """
         if hasattr(self, "_picks"):
             picks = self._picks
@@ -118,7 +158,11 @@ class User():
         """Returns a list containing the user's automatic substitutions each
         gameweek.
 
-        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
+
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: list
         """
         if hasattr(self, "_picks"):
             picks = self._picks
@@ -138,9 +182,13 @@ class User():
         return [pick["automatic_subs"] for pick in picks]
 
     async def get_team(self):
-        """Returns a logged in user's current team.
+        """Returns a logged in user's current team. Requires the user to have
+        logged in using ``fpl.login()``.
 
-        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/my-team/3808385/
+
+        :rtype: list
         """
         if not self._session:
             raise "User must be logged in."
@@ -154,10 +202,14 @@ class User():
         return response["picks"]
 
     async def get_transfers(self, gameweek=None):
-        """Returns a list containing information about all the transfers the
-        user has made so far.
+        """Returns either a list of all the user's transfers, or a list of
+        transfers made in the given gameweek.
 
-        :gameweek (`int`, optional): The gameweek. Defaults to None.
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/transfers
+
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: list
         """
         if hasattr(self, "_transfers"):
             return self._transfers["history"]
@@ -175,8 +227,13 @@ class User():
         return transfers["history"]
 
     async def get_wildcards(self):
-        """Returns a list containing information about all the transfers the
-        user has made so far.
+        """Returns a list containing information about when (and if) the user
+        has played their wildcard(s).
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/transfers
+
+        :rtype: list
         """
         if hasattr(self, "_transfers"):
             return self._transfers["wildcards"]
@@ -188,7 +245,14 @@ class User():
         return transfers["wildcards"]
 
     async def get_watchlist(self):
-        """Returns the user's watchlist."""
+        """Returns the user's watchlist. Requires the user to have logged in
+        using ``fpl.login()``.
+
+        Information is taken from here:
+            https://fantasy.premierleague.com/drf/watchlist/
+
+        :rtype: list
+        """
         if not self._session:
             raise "User must be logged in."
 
