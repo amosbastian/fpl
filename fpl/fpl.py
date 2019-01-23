@@ -518,7 +518,7 @@ class FPL():
 
         An example:
 
-        .. code-block:: none
+        .. code-block:: javascript
 
           {
             "Man City": {
@@ -587,7 +587,7 @@ class FPL():
 
         An example:
 
-        .. code-block:: none
+        .. code-block:: javascript
 
           {
             "Man City": {

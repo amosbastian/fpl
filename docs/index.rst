@@ -53,7 +53,7 @@ This part of the documentation is mostly an introduction on how to use **fpl** a
    user/advanced
    user/authentication
 
-The API Documentation / Guide
+The Class Documentation / Guide
 -----------------------------
 
 This part of the documentation is for people who want or need more information about specific functions and classes found in **fpl**.
@@ -61,7 +61,14 @@ This part of the documentation is for people who want or need more information a
 .. toctree::
    :maxdepth: 2
 
-   api
+   classes/classic_league
+   classes/fixture
+   classes/fpl
+   classes/gameweek
+   classes/h2h_league
+   classes/player
+   classes/team
+   classes/user
 
 
 The Contributor Guide
