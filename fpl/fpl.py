@@ -133,10 +133,10 @@ class FPL():
         """
         url = API_URLS["teams"]
         teams = await fetch(self.session, url)
-        team = next(team for team in teams if team["id"] == team_id)
+        team = next(team for team in teams if team["id"] == int(team_id))
 
         if return_json:
-            team
+            return team
 
         return Team(team, self.session)
 
