@@ -47,11 +47,17 @@ class FPL():
         self.session = session
 
     async def get_user(self, user_id, return_json=False):
-        """Returns a `User` object or JSON containing information about the
-        user with the given `user_id`.
+        """Returns the user with the given ``user_id``.
 
-        :param string user_id: A user's id
-        :param boolean return_json: return dict if True, otherwise User
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385
+
+        :param user_id: A user's ID.
+        :type user_id: string or int
+        :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
+            if ``False`` returns a :class:`User` object. Defaults to ``False``.
+        :type return_json: bool
+        :rtype: :class:`User` or `dict`
         """
         url = API_URLS["user"].format(user_id)
         user = await fetch(self.session, url)
@@ -61,11 +67,19 @@ class FPL():
         return User(user, session=self.session)
 
     async def get_teams(self, team_ids=[], return_json=False):
-        """Returns a list JSON or `Team` objects of the teams currently
-        participating in the Premier League.
+        """Returns either a list of *all* teams, or a list of teams with IDs in
+        the optional ``team_ids`` list.
 
-        :param list team_ids: List containing the IDs of desired teams
-        :param boolean return_json: return dict if True, otherwise Team
+        Information is taken from:
+            https://fantasy.premierleague.com/drf/teams/
+
+        :param list team_ids: (optional) List containing the IDs of teams.
+            If not set a list of *all* teams will be returned.
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            ``dict``s, if ``False`` returns a list of  :class:`Team` objects.
+            Defaults to ``False``.
+        :type return_json: bool
+        :rtype: list
         """
         url = API_URLS["teams"]
         teams = await fetch(self.session, url)
@@ -80,11 +94,19 @@ class FPL():
                 for team_information in teams]
 
     async def get_team(self, team_id, return_json=False):
-        """Returns a `Team` object or JSON containing information about the
-        team with the given `team_id`.
+        """Returns the team with the given ``team_id``.
 
-        :param int team_id: A team's id
-        :param boolean return_json: return dict if True, otherwise Player
+        Information is taken from:
+            https://fantasy.premierleague.com/drf/teams/
+
+        :param team_id: A team's ID.
+        :type team_id: string or int
+        :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
+            if ``False`` returns a :class:`Team` object. Defaults to ``False``.
+        :type return_json: bool
+        :rtype: :class:`Team` or ``dict``
+
+        For reference here is the mapping from team ID to team name:
 
         .. code-block:: none
 
@@ -119,10 +141,17 @@ class FPL():
         return Team(team, self.session)
 
     async def get_player_summary(self, player_id, return_json=False):
-        """Returns a `PlayerSummary` or JSON object with the given `player_id`
+        """Returns a summary of the player with the given ``player_id``.
 
-        :param int player_id: A player's ID
-        :param boolean return_json: return dict if True, otherwise Player
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/element-summary/301
+
+        :param int player_id: A player's ID.
+        :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
+            if ``False`` returns a :class:`PlayerSummary` object. Defaults to
+            ``False``.
+        :type return_json: bool
+        :rtype: :class:`PlayerSummary` or ``dict``
         """
         url = API_URLS["player"].format(player_id)
         player_summary = await fetch(self.session, url)
@@ -133,11 +162,18 @@ class FPL():
         return PlayerSummary(player_summary)
 
     async def get_player_summaries(self, player_ids=[], return_json=False):
-        """Returns a list of `PlayerSummary` or JSON objects with the given
-        `player_ids`
+        """Returns either a list of summaries of *all* players, or a list of
+        summaries of players whose ID are in the ``player_ids`` list.
 
-        :param list player_ids: A list of player IDs
-        :param boolean return_json: return dict if True, otherwise Player
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/element-summary/1
+
+        :param list player_ids: (optional) A list of player IDs.
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            ``dict``s, if ``False`` returns a list of  :class:`PlayerSummary`
+            objects. Defaults to ``False``.
+        :type return_json: bool
+        :rtype: list
         """
         tasks = [asyncio.ensure_future(
                  fetch(self.session, API_URLS["player"].format(player_id)))
@@ -153,12 +189,21 @@ class FPL():
 
     async def get_player(self, player_id, players=None, include_summary=False,
                          return_json=False):
-        """Returns a `Player` or JSON object with the given `player_id`.
+        """Returns the player with the given ``player_id``.
 
-        :param int player_id: A player's ID
-        :param list players: A list of players
-        :param boolean include_summary: include player's summary if True
-        :param boolean return_json: return dict if True, otherwise Player
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/elements
+            https://fantasy.premierleague.com/drf/element-summary/1 (optional)
+
+        :param player_id: A player's ID.
+        :type player_id: string or int
+        :param list players: (optional) A list of players.
+        :param bool include_summary: (optional) Includes a player's summary
+            if ``True``.
+        :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
+            if ``False`` returns a :class:`Player` object. Defaults to
+            ``False``.
+        :rtype: :class:`Player` or ``dict``
         """
         if not players:
             players = await fetch(self.session, API_URLS["players"])
@@ -178,12 +223,21 @@ class FPL():
 
     async def get_players(self, player_ids=[], include_summary=False,
                           return_json=False):
-        """Returns a list of `Player` or JSON objects of either all players or
-        players with the given IDs.
+        """Returns either a list of *all* players, or a list of players whose
+        IDs are in the given ``player_ids`` list.
 
-        :param list player_ids: A list of player IDs
-        :param boolean include_summary: include player's summary if True
-        :param boolean return_json: return dict if True, otherwise Player
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/elements
+            https://fantasy.premierleague.com/drf/element-summary/1 (optional)
+
+        :param list player_ids: (optional) A list of player IDs
+        :param boolean include_summary: (optional) Includes a player's summary
+            if ``True``.
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            ``dict``s, if ``False`` returns a list of  :class:`Player`
+            objects. Defaults to ``False``.
+        :type return_json: bool
+        :rtype: list
         """
         players = await fetch(self.session, API_URLS["players"])
         if not player_ids:
@@ -198,10 +252,18 @@ class FPL():
         return players
 
     async def get_fixture(self, fixture_id, return_json=False):
-        """Returns the fixture with the given `fixture_id`.
+        """Returns the fixture with the given ``fixture_id``.
 
-        :param int fixture_id: The fixture's ID
-        :param boolean return_json: return dict if True, otherwise Fixture
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/fixtures/
+            https://fantasy.premierleague.com/drf/fixtures/?event=1
+
+        :param int fixture_id: The fixture's ID.
+        :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
+            if ``False`` returns a :class:`Fixture` object. Defaults to
+            ``False``.
+        :type return_json: bool
+        :rtype: :class:`Fixture` or ``dict``
         """
         fixtures = await fetch(self.session, API_URLS["fixtures"])
 
@@ -225,8 +287,16 @@ class FPL():
         """Returns a list of all fixtures with IDs included in the
         `fixture_ids` list.
 
-        :param list fixture_ids: A list of fixture IDs
-        :param boolean return_json: return dict if True, otherwise Fixture
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/fixtures/
+            https://fantasy.premierleague.com/drf/fixtures/?event=1
+
+        :param list fixture_ids: A list of fixture IDs.
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            ``dict``s, if ``False`` returns a list of  :class:`Fixture`
+            objects. Defaults to ``False``.
+        :type return_json: bool
+        :rtype: list
         """
         fixtures = await fetch(self.session, API_URLS["fixtures"])
         fixture_gameweeks = set(fixture["event"] for fixture in fixtures
@@ -248,10 +318,19 @@ class FPL():
         return [Fixture(fixture) for fixture in fixtures]
 
     async def get_fixtures_by_gameweek(self, gameweek, return_json=False):
-        """Returns a list of all fixtures of a given gameweek.
+        """Returns a list of all fixtures of the given ``gameweek``.
 
-        :param int gameweek: A gameweek
-        :param boolean return_json: return dict if True, otherwise Fixture
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/fixtures/
+            https://fantasy.premierleague.com/drf/fixtures/?event=1
+
+        :param gameweek: A gameweek.
+        :type gameweek: string or int
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            ``dict``s, if ``False`` returns a list of  :class:`Player`
+            objects. Defaults to ``False``.
+        :type return_json: bool
+        :rtype: list
         """
         fixtures = await fetch(self.session,
                                API_URLS["gameweek_fixtures"].format(gameweek))
@@ -262,10 +341,17 @@ class FPL():
         return [Fixture(fixture) for fixture in fixtures]
 
     async def get_fixtures(self, return_json=False):
-        """Returns a list of all fixtures.
+        """Returns a list of *all* fixtures.
 
-        :param list fixture_ids: A list of fixture IDs
-        :param boolean return_json: return dict if True, otherwise Fixture
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/fixtures/
+            https://fantasy.premierleague.com/drf/fixtures/?event=1
+
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            ``dict``s, if ``False`` returns a list of  :class:`Fixture`
+            objects. Defaults to ``False``.
+        :type return_json: bool
+        :rtype: list
         """
         gameweeks = range(1, 39)
         tasks = [asyncio.ensure_future(
@@ -283,10 +369,20 @@ class FPL():
 
     async def get_gameweek(self, gameweek_id, include_live=False,
                            return_json=False):
-        """Returns a `Gameweek` or JSON object of the specified gameweek.
+        """Returns the gameweek with the ID ``gameweek_id``.
 
-        :param int gameweek_id: A gameweek's id
-        :param boolean return_json: return dict if True, otherwise Gameweek
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/events/
+            https://fantasy.premierleague.com/drf/event/1/live
+
+        :param int gameweek_id: A gameweek's ID.
+        :param bool include_summary: (optional) Includes a gameweek's live data
+            if ``True``.
+        :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
+            if ``False`` returns a :class:`Gameweek` object. Defaults to
+            ``False``.
+        :type return_json: bool
+        :rtype: :class:`Gameweek` or ``dict``
         """
 
         static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
@@ -304,11 +400,19 @@ class FPL():
 
     async def get_gameweeks(self, gameweek_ids=[], include_live=False,
                             return_json=False):
-        """Returns a list `Gameweek` or JSON objects of either all gameweeks
-        or the gameweeks with the given IDs.
+        """Returns either a list of *all* gamweeks, or a list of gameweeks
+        whose IDs are in the ``gameweek_ids`` list.
 
-        :param list gameweek_ids: A list of gameweek IDs
-        :param boolean return_json: return dict if True, otherwise Gameweek
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/events/
+            https://fantasy.premierleague.com/drf/event/1/live
+
+        :param list gameweek_ids: (optional) A list of gameweek IDs.
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            ``dict``s, if ``False`` returns a list of  :class:`Gameweek`
+            objects. Defaults to ``False``.
+        :type return_json: bool
+        :rtype: list
         """
 
         if not gameweek_ids:
@@ -322,17 +426,29 @@ class FPL():
         return gameweeks
 
     async def game_settings(self):
-        """Returns a dictionary containing the Fantasy Premier League's rules.
+        """Returns the Fantasy Premier League's rules / settings.
+
+        Information is taken from here:
+            https://fantasy.premierleague.com/drf/game-settings/
+
+        :rtype: dict
         """
         settings = await fetch(self.session, API_URLS["settings"])
         return settings
 
     async def get_classic_league(self, league_id, return_json=False):
-        """Returns a `ClassicLeague` or JSON  object with the given
-        `league_id`.
+        """Returns the classic league with the given ``league_id``.
 
-        :param string league_id: A league's id
-        :param boolean return_json: return dict if True, otherwise ClassicLeague
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/leagues-classic-standings/1137
+
+        :param string league_id: A classic league's ID.
+        :type league_id: string or int
+        :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
+            if ``False`` returns a :class:`ClassicLeague` object. Defaults to
+            ``False``.
+        :type return_json: bool
+        :rtype: :class:`ClassicLeague` or ``dict``
         """
         url = API_URLS["league_classic"].format(league_id)
         league = await fetch(self.session, url)
@@ -345,8 +461,16 @@ class FPL():
     async def get_h2h_league(self, league_id, return_json=False):
         """Returns a `H2HLeague` object with the given `league_id`.
 
-        :param string league_id: A league's id
-        :param boolean return_json: return dict if True, otherwise H2HLeague
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/leagues-h2h-standings/829116
+
+        :param league_id: A H2H league's ID.
+        :type league_id: string or int
+        :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
+            if ``False`` returns a :class:`H2HLeague` object. Defaults to
+            ``False``.
+        :type return_json: bool
+        :rtype: :class:`H2HLeague` or ``dict``
         """
         url = API_URLS["league_h2h"].format(league_id)
         league = await fetch(self.session, url)
@@ -359,8 +483,10 @@ class FPL():
     async def login(self, email=None, password=None):
         """Returns a requests session with FPL login authentication.
 
-        :param string user: email
-        :param string password: password
+        :param string user: Email address for the user's Fantasy Premier League
+            account.
+        :param string password: Password for the user's Fantasy Premier League
+            account.
         """
         if not email and not password:
             email = os.environ["FPL_EMAIL"]
@@ -387,8 +513,40 @@ class FPL():
                 raise ValueError("Incorrect email or password!")
 
     async def get_points_against(self):
-        """Returns a dictionary containing the points scored against
-        all teams in the Premier League, split by position.
+        """Returns a dictionary containing the points scored against all teams
+        in the Premier League, split by position and location.
+
+        An example:
+
+        .. code-block:: none
+
+          {
+            "Man City": {
+                "all": {
+                "H": [3, ..., 1],
+                "A": [2, ..., 2]
+                },
+                "goalkeeper": {
+                "H": [3, ..., 3],
+                "A": [2, ..., 3]
+                },
+                "defender": {
+                "H": [1, ..., 2],
+                "A": [4, ..., 1]
+                },
+                "midfielder": {
+                "H": [2, ..., 1],
+                "A": [2, ..., 2]
+                },
+                "forward": {
+                "H": [1, ..., 2],
+                "A": [6, ..., 1]
+                }
+            },
+            ...
+          }
+
+        :rtype: dict
         """
         players = await self.get_players(
             include_summary=True, return_json=True)
@@ -422,11 +580,73 @@ class FPL():
         return points_against
 
     async def FDR(self):
-        """Creates a new Fixture Difficulty Ranking (FDR) based on the amount
-        of points each team concedes in Fantasy Premier League terms.
+        """Creates a new Fixture Difficulty Ranking (FDR) based on the number
+        of points each team gives up to players in the Fantasy Premier League.
+        These numbers are also between 1.0 and 5.0 to give a similar ranking
+        system as the official FDR.
+
+        An example:
+
+        .. code-block:: none
+
+          {
+            "Man City": {
+                "all": {
+                "H": 4.4524439427082,
+                "A": 5
+                },
+                "goalkeeper": {
+                "H": 3.6208195949129,
+                "A": 5
+                },
+                "defender": {
+                "H": 3.747999604078,
+                "A": 5
+                },
+                "midfielder": {
+                "H": 4.6103045986504,
+                "A": 5
+                },
+                "forward": {
+                "H": 5,
+                "A": 3.9363219561895
+                }
+            },
+            ...,
+            "Arsenal": {
+                "all": {
+                "H": 3.4414041151234,
+                "A": 4.2904529162594
+                },
+                "goalkeeper": {
+                "H": 4.1106924163919,
+                "A": 4.3867595818815
+                },
+                "defender": {
+                "H": 3.6720291204673,
+                "A": 4.3380917450181
+                },
+                "midfielder": {
+                "H": 3.3537357534825,
+                "A": 4.0706443384718
+                },
+                "forward": {
+                "H": 2.5143403441683,
+                "A": 4.205298013245
+                }
+            }
+          }
+
+        :rtype: dict
         """
         def average_points_against(points_against):
-            """Averages the points scored against all teams per position."""
+            """Returns a dict with the average points scored against all teams,
+            per position and location.
+
+            :param dict points_against: A dict containing the points scored
+                against each team in the Premier League.
+            :rtype: dict
+            """
             for team, positions in points_against.items():
                 for position in positions.values():
                     position["H"] = average(position["H"])
@@ -437,7 +657,12 @@ class FPL():
             return points_against
 
         def get_extrema(points_against):
-            """Returns the extrema for each position and location."""
+            """Returns the extrema for each position and location.
+
+            :param dict points_against: A dict containing the points scored
+                against each team in the Premier League.
+            :rtype: dict
+            """
             averages = {}
             for team, positions in points_against.items():
                 for position, average in positions.items():
@@ -456,9 +681,15 @@ class FPL():
             return averages
 
         def calculate_fdr(average_points, extrema):
-            """Returns a dictionary containing the FDR for each team, which is
+            """Returns a dict containing the FDR for each team, which is
             calculated by scaling the average points conceded per position
             between 1.0 and 5.0 using the given extrema.
+
+            :param dict points_against: A dict containing the points scored
+                against each team in the Premier League.
+            :param dict extrema: A dict containing the extrema for each
+                position and location.
+            :rtype: dict
             """
             for team, positions in average_points.items():
                 for position, locations in positions.items():
@@ -479,6 +710,3 @@ class FPL():
         fdr = calculate_fdr(average_points, extrema)
 
         return fdr
-
-    async def _close(self):
-        await self.session.lose()
