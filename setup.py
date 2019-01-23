@@ -33,6 +33,7 @@ setup(
         "appdirs",
         "aiohttp",
         "pytest-aiohttp",
+        "pytest",
     ],
     entry_points="""
         [console_scripts]
