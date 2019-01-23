@@ -30,7 +30,10 @@ class H2HLeague():
             setattr(self, k, v)
 
     async def get_fixtures(self, gameweek=None):
-        """Returns a list of fixtures / results of the H2H league -
+        """Returns a list of fixtures / results of the H2H league.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/leagues-entries-and-h2h-matches/829116/?page=1
 
         :param gameweek: (optional) The gameweek of the fixtures / results.
         :type gameweek: string or int

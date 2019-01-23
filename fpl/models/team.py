@@ -27,7 +27,8 @@ class Team():
             setattr(self, k, v)
 
     async def get_players(self, return_json=False):
-        """Returns a list containing the players who play for the team.
+        """Returns a list containing the players who play for the team. Does
+        not include the player's summary.
 
         :param return_json: (optional) Boolean. If ``True`` returns a list of
             dicts, if ``False`` returns a list of Player objects. Defaults to

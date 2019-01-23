@@ -583,7 +583,7 @@ class FPL():
         """Creates a new Fixture Difficulty Ranking (FDR) based on the number
         of points each team gives up to players in the Fantasy Premier League.
         These numbers are also between 1.0 and 5.0 to give a similar ranking
-        system as the official FDR.
+        system to the official FDR.
 
         An example:
 

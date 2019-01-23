@@ -40,6 +40,9 @@ class User():
     async def get_gameweek_history(self, gameweek=None):
         """Returns a list containing the gameweek history of the user.
 
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/history
+
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list if gameweek is ``None``, otherwise dict.
         """
@@ -61,6 +64,9 @@ class User():
     async def get_season_history(self):
         """Returns a list containing the seasonal history of the user.
 
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/history
+
         :rtype: list
         """
         if hasattr(self, "_history"):
@@ -74,6 +80,9 @@ class User():
 
     async def get_chips_history(self, gameweek=None):
         """Returns a list containing the chip history of the user.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/history
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
@@ -95,6 +104,9 @@ class User():
 
     async def get_picks(self, gameweek=None):
         """Returns a list containing the user's picks each gameweek.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
@@ -118,6 +130,9 @@ class User():
 
     async def get_active_chips(self, gameweek=None):
         """Returns a list containing the user's active chips each gameweek.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
@@ -143,6 +158,9 @@ class User():
         """Returns a list containing the user's automatic substitutions each
         gameweek.
 
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
+
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
         """
@@ -164,7 +182,11 @@ class User():
         return [pick["automatic_subs"] for pick in picks]
 
     async def get_team(self):
-        """Returns a logged in user's current team.
+        """Returns a logged in user's current team. Requires the user to have
+        logged in using ``fpl.login()``.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/my-team/3808385/
 
         :rtype: list
         """
@@ -182,6 +204,9 @@ class User():
     async def get_transfers(self, gameweek=None):
         """Returns either a list of all the user's transfers, or a list of
         transfers made in the given gameweek.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/transfers
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
@@ -205,6 +230,9 @@ class User():
         """Returns a list containing information about when (and if) the user
         has played their wildcard(s).
 
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/transfers
+
         :rtype: list
         """
         if hasattr(self, "_transfers"):
@@ -217,7 +245,11 @@ class User():
         return transfers["wildcards"]
 
     async def get_watchlist(self):
-        """Returns the user's watchlist. Requires the user to have logged in.
+        """Returns the user's watchlist. Requires the user to have logged in
+        using ``fpl.login()``.
+
+        Information is taken from here:
+            https://fantasy.premierleague.com/drf/watchlist/
 
         :rtype: list
         """
