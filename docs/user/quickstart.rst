@@ -9,8 +9,8 @@ This part of the user guide will try to make it a bit more easy for
 users to get started with using **fpl**! Before starting, make sure that
 **fpl** is :ref:`installed and up to date <installation>`.
 
-Creating an FPL object
-----------------------
+Using the FPL object
+--------------------
 
 The :class:`FPL <fpl.FPL>` class is the main way you will be accessing
 information from the Fantasy Premier League's API.
@@ -19,8 +19,8 @@ Begin by importing the :class:`FPL <fpl.FPL>` class from **fpl**::
 
     >>> from fpl import FPL
 
-Because **fpl** uses `aiohttp <https://aiohttp.readthedocs.io/en/stable/>`,
-we must also import this and pass a `Client Session <https://docs.aiohttp.org/en/stable/client_advanced.html>`
+Because **fpl** uses `aiohttp <https://aiohttp.readthedocs.io/en/stable/>`_,
+we must also import this and pass a `Client Session <https://docs.aiohttp.org/en/stable/client_advanced.html>`_
 as an argument to the `FPL` class. You can either create a session and pass it like this::
 
     >>> import aiohttp
