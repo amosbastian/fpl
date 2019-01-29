@@ -49,6 +49,7 @@ This part of the documentation is mostly an introduction on how to use **fpl** a
 
    user/installation
    user/quickstart
+   user/examples
 
 The Class Documentation / Guide
 -------------------------------
