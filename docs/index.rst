@@ -1,5 +1,5 @@
 A Python wrapper for the Fantasy Premier League API
-==========================
+===================================================
 
 .. image:: https://travis-ci.org/amosbastian/fpl.svg?branch=master
     :target: https://travis-ci.org/amosbastian/fpl

@@ -1,11 +1,13 @@
 User
 ================
 
-Information for the :class:`User` is taken from the following endpoint:
+.. module:: fpl
+
+Information for the :class:`User <fpl.models.user.User>` is taken from the following endpoint:
 
     https://fantasy.premierleague.com/drf/entry/3808385
 
-An example of what information a :class:`User` contains is shown below:
+An example of what information a :class:`User <fpl.models.user.User>` contains is shown below:
 
 .. code-block:: javascript
 

@@ -1,5 +1,9 @@
+.. _quickstart:
+
 Quickstart
 ==========
+
+.. module:: fpl
 
 This part of the user guide will try to make it a bit more easy for
 users to get started with using `fpl`! Before starting, make sure that
@@ -8,10 +12,10 @@ users to get started with using `fpl`! Before starting, make sure that
 Creating an FPL object
 ----------------------
 
-The :class:`FPL` class is the main way you will be accessing information
+The :class:`FPL <fpl.FPL>` class is the main way you will be accessing information
 from the Fantasy Premier League's API.
 
-Begin by importing the :class:`FPL` class from `fpl`::
+Begin by importing the :class:`FPL <fpl.FPL>` class from `fpl`::
 
     >>> from fpl import FPL
 
@@ -41,7 +45,7 @@ star midfielder Paul Pogba (replace `# ...` with this code)::
     >>> print(player)
     Pogba - Midfielder - Man Utd
 
-Now, we have a :class:`Player <fpl.models.Player>` object called ``player``. We can
+Now, we have a :class:`Player <fpl.models.player.Player>` object called ``player``. We can
 get all the information we need from this object. For example, if we want his
 points per game, or his total points, then we can simply do this::
 
@@ -51,7 +55,7 @@ points per game, or his total points, then we can simply do this::
     113
 
 Nearly all of :class:`FPL <fpl.FPL>`'s functions include the argument ``return_json`` -
-if you want to get a ``dict`` instead of e.g. a :class:`Player <fpl.models.Player>` object,
+if you want to get a ``dict`` instead of e.g. a :class:`Player <fpl.models.player.Player>` object,
 then you can simply do the following::
 
     >>> player = await fpl.get_player(302, return_json=True)
