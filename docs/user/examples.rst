@@ -97,7 +97,6 @@ this table with colour highlighting is shown::
         async with aiohttp.ClientSession() as session:
             fpl = FPL(session)
             fdr = await fpl.FDR()
-            print(fdr)
 
         fdr_table = PrettyTable()
         fdr_table.field_names = [
@@ -151,3 +150,124 @@ which outputs the following table::
     | Brighton       |   2.24  |   3.39  |  2.53  |  4.18  |   1.97  |   3.61  |   2.34  |   3.61  |   3.53  |   2.96  |
     | Arsenal        |   3.44  |   4.29  |  4.11  |  4.39  |   3.67  |   4.34  |   3.35  |   4.07  |   2.51  |   4.21  |
     +----------------+---------+---------+--------+--------+---------+---------+---------+---------+---------+---------+
+
+Optimal captain choice?!
+------------------------
+
+One of the most important aspects of the Fantasy Premier League is your captain
+choice each week. Of course, it's very difficult to get this correct each week!
+Because of this, it's quite interesting (or frustrating) to see what could've been.
+The code snippet below shows how you can create a table showing your captain and
+top scorer of each gameweek, and their respective difference in points scored::
+
+    import asyncio
+    from operator import attrgetter
+
+    import aiohttp
+    from prettytable import PrettyTable
+
+    from fpl import FPL
+    from fpl.utils import team_converter
+
+
+    def get_gameweek_score(player, gameweek):
+        gameweek_history = next(history for history in player.history
+                                if history["round"] == gameweek)
+        return gameweek_history["total_points"]
+
+
+    def get_gameweek_opponent(player, gameweek):
+        gameweek_history = next(history for history in player.history
+                                if history["round"] == gameweek)
+        return (f"{team_converter(gameweek_history['opponent_team'])} ("
+                f"{'H' if gameweek_history['was_home'] else 'A'})")
+
+
+    def get_point_difference(player_a, player_b, gameweek):
+        if player_a == player_b:
+            return 0
+
+        history_a = next(history for history in player_a.history
+                        if history["round"] == gameweek)
+        history_b = next(history for history in player_b.history
+                        if history["round"] == gameweek)
+
+        return history_a["total_points"] - history_b["total_points"]
+
+    async def main(user_id):
+        player_table = PrettyTable()
+        player_table.field_names = ["Gameweek", "Captain", "Top scorer", "Δ"]
+        player_table.align = "r"
+        total_difference = 0
+
+        async with aiohttp.ClientSession() as session:
+            fpl = FPL(session)
+            user = await fpl.get_user(user_id)
+            picks = await user.get_picks()
+
+            for i, elements in enumerate(picks):
+                gameweek = i + 1
+                captain_id = next(player for player in elements
+                                  if player["is_captain"])["element"]
+                players = await fpl.get_players(
+                    [player["element"] for player in elements],
+                    include_summary=True)
+
+                captain = next(player for player in players
+                              if player.id == captain_id)
+
+                top_scorer = max(
+                    players, key=lambda x: get_gameweek_score(x, gameweek))
+
+                point_difference = get_point_difference(
+                    captain, top_scorer, gameweek)
+
+                player_table.add_row([
+                    gameweek,
+                    (f"{captain.web_name} - "
+                    f"{get_gameweek_score(captain, gameweek)} points vs. "
+                    f"{get_gameweek_opponent(captain, gameweek)}"),
+                    (f"{top_scorer.web_name} - "
+                    f"{get_gameweek_score(top_scorer, gameweek)} points vs. "
+                    f"{get_gameweek_opponent(top_scorer, gameweek)}"),
+                    point_difference
+                ])
+
+                total_difference += point_difference
+
+        print(player_table)
+        print(f"Total point difference is {abs(total_difference)} points!")
+
+    if __name__ == '__main__':
+        asyncio.run(main(3808385))
+
+which outputs the following table::
+
+    +----------+------------------------------------------+-------------------------------------------+-----+
+    | Gameweek |                                  Captain |                                Top scorer |   Δ |
+    +----------+------------------------------------------+-------------------------------------------+-----+
+    |        1 |     Sánchez - 5 points vs. Leicester (H) |         Mané - 16 points vs. West Ham (H) | -11 |
+    |        2 |  Agüero - 20 points vs. Huddersfield (H) |   Agüero - 20 points vs. Huddersfield (H) |   0 |
+    |        3 |         Agüero - 2 points vs. Wolves (A) |     Robertson - 9 points vs. Brighton (H) |  -7 |
+    |        4 |      Agüero - 6 points vs. Newcastle (H) |    Hazard - 11 points vs. Bournemouth (H) |  -5 |
+    |        5 |         Agüero - 7 points vs. Fulham (H) |        Hazard - 20 points vs. Cardiff (H) | -13 |
+    |        6 |        Agüero - 6 points vs. Cardiff (A) |  Wan-Bissaka - 9 points vs. Newcastle (H) |  -3 |
+    |        7 |       Agüero - 8 points vs. Brighton (H) |      Hazard - 10 points vs. Liverpool (H) |  -2 |
+    |        8 |          Kane - 1 points vs. Cardiff (H) |    Hazard - 14 points vs. Southampton (A) | -13 |
+    |        9 |      Sterling - 0 points vs. Burnley (H) |         Mendy - 10 points vs. Burnley (H) | -10 |
+    |       10 |     Robertson - 0 points vs. Cardiff (H) |          Mané - 15 points vs. Cardiff (H) | -15 |
+    |       11 | Sterling - 21 points vs. Southampton (H) |  Sterling - 21 points vs. Southampton (H) |   0 |
+    |       12 |           Mané - 3 points vs. Fulham (H) |      Robertson - 12 points vs. Fulham (H) |  -9 |
+    |       13 |    Sterling - 16 points vs. West Ham (A) |     Sterling - 16 points vs. West Ham (A) |   0 |
+    |       14 |  Sterling - 9 points vs. Bournemouth (H) |   Sterling - 9 points vs. Bournemouth (H) |   0 |
+    |       15 |          Sané - 7 points vs. Watford (A) |   Fraser - 12 points vs. Huddersfield (H) |  -5 |
+    |       16 |        Kane - 1 points vs. Leicester (A) | Robertson - 11 points vs. Bournemouth (A) | -10 |
+    |       17 |          Kane - 5 points vs. Burnley (H) |       Hazard - 13 points vs. Brighton (A) |  -8 |
+    |       18 |   Sané - 2 points vs. Crystal Palace (H) |          Kane - 15 points vs. Everton (A) | -13 |
+    |       19 |      Kane - 6 points vs. Bournemouth (H) |        Hazard - 15 points vs. Watford (A) |  -9 |
+    |       20 |           Kane - 6 points vs. Wolves (H) |     Pogba - 18 points vs. Bournemouth (H) | -12 |
+    |       21 |    Hazard - 3 points vs. Southampton (H) |        Fraser - 12 points vs. Watford (H) |  -9 |
+    |       22 |       Salah - 11 points vs. Brighton (A) |     Digne - 12 points vs. Bournemouth (H) |  -1 |
+    |       23 | Salah - 15 points vs. Crystal Palace (H) |  Salah - 15 points vs. Crystal Palace (H) |   0 |
+    +----------+------------------------------------------+-------------------------------------------+-----+
+    Total point difference is 155 points!
