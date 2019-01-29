@@ -50,7 +50,7 @@ points per game, or his total points, then we can simply do this::
     >>> print(player.total_points)
     113
 
-Each of :class:`FPL <fpl.FPL>`'s functions include the argument ``return_json`` -
+Nearly all of :class:`FPL <fpl.FPL>`'s functions include the argument ``return_json`` -
 if you want to get a ``dict`` instead of e.g. a :class:`Player <fpl.models.Player>` object,
 then you can simply do the following::
 
@@ -64,3 +64,32 @@ asynchronous, you must use ``asyncio`` to run the function::
     >>> import asyncio
     >>> asyncio.run(main())
 
+
+Authentication
+--------------
+
+Some of the Fantasy Premier League's API endpoints require the user to be logged in.
+For example, the endpoint for `my team <https://fantasy.premierleague.com/drf/my-team/3808385/>`)
+will return::
+
+    {"detail":"Authentication credentials were not provided."}
+
+since you aren't logged in to my account. To still allow ``fpl`` users to access this,
+the ``login`` function was added to :class:`FPL <fpl.FPL>`. It must be called
+before using other functions where login authentication is required. Let's use my team
+as an example::
+
+    >>> import asyncio
+    >>> import aiohttp
+    >>> from fpl import FPL
+    >>>
+    >>> async def my_team(user_id):
+    ...     async with aiohttp.ClientSession() as session:
+    ...         fpl = FPL(session)
+    ...         await fpl.login()
+    ...         user = await fpl.get_user(user_id)
+    ...         team = await user.get_team()
+    ...     print(team)
+    ...
+    >>> asyncio.run(my_team(3808385))
+    [{'can_sub': True, 'has_played': False, 'is_sub': False, 'can_captain': True, 'selling_price': 46, 'multiplier': 1, 'is_captain': False, 'is_vice_captain': False, 'position': 1, 'element': 400}, ..., {'can_sub': True, 'has_played': False, 'is_sub': True, 'can_captain': True, 'selling_price': 44, 'multiplier': 1, 'is_captain': False, 'is_vice_captain': False, 'position': 15, 'element': 201}]
