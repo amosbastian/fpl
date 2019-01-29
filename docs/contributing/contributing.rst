@@ -9,7 +9,8 @@ that *should* make it easier for you to start contributing. Since contributions
 can be in all kinds of different forms, the contributing guide has been split
 up into sections.
 
-To contact me directly you can add me on Discord (Amos#4622).
+To contact me directly you can add me on Discord (Amos#4622) or send an email
+to `amosbastian@gmail.com <mailto:amosbastian@gmail.com>`_.
 
 Code contributions
 ------------------
@@ -22,14 +23,16 @@ When contributing code, you'll want to follow this checklist:
 1. Fork the repository on GitHub.
 2. Run the tests with `pytest tests/` to confirm they all pass on your system.
    If the tests fail, then try and find out why this is happening. If you aren't
-   able to do this yourself, then don't hesitate to create an issue on GitHub
-   (see :ref:`reporting-bugs`) or contact me on Discord.
+   able to do this yourself, then don't hesitate to either create an issue on
+   GitHub (see :ref:`reporting-bugs`), contact me on Discord or send an email
+   to `amosbastian@gmail.com <mailto:amosbastian@gmail.com>`_.
 3. Either create your feature and then write tests for it, or do this the other
    way around.
 4. Run all tests again with with `pytest tests/` to confirm that everything
    still passes, including your newly added test(s).
 5. Create a pull request for the main repository's ``master`` branch.
 
+If you want, you can also add your name `AUTHORS <https://github.com/amosbastian/fpl/blob/master/AUTHORS.rst>`_.
 
 Code review
 ~~~~~~~~~~~
@@ -53,6 +56,8 @@ specific additions to this, but if you think more should be added, then this
 can always be discussed.
 
 - Always use double-quoted strings, unless it is not possible.
+
+.. _PEP 8: https://pep8.org/
 
 Documentation contributions
 ---------------------------
@@ -79,6 +84,8 @@ open an issue. However, before you do, please check the `GitHub issues`_ (make
 sure to also check closed ones) to see if the bug has already been reported.
 
 A template is provided below to make it easier to understand the issue:
+
+.. code-block:: none
 
     #### Expected behaviour
     What did you expect to happen?

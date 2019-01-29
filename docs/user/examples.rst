@@ -11,6 +11,8 @@ If there are certain examples you think would be helpful to add to this page,
 then don't hesitate to `create an issue <https://github.com/amosbastian/fpl/issues>`_
 detailing it.
 
+.. note:: There is no doubt that the below examples could be implemented in a
+          much better way - if you want to improve them, then don't hestitate to!
 
 The league's best ...
 ---------------------
@@ -18,7 +20,7 @@ The league's best ...
 One of things that is most interesting to see is which players are performing
 the best in certain metrics. For example, which players score the most points
 per game, or which players have the most goals + assists. This is really easy
-to implement using `fpl`!
+to implement using **fpl**!
 
 .. code-block:: python
 

@@ -91,6 +91,7 @@ html_theme_options = {
     'github_repo': 'fpl',
     'github_banner': True,
     'github_button': True,
+    'github_type': 'star',
     'note_bg': '#FFF59C',
     'logo': 'fpl.png'
 }

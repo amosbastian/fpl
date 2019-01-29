@@ -6,8 +6,8 @@ Quickstart
 .. module:: fpl
 
 This part of the user guide will try to make it a bit more easy for
-users to get started with using `fpl`! Before starting, make sure that
-`fpl` is :ref:`installed and up to date <installation>`.
+users to get started with using **fpl**! Before starting, make sure that
+**fpl** is :ref:`installed and up to date <installation>`.
 
 Creating an FPL object
 ----------------------
@@ -15,11 +15,11 @@ Creating an FPL object
 The :class:`FPL <fpl.FPL>` class is the main way you will be accessing
 information from the Fantasy Premier League's API.
 
-Begin by importing the :class:`FPL <fpl.FPL>` class from `fpl`::
+Begin by importing the :class:`FPL <fpl.FPL>` class from **fpl**::
 
     >>> from fpl import FPL
 
-Because `fpl` uses `aiohttp <https://aiohttp.readthedocs.io/en/stable/>`,
+Because **fpl** uses `aiohttp <https://aiohttp.readthedocs.io/en/stable/>`,
 we must also import this and pass a `Client Session <https://docs.aiohttp.org/en/stable/client_advanced.html>`
 as an argument to the `FPL` class. You can either create a session and pass it like this::
 
@@ -64,7 +64,7 @@ following::
     >>> print(player["total_points"])
     113
 
-Nice, right? However, one important thing was left out. Because ``fpl`` is
+Nice, right? However, one important thing was left out. Because **fpl** is
 asynchronous, you must use ``asyncio`` to run the function::
 
     >>> import asyncio
@@ -80,7 +80,7 @@ will return::
 
     {"detail":"Authentication credentials were not provided."}
 
-since you aren't logged in to my account. To still allow ``fpl`` users to
+since you aren't logged in to my account. To still allow **fpl** users to
 access this, the ``login`` function was added to :class:`FPL <fpl.FPL>`. It
 must be called before using other functions where login authentication is
 required. Let's use my team as an example::

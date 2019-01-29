@@ -1,7 +1,7 @@
 .. _installation:
 
-Installing fpl
-==============
+Installing **fpl**
+==================
 
 The recommended way to install ``fpl`` is via ``pip``.
 
@@ -12,10 +12,10 @@ The recommended way to install ``fpl`` is via ``pip``.
 .. note:: Depending on your system, you may need to use ``pip3`` to install
           packages for Python 3.
 
-Updating fpl with pip
----------------------
+Updating **fpl** with pip
+-------------------------
 
-To update ``fpl`` you can run:
+To update **fpl** you can run:
 
 .. code-block:: bash
 
@@ -34,7 +34,7 @@ Example output:
 Installing older versions
 -------------------------
 
-Older versions of fpl can be installed by specifying the version number
+Older versions of **fpl** can be installed by specifying the version number
 as part of the installation command:
 
 .. code-block:: bash
@@ -44,9 +44,9 @@ as part of the installation command:
 Installing from GitHub
 ----------------------
 
-The source code for `fpl` is available on GitHub repository
+The source code for **fpl** is available on GitHub repository
 `<https://github.com/amosbastian/fpl>`_. To install the most recent
-version of `fpl` from here you can use the following command::
+version of **fpl** from here you can use the following command::
 
     $ git clone git://github.com/amosbastian/fpl.git
 

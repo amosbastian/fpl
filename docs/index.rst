@@ -20,8 +20,9 @@ A Python wrapper for the Fantasy Premier League API
 .. note:: The latest version of **fpl** is asynchronous, and requires Python 3.6+!
 
 If you're interested in helping out the development of **fpl**, or have
-suggestions and ideas then please don't hesitate to create an issue on GitHub
-or contact me on Discord (Amos#4622)!
+suggestions and ideas then please don't hesitate to create an issue on GitHub,
+contact me on Discord (Amos#4622) or send an email to
+`amosbastian@gmail.com <mailto:amosbastian@gmail.com>`_!
 
 --------------
 
@@ -81,3 +82,8 @@ If you want to help **fpl** out and contribute to the project, be it via
 development, suggestions, hunting bugs etc. then this part of the
 documentation is for you!
 
+.. toctree::
+   :maxdepth: 2
+
+   contributing/contributing
+   contributing/authors
