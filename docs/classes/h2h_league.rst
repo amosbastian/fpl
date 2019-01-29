@@ -1,12 +1,12 @@
 H2HLeague
 ================
 
-Information for the :class:`H2HLeague` is taken from the following endpoints:
+Information for the :class:`H2HLeague <fpl.models.h2h_league.H2HLeague>` is taken from the following endpoints:
 
     https://fantasy.premierleague.com/drf/leagues-h2h-standings/829116
     https://fantasy.premierleague.com/drf/leagues-entries-and-h2h-matches/829116/?page=1
 
-An example of what information a :class:`H2HLeague` contains is shown below:
+An example of what information a :class:`H2HLeague <fpl.models.h2h_league.H2HLeague>` contains is shown below:
 
 .. code-block:: javascript
 

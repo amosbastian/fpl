@@ -1,12 +1,14 @@
 Fixture
 ================
 
-Information for the :class:`Fixture` is taken from e.g. the following endpoints:
+.. module:: fpl
+
+Information for the :class:`Fixture <fpl.models.fixture.Fixture>` is taken from e.g. the following endpoints:
 
     https://fantasy.premierleague.com/drf/fixtures/
     https://fantasy.premierleague.com/drf/fixtures/?event=1
 
-An example of what information a :class:`Fixture` contains is shown below:
+An example of what information a :class:`Fixture <fpl.models.fixture.Fixture>` contains is shown below:
 
 .. code-block:: javascript
 

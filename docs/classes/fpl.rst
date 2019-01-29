@@ -1,8 +1,10 @@
 FPL
 ================
 
-The :class:`FPL` class is the main class used for interacting with Fantasy Premier League's API. It
-requires a ``aiohttp.ClientSession`` for sending requests, so typical usage of the :class:`FPL` class
+.. module:: fpl
+
+The :class:`FPL <fpl.FPL>` class is the main class used for interacting with Fantasy Premier League's API. It
+requires a ``aiohttp.ClientSession`` for sending requests, so typical usage of the :class:`FPL <fpl.FPL>` class
 can look something like this:
 
 .. code-block:: python

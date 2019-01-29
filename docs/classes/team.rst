@@ -1,11 +1,13 @@
 Team
 ================
 
-Information for the :class:`Team` is taken from the following endpoint:
+.. module:: fpl
+
+Information for the :class:`Team <fpl.models.team.Team>` is taken from the following endpoint:
 
     https://fantasy.premierleague.com/drf/teams
 
-An example of what information a :class:`Team` (Manchester United) contains is shown below:
+An example of what information a :class:`Team <fpl.models.team.Team>` (Manchester United) contains is shown below:
 
 .. code-block:: javascript
 
