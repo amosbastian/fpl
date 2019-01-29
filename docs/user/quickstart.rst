@@ -75,7 +75,7 @@ Authentication
 --------------
 
 Some of the Fantasy Premier League's API endpoints require the user to be
-logged in. For example, the endpoint for `my team <https://fantasy.premierleague.com/drf/my-team/3808385/>`)
+logged in. For example, the endpoint for `my team <https://fantasy.premierleague.com/drf/my-team/3808385/>`_)
 will return::
 
     {"detail":"Authentication credentials were not provided."}
