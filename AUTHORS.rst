@@ -1,7 +1,7 @@
 Maintainer
 ``````````
 
-- Amos Bastian <amosbastian@gmail.com> `@amosbastian <https://github.com/kennethreitz>`_,
+- Amos Bastian <amosbastian@gmail.com> `@amosbastian <https://github.com/amosbastian>`_,
 
 Contributors
 ````````````
