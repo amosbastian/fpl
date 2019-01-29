@@ -9,8 +9,8 @@ This part of the user guide will try to make it a bit more easy for
 users to get started with using **fpl**! Before starting, make sure that
 **fpl** is :ref:`installed and up to date <installation>`.
 
-Using the FPL object
---------------------
+Using the FPL class
+-------------------
 
 The :class:`FPL <fpl.FPL>` class is the main way you will be accessing
 information from the Fantasy Premier League's API.
