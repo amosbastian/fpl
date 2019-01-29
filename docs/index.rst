@@ -39,7 +39,7 @@ If you're interested in helping out the development of **fpl**, or have suggesti
 
 With **fpl** you can easily use the Fantasy Premier League API in all your Python scripts, exactly how you expect it to work.
 
-The User Guide (more information coming soon!)
+The User Guide
 ----------------------------------------------
 
 This part of the documentation is mostly an introduction on how to use **fpl** and install it - including information for people newer to `asyncio`.
@@ -47,7 +47,7 @@ This part of the documentation is mostly an introduction on how to use **fpl** a
 .. toctree::
    :maxdepth: 2
 
-   installation
+   user/installation
 
 The Class Documentation / Guide
 -------------------------------
