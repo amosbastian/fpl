@@ -77,12 +77,13 @@ attributes, so just experiment!
 Alternative FDR
 ---------------
 
-As we all know, the official FDR used by the Fantasy Premier League is not the best. With
-this in mind the function :meth:`FDR() <fpl.FPL.FDR>` was created, which returns a
-dictionary containing an alternative FDR based on points scored for / against teams! Using
-this dictionary we can create a table containing each team's new FDR, which can then
-be used to decide which players you should play the next gameweek. Below an example of
-this table with colour highlighting is shown::
+As we all know, the official FDR used by the Fantasy Premier League is not the
+best. With this in mind the function :meth:`FDR() <fpl.FPL.FDR>` was created,
+which returns a dictionary containing an alternative FDR based on points
+scored for / against teams! Using this dictionary we can create a table
+containing each team's new FDR, which can then be used to decide which players
+you should play the next gameweek. Below an example of this table with colour
+highlighting is shown::
 
     import asyncio
 

@@ -12,8 +12,8 @@ users to get started with using `fpl`! Before starting, make sure that
 Creating an FPL object
 ----------------------
 
-The :class:`FPL <fpl.FPL>` class is the main way you will be accessing information
-from the Fantasy Premier League's API.
+The :class:`FPL <fpl.FPL>` class is the main way you will be accessing
+information from the Fantasy Premier League's API.
 
 Begin by importing the :class:`FPL <fpl.FPL>` class from `fpl`::
 
@@ -45,18 +45,20 @@ star midfielder Paul Pogba (replace `# ...` with this code)::
     >>> print(player)
     Pogba - Midfielder - Man Utd
 
-Now, we have a :class:`Player <fpl.models.player.Player>` object called ``player``. We can
-get all the information we need from this object. For example, if we want his
-points per game, or his total points, then we can simply do this::
+Now, we have a :class:`Player <fpl.models.player.Player>` object called
+``player``. We can get all the information we need from this object. For
+example, if we want his points per game, or his total points, then we can
+simply do this::
 
     >>> print(player.points_per_game)
     5.7
     >>> print(player.total_points)
     113
 
-Nearly all of :class:`FPL <fpl.FPL>`'s functions include the argument ``return_json`` -
-if you want to get a ``dict`` instead of e.g. a :class:`Player <fpl.models.player.Player>` object,
-then you can simply do the following::
+Nearly all of :class:`FPL <fpl.FPL>`'s functions include the argument
+``return_json`` - if you want to get a ``dict`` instead of e.g. a
+:class:`Player <fpl.models.player.Player>` object, then you can simply do the
+following::
 
     >>> player = await fpl.get_player(302, return_json=True)
     >>> print(player["total_points"])
@@ -72,16 +74,16 @@ asynchronous, you must use ``asyncio`` to run the function::
 Authentication
 --------------
 
-Some of the Fantasy Premier League's API endpoints require the user to be logged in.
-For example, the endpoint for `my team <https://fantasy.premierleague.com/drf/my-team/3808385/>`)
+Some of the Fantasy Premier League's API endpoints require the user to be
+logged in. For example, the endpoint for `my team <https://fantasy.premierleague.com/drf/my-team/3808385/>`)
 will return::
 
     {"detail":"Authentication credentials were not provided."}
 
-since you aren't logged in to my account. To still allow ``fpl`` users to access this,
-the ``login`` function was added to :class:`FPL <fpl.FPL>`. It must be called
-before using other functions where login authentication is required. Let's use my team
-as an example::
+since you aren't logged in to my account. To still allow ``fpl`` users to
+access this, the ``login`` function was added to :class:`FPL <fpl.FPL>`. It
+must be called before using other functions where login authentication is
+required. Let's use my team as an example::
 
     >>> import asyncio
     >>> import aiohttp
