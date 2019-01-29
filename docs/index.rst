@@ -48,6 +48,7 @@ This part of the documentation is mostly an introduction on how to use **fpl** a
    :maxdepth: 2
 
    user/installation
+   user/quickstart
 
 The Class Documentation / Guide
 -------------------------------
