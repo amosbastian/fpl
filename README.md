@@ -22,6 +22,8 @@
         <img src="https://pepy.tech/badge/fpl"></a>
 </p>
 
+Join the [Discord server](https://discord.gg/cjY37fv) or submit [an issue](https://github.com/amosbastian/fpl/issues) for help and / or suggestions!
+
 ## Installing fpl
 
 The recommended way to install fpl is via ``pip``.
