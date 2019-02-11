@@ -21,7 +21,7 @@ A Python wrapper for the Fantasy Premier League API
 
 If you're interested in helping out the development of **fpl**, or have
 suggestions and ideas then please don't hesitate to create an issue on GitHub,
-contact me on Discord (Amos#4622) or send an email to
+join our `Discord server <https://discord.gg/cjY37fv>`_ or send an email to
 `amosbastian@gmail.com <mailto:amosbastian@gmail.com>`_!
 
 --------------

@@ -9,8 +9,10 @@ that *should* make it easier for you to start contributing. Since contributions
 can be in all kinds of different forms, the contributing guide has been split
 up into sections.
 
-To contact me directly you can add me on Discord (Amos#4622) or send an email
-to `amosbastian@gmail.com <mailto:amosbastian@gmail.com>`_.
+To contact me directly you can send an email to
+`amosbastian@gmail.com <mailto:amosbastian@gmail.com>`_. If you are looking
+for other people interested in FPL related programming, then you can also join
+our `Discord server <https://discord.gg/cjY37fv>`_.
 
 Code contributions
 ------------------
