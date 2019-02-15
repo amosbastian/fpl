@@ -316,6 +316,9 @@ class FPL():
         :type return_json: bool
         :rtype: list
         """
+        if not fixture_ids:
+            return []
+
         fixtures = await fetch(self.session, API_URLS["fixtures"])
         fixture_gameweeks = set(fixture["event"] for fixture in fixtures
                                 if fixture["id"] in fixture_ids)
