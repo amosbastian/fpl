@@ -504,14 +504,16 @@ class FPL():
     async def login(self, email=None, password=None):
         """Returns a requests session with FPL login authentication.
 
-        :param string user: Email address for the user's Fantasy Premier League
+        :param string email: Email address for the user's Fantasy Premier League
             account.
         :param string password: Password for the user's Fantasy Premier League
             account.
         """
         if not email and not password:
-            email = os.environ["FPL_EMAIL"]
-            password = os.environ["FPL_PASSWORD"]
+            email = os.getenv("FPL_EMAIL", None)
+            password = os.getenv("FPL_PASSWORD", None)
+        if not email or not password:
+            raise ValueError("Email and password must be set")
 
         url = "https://fantasy.premierleague.com/"
         await self.session.get(url)
