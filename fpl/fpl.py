@@ -211,12 +211,16 @@ class FPL():
             if ``False`` returns a :class:`Player` object. Defaults to
             ``False``.
         :rtype: :class:`Player` or ``dict``
+        :raises ValueError: Player with ``player_id`` not found
         """
         if not players:
             players = await fetch(self.session, API_URLS["players"])
 
-        player = next(player for player in players
-                      if player["id"] == player_id)
+        try:
+            player = next(player for player in players
+                          if player["id"] == player_id)
+        except StopIteration:
+            raise ValueError(f"Player with ID {player_id} not found")
 
         if include_summary:
             player_summary = await self.get_player_summary(
