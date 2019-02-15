@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock
-
 import aiohttp
 import pytest
 
@@ -11,11 +9,7 @@ from fpl.models.h2h_league import H2HLeague
 from fpl.models.player import Player, PlayerSummary
 from fpl.models.team import Team
 from fpl.models.user import User
-
-
-class AsyncMock(MagicMock):
-    async def __call__(self, *args, **kwargs):
-        return super(AsyncMock, self).__call__(*args, **kwargs)
+from tests.helper import AsyncMock
 
 
 class TestFPL(object):
