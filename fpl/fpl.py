@@ -59,6 +59,7 @@ class FPL():
         :type return_json: bool
         :rtype: :class:`User` or `dict`
         """
+        assert int(user_id) > 0, "User ID must be a positive number."
         url = API_URLS["user"].format(user_id)
         user = await fetch(self.session, url)
 
