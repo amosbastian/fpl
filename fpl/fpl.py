@@ -67,7 +67,7 @@ class FPL():
             return user
         return User(user, session=self.session)
 
-    async def get_teams(self, team_ids=[], return_json=False):
+    async def get_teams(self, team_ids=None, return_json=False):
         """Returns either a list of *all* teams, or a list of teams with IDs in
         the optional ``team_ids`` list.
 
@@ -86,6 +86,7 @@ class FPL():
         teams = await fetch(self.session, url)
 
         if team_ids:
+            team_ids = set(team_ids)
             teams = [team for team in teams if team["id"] in team_ids]
 
         if return_json:
