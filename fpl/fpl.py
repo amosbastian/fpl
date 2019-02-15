@@ -156,6 +156,7 @@ class FPL():
         :type return_json: bool
         :rtype: :class:`PlayerSummary` or ``dict``
         """
+        assert int(player_id) > 0, "Player's ID must be a positive number"
         url = API_URLS["player"].format(player_id)
         player_summary = await fetch(self.session, url)
 
