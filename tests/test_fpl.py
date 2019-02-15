@@ -1,3 +1,6 @@
+from unittest.mock import MagicMock
+
+import aiohttp
 import pytest
 
 from fpl import FPL
@@ -10,15 +13,41 @@ from fpl.models.team import Team
 from fpl.models.user import User
 
 
+class AsyncMock(MagicMock):
+    async def __call__(self, *args, **kwargs):
+        return super(AsyncMock, self).__call__(*args, **kwargs)
+
+
 class TestFPL(object):
+    async def test_init(self, loop):
+        session = aiohttp.ClientSession()
+        fpl = FPL(session)
+        assert fpl.session is session
+        await session.close()
+
     async def test_user(self, loop, fpl):
+        # test negative id
+        with pytest.raises(AssertionError):
+            await fpl.get_user(-10)
+
+        with pytest.raises(AssertionError):
+            await fpl.get_user("-10")
+
+        # test valid id
         user = await fpl.get_user("3523615")
         assert isinstance(user, User)
 
+        # test valid id, require json response
         user = await fpl.get_user("3523615", True)
         assert isinstance(user, dict)
 
     async def test_team(self, loop, fpl):
+        # test team id out of valid range
+        with pytest.raises(AssertionError):
+            await fpl.get_team(0)
+        with pytest.raises(AssertionError):
+            await fpl.get_team(21)
+
         team = await fpl.get_team(1)
         assert isinstance(team, Team)
 
@@ -43,6 +72,10 @@ class TestFPL(object):
         assert [team.id for team in teams] == [1, 2, 3]
 
     async def test_player_summary(self, loop, fpl):
+        # test non positive id
+        with pytest.raises(AssertionError):
+            await fpl.get_player_summary(0)
+
         player_summary = await fpl.get_player_summary(123)
         assert isinstance(player_summary, PlayerSummary)
 
@@ -50,6 +83,11 @@ class TestFPL(object):
         assert isinstance(player_summary, dict)
 
     async def test_player_summaries(self, loop, fpl):
+        # test no specified IDs
+        player_summaries = await fpl.get_player_summaries([])
+        assert isinstance(player_summaries, list)
+        assert len(player_summaries) == 0
+
         player_summaries = await fpl.get_player_summaries([1, 2, 3])
         assert isinstance(player_summaries, list)
         assert isinstance(player_summaries[0], PlayerSummary)
@@ -59,6 +97,10 @@ class TestFPL(object):
         assert isinstance(player_summaries[0], dict)
 
     async def test_player(self, loop, fpl):
+        # test invalid ID
+        with pytest.raises(ValueError):
+            await fpl.get_player(-1)
+
         player = await fpl.get_player(1)
         assert isinstance(player, Player)
 
@@ -86,6 +128,10 @@ class TestFPL(object):
         assert isinstance(players[0].fixtures, list)
 
     async def test_fixture(self, loop, fpl):
+        # test fixture with unknown id
+        with pytest.raises(ValueError):
+            await fpl.get_fixture(0)
+
         fixture = await fpl.get_fixture(6)
         assert isinstance(fixture, Fixture)
 
@@ -93,6 +139,11 @@ class TestFPL(object):
         assert isinstance(fixture, dict)
 
     async def test_fixtures_by_id(self, loop, fpl):
+        # test empty fixture ids
+        fixtures = await fpl.get_fixtures_by_id([])
+        assert isinstance(fixtures, list)
+        assert len(fixtures) == 0
+
         fixtures = await fpl.get_fixtures_by_id([100, 200, 300])
         assert isinstance(fixtures, list)
         assert isinstance(fixtures[0], Fixture)
@@ -160,14 +211,33 @@ class TestFPL(object):
         h2h_league = await fpl.get_h2h_league(760869, True)
         assert isinstance(h2h_league, dict)
 
-    async def test_login(self, loop, fpl):
+    async def test_login_with_no_email_password(self, loop, mocker, monkeypatch, fpl):
+        mocked_text = mocker.patch('aiohttp.ClientResponse.text', new_callable=AsyncMock)
+        monkeypatch.setenv("FPL_EMAIL", "")
+        monkeypatch.setenv("FPL_PASSWORD", "")
+        with pytest.raises(ValueError):
+            await fpl.login()
+        mocked_text.assert_not_called()
+
+    async def test_login_with_invalid_email_password(self, loop, mocker, monkeypatch, fpl):
+        mocked_text = mocker.patch('aiohttp.ClientResponse.text', new_callable=AsyncMock)
+        mocked_text.return_value = "Incorrect email or password"
+
         with pytest.raises(ValueError):
             await fpl.login(123, 123)
+        assert mocked_text.call_count == 1
 
-        await fpl.login()
-        user = await fpl.get_user(3808385)
-        team = await user.get_team()
-        assert isinstance(team, list)
+        monkeypatch.setenv("FPL_EMAIL", 123)
+        monkeypatch.setenv("FPL_PASSWORD", 123)
+        with pytest.raises(ValueError):
+            await fpl.login()
+        assert mocked_text.call_count == 2
+
+    async def test_login_with_valid_email_password(self, loop, mocker, fpl):
+        mocked_text = mocker.patch('aiohttp.ClientResponse.text', new_callable=AsyncMock)
+        mocked_text.return_value = "Successful login"
+        await fpl.login("email", "password")
+        mocked_text.assert_called_once()
 
     async def test_points_against(self, loop, fpl):
         points_against = await fpl.get_points_against()
