@@ -232,7 +232,7 @@ class FPL():
 
         return Player(player)
 
-    async def get_players(self, player_ids=[], include_summary=False,
+    async def get_players(self, player_ids=None, include_summary=False,
                           return_json=False):
         """Returns either a list of *all* players, or a list of players whose
         IDs are in the given ``player_ids`` list.
