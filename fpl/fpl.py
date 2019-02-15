@@ -165,20 +165,23 @@ class FPL():
 
         return PlayerSummary(player_summary)
 
-    async def get_player_summaries(self, player_ids=[], return_json=False):
-        """Returns either a list of summaries of *all* players, or a list of
-        summaries of players whose ID are in the ``player_ids`` list.
+    async def get_player_summaries(self, player_ids, return_json=False):
+        """Returns a list of summaries of players whose ID are
+        in the ``player_ids`` list.
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/drf/element-summary/1
 
-        :param list player_ids: (optional) A list of player IDs.
+        :param list player_ids: A list of player IDs.
         :param return_json: (optional) Boolean. If ``True`` returns a list of
             ``dict``s, if ``False`` returns a list of  :class:`PlayerSummary`
             objects. Defaults to ``False``.
         :type return_json: bool
         :rtype: list
         """
+        if not player_ids:
+            return []
+
         tasks = [asyncio.ensure_future(
                  fetch(self.session, API_URLS["player"].format(player_id)))
                  for player_id in player_ids]
