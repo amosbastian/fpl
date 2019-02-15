@@ -275,19 +275,26 @@ class FPL():
             ``False``.
         :type return_json: bool
         :rtype: :class:`Fixture` or ``dict``
+        :raises ValueError: if fixture with ``fixture_id`` not found
         """
         fixtures = await fetch(self.session, API_URLS["fixtures"])
 
-        fixture = next(fixture for fixture in fixtures
-                       if fixture["id"] == fixture_id)
+        try:
+            fixture = next(fixture for fixture in fixtures
+                           if fixture["id"] == fixture_id)
+        except StopIteration:
+            raise ValueError(f"Fixture with ID {fixture_id} not found")
         fixture_gameweek = fixture["event"]
 
         gameweek_fixtures = await fetch(
             self.session,
             API_URLS["gameweek_fixtures"].format(fixture_gameweek))
 
-        fixture = next(fixture for fixture in gameweek_fixtures
-                       if fixture["id"] == fixture_id)
+        try:
+            fixture = next(fixture for fixture in gameweek_fixtures
+                           if fixture["id"] == fixture_id)
+        except StopIteration:
+            raise ValueError(f"Fixture with ID {fixture_id} not found in gameweek fixtures")
 
         if return_json:
             return fixture
