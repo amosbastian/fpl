@@ -30,7 +30,7 @@ class Player():
 
         :rtype: int
         """
-        return sum([1 for fixture in self.fixtures if fixture["minutes"] > 0])
+        return sum([1 for fixture in getattr(self, "fixtures", []) if fixture["minutes"] > 0])
 
     @property
     def pp90(self):
@@ -38,9 +38,10 @@ class Player():
 
         :rtype: float
         """
-        if self.minutes == 0:
+        minutes = getattr(self, "minutes", 0)
+        if minutes == 0:
             return 0
-        return self.total_points / float(self.minutes)
+        return getattr(self, "total_points", 0) / float(minutes)
 
     def __str__(self):
         return (f"{self.web_name} - "
