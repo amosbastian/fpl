@@ -130,16 +130,6 @@ async def gameweek():
 
 
 @pytest.fixture()
-async def h2h_league():
-    session = aiohttp.ClientSession()
-    fpl = FPL(session)
-    await fpl.login()
-    h2h_league = await fpl.get_h2h_league(760869)
-    yield h2h_league
-    await session.close()
-
-
-@pytest.fixture()
 async def player():
     session = aiohttp.ClientSession()
     fpl = FPL(session)
