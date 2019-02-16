@@ -407,8 +407,11 @@ class FPL():
         """
 
         static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
-        static_gameweek = next(gameweek for gameweek in static_gameweeks if
-                               gameweek["id"] == gameweek_id)
+        try:
+            static_gameweek = next(gameweek for gameweek in static_gameweeks if
+                                   gameweek["id"] == gameweek_id)
+        except StopIteration:
+            raise ValueError(f"Gameweek with ID {gameweek_id} not found")
         live_gameweek = await fetch(
             self.session, API_URLS["gameweek_live"].format(gameweek_id))
 
