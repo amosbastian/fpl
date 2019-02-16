@@ -1,40 +1,106 @@
+from fpl.models.fixture import Fixture
+
+
 class TestFixture(object):
-    def test_get_goalscorers(self, loop, fixture):
-        goalscorers = fixture.get_goalscorers()
-        assert isinstance(goalscorers, dict)
+    def test_init(self):
+        data = {
+            "id": 265,
+            "kickoff_time_formatted": None,
+            "started": False,
+            "event_day": None,
+            "deadline_time": None,
+            "deadline_time_formatted": None,
+            "stats": [],
+            "team_h_difficulty": 2,
+            "team_a_difficulty": 4,
+            "code": 987856,
+            "kickoff_time": None,
+            "team_h_score": None,
+            "team_a_score": None,
+            "finished": False,
+            "minutes": 0,
+            "provisional_start_time": False,
+            "finished_provisional": False,
+            "event": None,
+            "team_a": 3,
+            "team_h": 6,
+        }
+        fixture = Fixture(data)
+        for k, v in data.items():
+            assert getattr(fixture, k) == v
 
-    def test_get_assisters(self, loop, fixture):
-        assisters = fixture.get_assisters()
-        assert isinstance(assisters, dict)
+    @staticmethod
+    def _do_test_not_finished(fixture, method):
+        delattr(fixture, "finished")
+        data_dict = getattr(fixture, method)()
+        assert isinstance(data_dict, dict)
+        assert len(data_dict) == 0
 
-    def test_get_own_goalscorers(self, loop, fixture):
-        own_goalscorers = fixture.get_own_goalscorers()
-        assert isinstance(own_goalscorers, dict)
+    @staticmethod
+    def _do_test_finished(fixture, method):
+        data_dict = getattr(fixture, method)()
+        assert isinstance(data_dict, dict)
+        assert len(data_dict) == 2
 
-    def test_get_yellow_cards(self, loop, fixture):
-        yellow_cards = fixture.get_yellow_cards()
-        assert isinstance(yellow_cards, dict)
+    def test_get_goalscorers_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_goalscorers")
 
-    def test_get_red_cards(self, loop, fixture):
-        red_cards = fixture.get_red_cards()
-        assert isinstance(red_cards, dict)
+    def test_get_goalscorers_finished(self, fixture):
+        self._do_test_finished(fixture, "get_goalscorers")
 
-    def test_get_penalty_saves(self, loop, fixture):
-        penalty_saves = fixture.get_penalty_saves()
-        assert isinstance(penalty_saves, dict)
+    def test_get_assisters_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_assisters")
 
-    def test_get_penalty_misses(self, loop, fixture):
-        penalty_misses = fixture.get_penalty_misses()
-        assert isinstance(penalty_misses, dict)
+    def test_get_assisters_finished(self, fixture):
+        self._do_test_finished(fixture, "get_assisters")
 
-    def test_get_saves(self, loop, fixture):
-        saves = fixture.get_saves()
-        assert isinstance(saves, dict)
+    def test_get_own_goalscorers_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_own_goalscorers")
 
-    def test_get_bonus(self, loop, fixture):
-        bonus = fixture.get_bonus()
-        assert isinstance(bonus, dict)
+    def test_get_own_goalscorers_finished(self, fixture):
+        self._do_test_finished(fixture, "get_own_goalscorers")
 
-    def test_get_bps(self, loop, fixture):
-        bps = fixture.get_bps()
-        assert isinstance(bps, dict)
+    def test_get_yellow_cards_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_yellow_cards")
+
+    def test_get_yellow_cards(self, fixture):
+        self._do_test_finished(fixture, "get_yellow_cards")
+
+    def test_get_red_cards_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_red_cards")
+
+    def test_get_red_cards_finished(self, fixture):
+        self._do_test_finished(fixture, "get_red_cards")
+
+    def test_get_penalty_saves_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_penalty_saves")
+
+    def test_get_penalty_saves_finished(self, fixture):
+        self._do_test_finished(fixture, "get_penalty_saves")
+
+    def test_get_penalty_misses_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_penalty_misses")
+
+    def test_get_penalty_misses_finished(self, fixture):
+        self._do_test_finished(fixture, "get_penalty_misses")
+
+    def test_get_saves_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_saves")
+
+    def test_get_saves_finished(self, fixture):
+        self._do_test_finished(fixture, "get_saves")
+
+    def test_get_bonus_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_bonus")
+
+    def test_get_bonus_finished(self, fixture):
+        self._do_test_finished(fixture, "get_bonus")
+
+    def test_get_bps_not_finished(self, fixture):
+        self._do_test_not_finished(fixture, "get_bps")
+
+    def test_get_bps_finished(self, fixture):
+        self._do_test_finished(fixture, "get_bps")
+
+    def test_str(self, fixture):
+        assert str(fixture) == "Man Utd vs. Leicester - 10 Aug 19:00"
