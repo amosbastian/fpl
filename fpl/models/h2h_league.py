@@ -1,7 +1,7 @@
 import asyncio
 
 from ..constants import API_URLS
-from ..utils import fetch, get_current_gameweek
+from ..utils import fetch, get_current_gameweek, logged_in
 
 
 class H2HLeague():
@@ -23,7 +23,7 @@ class H2HLeague():
       >>> asyncio.run(main())
       League 760869 - 760869
     """
-    def __init__(self, league_information, session=None):
+    def __init__(self, league_information, session):
         self._session = session
 
         for k, v in league_information.items():
@@ -41,6 +41,9 @@ class H2HLeague():
         """
         if not self._session:
             return
+
+        if not logged_in(self._session):
+            raise Exception("Not authorized to get h2h fixtures. Log in.")
 
         if gameweek:
             gameweeks = range(gameweek, gameweek + 1)
