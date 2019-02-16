@@ -85,3 +85,14 @@ def scale(value, upper, lower, min_, max_):
 def average(iterable):
     """Returns the average value of the iterable."""
     return sum(iterable) / float(len(iterable))
+
+
+def logged_in(session):
+    """Checks that the user is logged in within the session.
+
+    :param session: http session
+    :type session: aiohttp.ClientSession
+    :return: True if user is logged in else False
+    :rtype: bool
+    """
+    return "csrftoken" in session.cookie_jar.filter_cookies("https://users.premierleague.com/")
