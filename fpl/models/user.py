@@ -9,9 +9,11 @@ def valid_gameweek(gameweek):
 
     :param gameweek: The gameweek.
     :type gameweek: int or string
+    :raises ValueError: if gameweek is not a number in [1, 38]
     """
-    if not isinstance(gameweek, int) and (gameweek < 1 or gameweek > 38):
-        raise "Gameweek must be a number between 1 and 38."
+    gameweek = int(gameweek)
+    if (gameweek < 1) or (gameweek > 38):
+        raise ValueError("Gameweek must be a number between 1 and 38.")
     return True
 
 
