@@ -128,7 +128,7 @@ class User():
             return next(pick["picks"] for pick in picks
                         if pick["event"]["id"] == gameweek)
 
-        return [pick["picks"] for pick in picks]
+        return [p for pick in picks for p in pick["picks"]]
 
     async def get_active_chips(self, gameweek=None):
         """Returns a list containing the user's active chips each gameweek.
