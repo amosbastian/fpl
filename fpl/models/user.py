@@ -213,13 +213,11 @@ class User():
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
         """
-        if hasattr(self, "_transfers"):
-            return self._transfers["history"]
-
-        transfers = await fetch(
-            self._session, API_URLS["user_transfers"].format(self.id))
-
-        self._transfers = transfers
+        transfers = getattr(self, "_transfers", None)
+        if not transfers:
+            transfers = await fetch(
+                self._session, API_URLS["user_transfers"].format(self.id))
+            self._transfers = transfers
 
         if gameweek:
             valid_gameweek(gameweek)
