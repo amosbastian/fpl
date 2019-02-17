@@ -181,7 +181,7 @@ class User():
             return next(pick["automatic_subs"] for pick in picks
                         if pick["event"]["id"] == gameweek)
 
-        return [pick["automatic_subs"] for pick in picks]
+        return [p for pick in picks for p in pick["automatic_subs"]]
 
     async def get_team(self):
         """Returns a logged in user's current team. Requires the user to have
