@@ -1,7 +1,7 @@
 import asyncio
 
 from ..constants import API_URLS
-from ..utils import fetch
+from ..utils import fetch, logged_in
 
 
 def valid_gameweek(gameweek):
@@ -192,8 +192,8 @@ class User():
 
         :rtype: list
         """
-        if not self._session:
-            raise "User must be logged in."
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
 
         response = await fetch(
             self._session, API_URLS["user_team"].format(self.id))
@@ -255,8 +255,8 @@ class User():
 
         :rtype: list
         """
-        if not self._session:
-            raise "User must be logged in."
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
 
         return await fetch(self._session, API_URLS["watchlist"])
 
