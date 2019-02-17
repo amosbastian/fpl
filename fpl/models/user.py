@@ -72,7 +72,7 @@ class User():
         :rtype: list
         """
         if hasattr(self, "_history"):
-            history = self._history["season"]
+            history = self._history
         else:
             history = await fetch(
                 self._session, API_URLS["user_history"].format(self.id))
