@@ -57,11 +57,3 @@ async def team():
     await session.close()
 
 
-@pytest.fixture()
-async def user():
-    session = aiohttp.ClientSession()
-    fpl = FPL(session)
-    await fpl.login()
-    user = await fpl.get_user(3808385)
-    yield user
-    await session.close()
