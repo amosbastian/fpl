@@ -2,7 +2,8 @@ from fpl.models.player import Player
 
 
 class TestTeam(object):
-    def test_team(self, loop, team):
+    @staticmethod
+    def test_team(loop, team):
         assert team.__str__() == team.name
 
     async def test_get_players(self, loop, team):
