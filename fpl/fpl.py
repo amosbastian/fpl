@@ -26,9 +26,6 @@ Fantasy Premier League API:
 import asyncio
 import itertools
 import os
-from datetime import datetime
-
-import aiohttp
 
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
@@ -422,7 +419,7 @@ class FPL():
 
         return Gameweek(live_gameweek)
 
-    async def get_gameweeks(self, gameweek_ids=[], include_live=False,
+    async def get_gameweeks(self, gameweek_ids=None, include_live=False,
                             return_json=False):
         """Returns either a list of *all* gamweeks, or a list of gameweeks
         whose IDs are in the ``gameweek_ids`` list.
@@ -690,7 +687,7 @@ class FPL():
             :rtype: dict
             """
             averages = {}
-            for team, positions in points_against.items():
+            for _, positions in points_against.items():
                 for position, average in positions.items():
                     averages.setdefault(position, {"H": [], "A": []})
                     averages[position]["H"].append(average["H"])
