@@ -36,10 +36,11 @@ class Team():
         :type return_json: bool
         :rtype: list
         """
-        if hasattr(self, "players"):
-            players = self.players
-        else:
+        players = getattr(self, "players", [])
+
+        if not players:
             players = await fetch(self.session, API_URLS["players"])
+            self.players = players
 
         team_players = [player for player in players
                         if player["team"] == self.id]
@@ -47,6 +48,7 @@ class Team():
 
         if return_json:
             return team_players
+
         return [Player(player) for player in team_players]
 
     async def get_fixtures(self, return_json=False):
@@ -58,13 +60,13 @@ class Team():
         :type return_json: bool
         :rtype: list
         """
-        if hasattr(self, "fixtures"):
-            return self.fixtures
+        fixtures = getattr(self, "fixtures", [])
+        if fixtures:
+            return fixtures
 
-        if not hasattr(self, "players"):
+        players = getattr(self, "players", [])
+        if not players:
             await self.get_players()
-
-        print(self.players)
 
         player = self.players[0]
         url = API_URLS["player"].format(player["id"])
