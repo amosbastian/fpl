@@ -1,6 +1,3 @@
-import asyncio
-
-
 async def fetch(session, url):
     while True:
         try:
