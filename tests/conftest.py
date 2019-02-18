@@ -2,6 +2,10 @@ import aiohttp
 import pytest
 
 from fpl import FPL
+from fpl.models import Fixture, H2HLeague, User
+from tests.test_fixture import fixture_data
+from tests.test_h2h_league import h2h_league_data
+from tests.test_user import user_data
 
 
 @pytest.fixture()
@@ -22,30 +26,11 @@ async def classic_league():
 
 
 @pytest.fixture()
-async def fixture():
-    session = aiohttp.ClientSession()
-    fpl = FPL(session)
-    fixture = await fpl.get_fixture(6)
-    yield fixture
-    await session.close()
-
-
-@pytest.fixture()
 async def gameweek():
     session = aiohttp.ClientSession()
     fpl = FPL(session)
     gameweek = await fpl.get_gameweek(6)
     yield gameweek
-    await session.close()
-
-
-@pytest.fixture()
-async def h2h_league():
-    session = aiohttp.ClientSession()
-    fpl = FPL(session)
-    await fpl.login()
-    h2h_league = await fpl.get_h2h_league(760869)
-    yield h2h_league
     await session.close()
 
 
@@ -77,10 +62,19 @@ async def team():
 
 
 @pytest.fixture()
+def fixture():
+    return Fixture(fixture_data)
+
+
+@pytest.fixture()
+async def h2h_league():
+    session = aiohttp.ClientSession()
+    yield H2HLeague(h2h_league_data, session)
+    await session.close()
+
+
+@pytest.fixture()
 async def user():
     session = aiohttp.ClientSession()
-    fpl = FPL(session)
-    await fpl.login()
-    user = await fpl.get_user(3808385)
-    yield user
+    yield User(user_data, session)
     await session.close()

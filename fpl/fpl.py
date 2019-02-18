@@ -59,6 +59,7 @@ class FPL():
         :type return_json: bool
         :rtype: :class:`User` or `dict`
         """
+        assert int(user_id) > 0, "User ID must be a positive number."
         url = API_URLS["user"].format(user_id)
         user = await fetch(self.session, url)
 
@@ -66,7 +67,7 @@ class FPL():
             return user
         return User(user, session=self.session)
 
-    async def get_teams(self, team_ids=[], return_json=False):
+    async def get_teams(self, team_ids=None, return_json=False):
         """Returns either a list of *all* teams, or a list of teams with IDs in
         the optional ``team_ids`` list.
 
@@ -85,6 +86,7 @@ class FPL():
         teams = await fetch(self.session, url)
 
         if team_ids:
+            team_ids = set(team_ids)
             teams = [team for team in teams if team["id"] in team_ids]
 
         if return_json:
@@ -131,6 +133,7 @@ class FPL():
             19 - West Ham
             20 - Wolves
         """
+        assert 0 < int(team_id) < 21, "Team ID must be a number between 1 and 20."
         url = API_URLS["teams"]
         teams = await fetch(self.session, url)
         team = next(team for team in teams if team["id"] == int(team_id))
@@ -153,6 +156,7 @@ class FPL():
         :type return_json: bool
         :rtype: :class:`PlayerSummary` or ``dict``
         """
+        assert int(player_id) > 0, "Player's ID must be a positive number"
         url = API_URLS["player"].format(player_id)
         player_summary = await fetch(self.session, url)
 
@@ -161,20 +165,23 @@ class FPL():
 
         return PlayerSummary(player_summary)
 
-    async def get_player_summaries(self, player_ids=[], return_json=False):
-        """Returns either a list of summaries of *all* players, or a list of
-        summaries of players whose ID are in the ``player_ids`` list.
+    async def get_player_summaries(self, player_ids, return_json=False):
+        """Returns a list of summaries of players whose ID are
+        in the ``player_ids`` list.
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/drf/element-summary/1
 
-        :param list player_ids: (optional) A list of player IDs.
+        :param list player_ids: A list of player IDs.
         :param return_json: (optional) Boolean. If ``True`` returns a list of
             ``dict``s, if ``False`` returns a list of  :class:`PlayerSummary`
             objects. Defaults to ``False``.
         :type return_json: bool
         :rtype: list
         """
+        if not player_ids:
+            return []
+
         tasks = [asyncio.ensure_future(
                  fetch(self.session, API_URLS["player"].format(player_id)))
                  for player_id in player_ids]
@@ -204,12 +211,16 @@ class FPL():
             if ``False`` returns a :class:`Player` object. Defaults to
             ``False``.
         :rtype: :class:`Player` or ``dict``
+        :raises ValueError: Player with ``player_id`` not found
         """
         if not players:
             players = await fetch(self.session, API_URLS["players"])
 
-        player = next(player for player in players
-                      if player["id"] == player_id)
+        try:
+            player = next(player for player in players
+                          if player["id"] == player_id)
+        except StopIteration:
+            raise ValueError(f"Player with ID {player_id} not found")
 
         if include_summary:
             player_summary = await self.get_player_summary(
@@ -221,7 +232,7 @@ class FPL():
 
         return Player(player)
 
-    async def get_players(self, player_ids=[], include_summary=False,
+    async def get_players(self, player_ids=None, include_summary=False,
                           return_json=False):
         """Returns either a list of *all* players, or a list of players whose
         IDs are in the given ``player_ids`` list.
@@ -264,19 +275,26 @@ class FPL():
             ``False``.
         :type return_json: bool
         :rtype: :class:`Fixture` or ``dict``
+        :raises ValueError: if fixture with ``fixture_id`` not found
         """
         fixtures = await fetch(self.session, API_URLS["fixtures"])
 
-        fixture = next(fixture for fixture in fixtures
-                       if fixture["id"] == fixture_id)
+        try:
+            fixture = next(fixture for fixture in fixtures
+                           if fixture["id"] == fixture_id)
+        except StopIteration:
+            raise ValueError(f"Fixture with ID {fixture_id} not found")
         fixture_gameweek = fixture["event"]
 
         gameweek_fixtures = await fetch(
             self.session,
             API_URLS["gameweek_fixtures"].format(fixture_gameweek))
 
-        fixture = next(fixture for fixture in gameweek_fixtures
-                       if fixture["id"] == fixture_id)
+        try:
+            fixture = next(fixture for fixture in gameweek_fixtures
+                           if fixture["id"] == fixture_id)
+        except StopIteration:
+            raise ValueError(f"Fixture with ID {fixture_id} not found in gameweek fixtures")
 
         if return_json:
             return fixture
@@ -298,6 +316,9 @@ class FPL():
         :type return_json: bool
         :rtype: list
         """
+        if not fixture_ids:
+            return []
+
         fixtures = await fetch(self.session, API_URLS["fixtures"])
         fixture_gameweeks = set(fixture["event"] for fixture in fixtures
                                 if fixture["id"] in fixture_ids)
@@ -386,8 +407,11 @@ class FPL():
         """
 
         static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
-        static_gameweek = next(gameweek for gameweek in static_gameweeks if
-                               gameweek["id"] == gameweek_id)
+        try:
+            static_gameweek = next(gameweek for gameweek in static_gameweeks if
+                                   gameweek["id"] == gameweek_id)
+        except StopIteration:
+            raise ValueError(f"Gameweek with ID {gameweek_id} not found")
         live_gameweek = await fetch(
             self.session, API_URLS["gameweek_live"].format(gameweek_id))
 
@@ -483,14 +507,16 @@ class FPL():
     async def login(self, email=None, password=None):
         """Returns a requests session with FPL login authentication.
 
-        :param string user: Email address for the user's Fantasy Premier League
+        :param string email: Email address for the user's Fantasy Premier League
             account.
         :param string password: Password for the user's Fantasy Premier League
             account.
         """
         if not email and not password:
-            email = os.environ["FPL_EMAIL"]
-            password = os.environ["FPL_PASSWORD"]
+            email = os.getenv("FPL_EMAIL", None)
+            password = os.getenv("FPL_PASSWORD", None)
+        if not email or not password:
+            raise ValueError("Email and password must be set")
 
         url = "https://fantasy.premierleague.com/"
         await self.session.get(url)

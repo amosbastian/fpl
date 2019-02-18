@@ -35,19 +35,20 @@ class Fixture():
         """Helper function that returns a dictionary containing players for the
         given metric (away and home).
         """
-        for statistic in self.stats:
+        stats = getattr(self, "stats", [])
+        for statistic in stats:
             if metric in statistic.keys():
-                player_information = statistic[metric]
+                return statistic[metric]
 
-        return player_information
+        return {}
 
     def get_goalscorers(self):
         """Returns all players who scored in the fixture.
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("goals_scored")
 
@@ -56,8 +57,8 @@ class Fixture():
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("assists")
 
@@ -66,8 +67,8 @@ class Fixture():
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("own_goals")
 
@@ -76,8 +77,8 @@ class Fixture():
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("yellow_cards")
 
@@ -86,8 +87,8 @@ class Fixture():
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("red_cards")
 
@@ -96,8 +97,8 @@ class Fixture():
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("penalties_saved")
 
@@ -106,8 +107,8 @@ class Fixture():
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("penalties_missed")
 
@@ -116,8 +117,8 @@ class Fixture():
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("saves")
 
@@ -126,8 +127,8 @@ class Fixture():
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("bonus")
 
@@ -136,8 +137,8 @@ class Fixture():
 
         :rtype: dict
         """
-        if not self.finished:
-            return
+        if not getattr(self, "finished", False):
+            return {}
 
         return self._get_players("bps")
 

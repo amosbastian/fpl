@@ -1,7 +1,7 @@
 import asyncio
 
 from ..constants import API_URLS
-from ..utils import fetch
+from ..utils import fetch, logged_in
 
 
 def valid_gameweek(gameweek):
@@ -9,9 +9,11 @@ def valid_gameweek(gameweek):
 
     :param gameweek: The gameweek.
     :type gameweek: int or string
+    :raises ValueError: if gameweek is not a number between 1 and 38
     """
-    if not isinstance(gameweek, int) and (gameweek < 1 or gameweek > 38):
-        raise "Gameweek must be a number between 1 and 38."
+    gameweek = int(gameweek)
+    if (gameweek < 1) or (gameweek > 38):
+        raise ValueError("Gameweek must be a number between 1 and 38.")
     return True
 
 
@@ -70,7 +72,7 @@ class User():
         :rtype: list
         """
         if hasattr(self, "_history"):
-            history = self._history["season"]
+            history = self._history
         else:
             history = await fetch(
                 self._session, API_URLS["user_history"].format(self.id))
@@ -126,7 +128,7 @@ class User():
             return next(pick["picks"] for pick in picks
                         if pick["event"]["id"] == gameweek)
 
-        return [pick["picks"] for pick in picks]
+        return [p for pick in picks for p in pick["picks"]]
 
     async def get_active_chips(self, gameweek=None):
         """Returns a list containing the user's active chips each gameweek.
@@ -179,7 +181,7 @@ class User():
             return next(pick["automatic_subs"] for pick in picks
                         if pick["event"]["id"] == gameweek)
 
-        return [pick["automatic_subs"] for pick in picks]
+        return [p for pick in picks for p in pick["automatic_subs"]]
 
     async def get_team(self):
         """Returns a logged in user's current team. Requires the user to have
@@ -190,8 +192,8 @@ class User():
 
         :rtype: list
         """
-        if not self._session:
-            raise "User must be logged in."
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
 
         response = await fetch(
             self._session, API_URLS["user_team"].format(self.id))
@@ -211,13 +213,11 @@ class User():
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
         """
-        if hasattr(self, "_transfers"):
-            return self._transfers["history"]
-
-        transfers = await fetch(
-            self._session, API_URLS["user_transfers"].format(self.id))
-
-        self._transfers = transfers
+        transfers = getattr(self, "_transfers", None)
+        if not transfers:
+            transfers = await fetch(
+                self._session, API_URLS["user_transfers"].format(self.id))
+            self._transfers = transfers
 
         if gameweek:
             valid_gameweek(gameweek)
@@ -253,8 +253,8 @@ class User():
 
         :rtype: list
         """
-        if not self._session:
-            raise "User must be logged in."
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
 
         return await fetch(self._session, API_URLS["watchlist"])
 

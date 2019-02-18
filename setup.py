@@ -33,6 +33,7 @@ setup(
         "appdirs",
         "aiohttp",
         "pytest-aiohttp",
+        "pytest-mock",
         "pytest",
     ],
     entry_points="""
