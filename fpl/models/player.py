@@ -1,4 +1,3 @@
-from ..constants import API_URLS
 from ..utils import team_converter, position_converter
 
 
