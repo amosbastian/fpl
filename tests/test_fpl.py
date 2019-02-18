@@ -243,7 +243,7 @@ class TestFPL(object):
             assert len(fdr) == 20
 
             location_extrema = {"H": [], "A": []}
-            for team, positions in fdr.items():
+            for _, positions in fdr.items():
                 for location in positions.values():
                     location_extrema["H"].append(location["H"])
                     location_extrema["A"].append(location["A"])
