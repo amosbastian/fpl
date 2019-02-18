@@ -1,5 +1,3 @@
-import pytest
-
 from fpl.models.fixture import Fixture
 
 fixture_data = {
@@ -95,11 +93,6 @@ fixture_data = {
     "team_a": 11,
     "team_h": 14,
 }
-
-
-@pytest.fixture()
-def fixture():
-    return Fixture(fixture_data)
 
 
 class TestFixture(object):

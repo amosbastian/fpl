@@ -31,13 +31,6 @@ h2h_league_data = {
 }
 
 
-@pytest.fixture()
-async def h2h_league():
-    session = aiohttp.ClientSession()
-    yield H2HLeague(h2h_league_data, session)
-    await session.close()
-
-
 class TestH2HLeague(object):
     async def test_init(self, loop):
         session = aiohttp.ClientSession()

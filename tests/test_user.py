@@ -49,13 +49,6 @@ user_data = {
 }
 
 
-@pytest.fixture()
-async def user():
-    session = aiohttp.ClientSession()
-    yield User(user_data, session)
-    await session.close()
-
-
 class TestHelpers:
     def test_valid_gameweek_gameweek_out_of_range(self):
         with pytest.raises(ValueError):
