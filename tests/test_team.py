@@ -16,10 +16,10 @@ class TestTeam(object):
         assert isinstance(players[0], dict)
 
     async def test_get_fixtures(self, loop, team):
-        fixtures = await team.get_fixtures()
+        await team.get_fixtures()
         assert isinstance(team.fixtures, list)
         assert len(team.fixtures) > 0
 
-        fixtures = await team.get_fixtures(return_json=True)
+        await team.get_fixtures(return_json=True)
         assert isinstance(team.fixtures, list)
         assert len(team.fixtures) > 0

@@ -50,7 +50,8 @@ user_data = {
 
 
 class TestHelpers:
-    def test_valid_gameweek_gameweek_out_of_range(self):
+    @staticmethod
+    def test_valid_gameweek_gameweek_out_of_range():
         with pytest.raises(ValueError):
             valid_gameweek(0)
         with pytest.raises(ValueError):
