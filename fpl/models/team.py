@@ -36,15 +36,13 @@ class Team():
         :type return_json: bool
         :rtype: list
         """
-        players = getattr(self, "players", [])
+        team_players = getattr(self, "players", [])
 
-        if not players:
+        if not team_players:
             players = await fetch(self.session, API_URLS["players"])
-            self.players = players
-
-        team_players = [player for player in players
-                        if player["team"] == self.id]
-        self.players = team_players
+            team_players = [player for player in players
+                            if player["team"] == self.id]
+            self.players = team_players
 
         if return_json:
             return team_players
