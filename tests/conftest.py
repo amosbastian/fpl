@@ -2,12 +2,13 @@ import aiohttp
 import pytest
 
 from fpl import FPL
-from fpl.models import Fixture, H2HLeague, User, ClassicLeague, Team
+from fpl.models import Fixture, H2HLeague, User, ClassicLeague, Team, Gameweek
 from tests.test_classic_league import classic_league_data
 from tests.test_fixture import fixture_data
 from tests.test_h2h_league import h2h_league_data
 from tests.test_team import team_data
 from tests.test_user import user_data
+from tests.test_gameweek import gameweek_data
 
 
 @pytest.fixture()
@@ -27,11 +28,7 @@ async def classic_league():
 
 @pytest.fixture()
 async def gameweek():
-    session = aiohttp.ClientSession()
-    fpl = FPL(session)
-    gameweek = await fpl.get_gameweek(6)
-    yield gameweek
-    await session.close()
+    return Gameweek(gameweek_data)
 
 
 @pytest.fixture()
