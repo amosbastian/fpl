@@ -32,21 +32,13 @@ async def gameweek():
 
 
 @pytest.fixture()
-async def player():
-    session = aiohttp.ClientSession()
-    fpl = FPL(session)
-    player = await fpl.get_player(345, include_summary=True)
-    yield player
-    await session.close()
+async def player(fpl):
+    yield await fpl.get_player(345, include_summary=True)
 
 
 @pytest.fixture()
-async def settings():
-    session = aiohttp.ClientSession()
-    fpl = FPL(session)
-    settings = await fpl.get_settings()
-    yield settings
-    await session.close()
+async def settings(fpl):
+    yield await fpl.game_settings()
 
 
 @pytest.fixture()
