@@ -18,8 +18,10 @@
         <img src="https://badge.fury.io/py/fpl.svg"/></a>
     <a href="https://pypi.org/project/fpl/" alt="Python version">
         <img src="https://img.shields.io/badge/Python-3.6%2B-blue.svg"/></a>
-    <a href="https://pepy.tech/project/fpl" alt="Downloads">
-        <img src="https://pepy.tech/badge/fpl"></a>
+    <a href="https://www.codacy.com/app/amosbastian/fpl?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=amosbastian/fpl&amp;utm_campaign=Badge_Grade" alt="Codacy Badge">
+        <img src="https://api.codacy.com/project/badge/Grade/8acd6709c8e1402fbcbbc4b7e39bbb98"></a>
+    <a href="https://codecov.io/gh/amosbastian/fpl">
+        <img src="https://codecov.io/gh/amosbastian/fpl/branch/master/graph/badge.svg"/></a>
 </p>
 
 Join the [Discord server](https://discord.gg/cjY37fv) or submit [an issue](https://github.com/amosbastian/fpl/issues) for help and / or suggestions!
