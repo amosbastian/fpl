@@ -3,13 +3,12 @@ import sqlite3
 
 import aiohttp
 import click
-import requests
 from appdirs import user_data_dir
 from prettytable import PrettyTable
 
 from fpl import FPL
 
-from .constants import API_URLS, MYTEAM_FORMAT, PICKS_FORMAT
+from .constants import MYTEAM_FORMAT, PICKS_FORMAT
 from .utils import chip_converter
 
 data_directory = user_data_dir("fpl", "fpl")
@@ -102,7 +101,7 @@ def used_chips(chips):
     """Returns formatted string of used chips."""
     if not chips:
         return "NONE."
-    used = ["{} (GW {})".format(chip_converter(chip["name"], chip["event"]))]
+    used = ["{} (GW {})".format(chip_converter(chip["name"]), chip["event"])]
     return ", ".join(used)
 
 
