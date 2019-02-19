@@ -122,7 +122,7 @@ class TestTeam(object):
         assert fixtures == team.fixtures
         mocked_fetch.assert_not_called()
 
-    async def test_get_fixtures_non_cached_return_json_is_true(self, loop, mocker, team):
+    async def test_get_fixtures_non_cached_fixtures_return_json_is_true(self, loop, mocker, team):
         team.players = team_players_data  # cached team players
         mocked_fetch = mocker.patch("fpl.models.team.fetch",
                                     return_value=player_summary,
@@ -131,3 +131,12 @@ class TestTeam(object):
         assert isinstance(fixtures, list)
         assert fixtures == team_fixtures
         mocked_fetch.assert_called_once()
+
+    async def test_get_fixtures_non_cached_fixtures_non_cached_players_return_json_is_true(self, loop, mocker, team):
+        mocked_fetch = mocker.patch("fpl.models.team.fetch",
+                                    side_effect=[team_players_data, player_summary],
+                                    new_callable=AsyncMock)
+        fixtures = await team.get_fixtures(return_json=True)
+        assert isinstance(fixtures, list)
+        assert fixtures == team_fixtures
+        assert mocked_fetch.call_count == 2
