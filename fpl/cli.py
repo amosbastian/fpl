@@ -1,19 +1,32 @@
-import click
 import os
-import requests
 import sqlite3
 
+import aiohttp
+import click
+import requests
 from appdirs import user_data_dir
-from fpl import FPL
 from prettytable import PrettyTable
 
-from .utils import chip_converter
-from .constants import MYTEAM_FORMAT, PICKS_FORMAT, API_URLS
+from fpl import FPL
 
-fpl = FPL()
+from .constants import API_URLS, MYTEAM_FORMAT, PICKS_FORMAT
+from .utils import chip_converter
+
 data_directory = user_data_dir("fpl", "fpl")
 sql_file = os.path.join(data_directory, "fpl.sqlite")
 connection = sqlite3.connect(sql_file)
+
+
+def table_exists(table_name):
+    """Returns True if `accounts` table exists, otherwise False."""
+    query = ("SELECT name FROM sqlite_master "
+             f"WHERE type='table' AND name='{table_name}'")
+    try:
+        cursor = connection.cursor()
+        cursor.execute(query)
+        return True if cursor.fetchone() else False
+    except sqlite3.OperationalError:
+        return False
 
 
 @click.group()
@@ -27,12 +40,14 @@ def get_starters(players, position):
     return starters
 
 
-def get_picks(team):
+async def get_picks(team):
     """Returns a list of players with the necessary information to format the
     team's formation properly.
     """
     player_ids = [player["element"] for player in team]
-    players = fpl.get_players(player_ids)
+    async with aiohttp.ClientSession() as session:
+        fpl = FPL(session)
+        players = await fpl.get_players(player_ids)
 
     for player_data in team:
         for player in players:
@@ -177,9 +192,10 @@ def get_account_data(index):
     3: password
     """
     cursor = connection.cursor()
-    accounts = cursor.execute("SELECT * from accounts").fetchall()
-    if accounts:
-        return accounts[0][index]
+    if table_exists("accounts"):
+        accounts = cursor.execute("SELECT * from accounts").fetchall()
+        if accounts:
+            return accounts[0][index]
     return ""
 
 
@@ -192,14 +208,16 @@ def get_account_data(index):
               envvar="FPL_PASSWORD", default=get_account_data(3),
               help="FPL password",
               show_default="password saved in SQLite database")
-def myteam(user_id, email, password):
+async def myteam(user_id, email, password):
     """Echoes a logged in user's team to the terminal."""
-    fpl.login(email, password)
-    try:
-        user = fpl.get_user(user_id)
-        format_myteam(user)
-    except KeyError:
-        raise click.BadParameter("email address or password.")
+    async with aiohttp.ClientSession() as session:
+        fpl = FPL(session)
+        await fpl.login(email, password)
+        try:
+            user = await fpl.get_user(user_id)
+            format_myteam(user)
+        except KeyError:
+            raise click.BadParameter("email address or password.")
 
 
 def automatic_substitutions(user_information, players):
@@ -270,9 +288,11 @@ def format_picks(user):
 
 @cli.command()
 @click.argument("user_id")
-def picks(user_id):
+async def picks(user_id):
     """Echoes a user's picks to the terminal."""
-    user = fpl.get_user(user_id)
+    async with aiohttp.ClientSession() as session:
+        fpl = FPL(session)
+        user = await fpl.get_user(user_id)
     format_picks(user)
 
 
@@ -286,17 +306,6 @@ def importaccount(user_id, email, password):
     """Imports an FPL account."""
     if not os.path.isdir(data_directory):
         os.makedirs(data_directory)
-
-    def table_exists():
-        """Returns True if `accounts` table exists, otherwise False."""
-        query = ("SELECT name FROM sqlite_master "
-                 "WHERE type='table' AND name='accounts'")
-        try:
-            cursor = connection.cursor()
-            cursor.execute(query)
-            return True if cursor.fetchone() else False
-        except sqlite3.OperationalError:
-            return False
 
     def create_table():
         """Creates the `accounts` table."""
@@ -324,7 +333,7 @@ def importaccount(user_id, email, password):
         else:
             return False
 
-    def add_account(user_id, email, password):
+    async def add_account(user_id, email, password):
         """Add a new account to the `accounts` table.
 
         :param int user_id: user's FPL ID
@@ -335,20 +344,22 @@ def importaccount(user_id, email, password):
             raise ValueError("Account with user ID {} already exists!".format(
                 user_id))
 
-        # Check if log in possible with provided email and password
-        try:
-            fpl.login(email, password)
-        except ValueError as error:
-            click.echo(error)
-            return
+        async with aiohttp.ClientSession() as session:
+            fpl = FPL(session)
+            # Check if log in possible with provided email and password
+            try:
+                await fpl.login(email, password)
+            except ValueError as error:
+                click.echo(error)
+                return
 
-        # Use my_team function to determine if user ID is associated to email
-        user = fpl.get_user(user_id)
-        try:
-            user.my_team()
-        except ValueError as error:
-            click.echo(error)
-            return
+            # Use my_team function to determine if user ID is associated to email
+            user = await fpl.get_user(user_id)
+            try:
+                await user.get_team()
+            except ValueError as error:
+                click.echo(error)
+                return
 
         query = ("INSERT INTO accounts (user_id, email, password) "
                  "VALUES (?, ?, ?)", (user_id, email, password))
@@ -356,7 +367,7 @@ def importaccount(user_id, email, password):
         cursor.execute(*query)
         connection.commit()
 
-    if not table_exists():
+    if not table_exists("accounts"):
         create_table()
 
     add_account(user_id, email, password)
@@ -376,7 +387,8 @@ def deleteaccount(email):
 def listaccounts():
     """Lists all imported FPL accounts."""
     cursor = connection.cursor()
-    accounts = cursor.execute("SELECT * from accounts").fetchall()
+    if table_exists("accounts"):
+        accounts = cursor.execute("SELECT * from accounts").fetchall()
 
     if not accounts:
         click.echo("No accounts found.")
