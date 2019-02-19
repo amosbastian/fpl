@@ -101,7 +101,7 @@ def used_chips(chips):
     """Returns formatted string of used chips."""
     if not chips:
         return "NONE."
-    used = ["{} (GW {})".format(chip_converter(chip["name"]), chip["event"])]
+    used = ["{} (GW {})".format(chip_converter(chip["name"]), chip["event"]) for chip in chips]
     return ", ".join(used)
 
 
