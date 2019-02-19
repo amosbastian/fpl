@@ -11,4 +11,7 @@ install:
   - python setup.py install
 
 script:
-  - pytest
+  - pytest --cov=fpl
+
+after_success:
+  - codecov

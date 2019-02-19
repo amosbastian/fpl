@@ -96,7 +96,8 @@ fixture_data = {
 
 
 class TestFixture(object):
-    def test_init(self):
+    @staticmethod
+    def test_init():
         fixture = Fixture(fixture_data)
         for k, v in fixture_data.items():
             assert getattr(fixture, k) == v
@@ -174,5 +175,6 @@ class TestFixture(object):
     def test_get_bps_finished(self, fixture):
         self._do_test_finished(fixture, "get_bps")
 
-    def test_str(self, fixture):
+    @staticmethod
+    def test_str(fixture):
         assert str(fixture) == "Man Utd vs. Leicester - 10 Aug 19:00"

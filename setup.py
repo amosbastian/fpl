@@ -29,10 +29,12 @@ setup(
     install_requires=[
         "Click",
         "colorama",
+        "codecov",
         "PTable",
         "appdirs",
         "aiohttp",
         "pytest-aiohttp",
+        "pytest-cov",
         "pytest-mock",
         "pytest",
     ],

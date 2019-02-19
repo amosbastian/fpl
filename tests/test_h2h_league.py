@@ -40,16 +40,17 @@ class TestH2HLeague(object):
             assert getattr(league, k) == v
         await session.close()
 
-    def test_h2h_league(self, loop, h2h_league):
+    @staticmethod
+    def test_h2h_league(loop, h2h_league):
         assert h2h_league.__str__() == "League 829116 - 829116"
 
     async def test_get_fixtures_with_known_gameweek_unauthorized(
-        self, loop, h2h_league):
+            self, loop, h2h_league):
         with pytest.raises(Exception):
             await h2h_league.get_fixtures(1)
 
     async def test_get_fixtures_with_known_gameweek_authorized(
-        self, loop, mocker, h2h_league):
+            self, loop, mocker, h2h_league):
         mocked_logged_in = mocker.patch(
             "fpl.models.h2h_league.logged_in", return_value=True)
         mocked_fetch = mocker.patch(
@@ -61,12 +62,12 @@ class TestH2HLeague(object):
         mocked_fetch.assert_called_once()
 
     async def test_get_fixtures_with_unknown_gameweek_unauthorized(
-        self, loop, h2h_league):
+            self, loop, h2h_league):
         with pytest.raises(Exception):
             await h2h_league.get_fixtures()
 
     async def test_get_fixtures_with_unknown_gameweek_authorized(
-        self, loop, mocker, h2h_league):
+            self, loop, mocker, h2h_league):
         mocked_logged_in = mocker.patch(
             "fpl.models.h2h_league.logged_in", return_value=True)
         mocked_fetch = mocker.patch(

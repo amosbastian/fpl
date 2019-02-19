@@ -1,13 +1,10 @@
-import asyncio
-
-
 async def fetch(session, url):
     while True:
         try:
             async with session.get(url) as response:
                 assert response.status == 200
                 return await response.json()
-        except Exception as error:
+        except Exception:
             pass
 
 
