@@ -2,10 +2,11 @@ import aiohttp
 import pytest
 
 from fpl import FPL
-from fpl.models import Fixture, H2HLeague, User, ClassicLeague
+from fpl.models import Fixture, H2HLeague, User, ClassicLeague, Team
 from tests.test_classic_league import classic_league_data
 from tests.test_fixture import fixture_data
 from tests.test_h2h_league import h2h_league_data
+from tests.test_team import team_data
 from tests.test_user import user_data
 
 
@@ -54,9 +55,7 @@ async def settings():
 @pytest.fixture()
 async def team():
     session = aiohttp.ClientSession()
-    fpl = FPL(session)
-    team = await fpl.get_team(14)
-    yield team
+    yield Team(team_data, session)
     await session.close()
 
 
