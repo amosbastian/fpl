@@ -1,3 +1,6 @@
+import asyncio
+from functools import update_wrapper
+
 async def fetch(session, url):
     while True:
         try:
@@ -93,3 +96,12 @@ def logged_in(session):
     :rtype: bool
     """
     return "csrftoken" in session.cookie_jar.filter_cookies("https://users.premierleague.com/")
+
+
+def coroutine(func):
+    func = asyncio.coroutine(func)
+
+    def wrapper(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(func(*args, **kwargs))
+    return update_wrapper(wrapper, func)
