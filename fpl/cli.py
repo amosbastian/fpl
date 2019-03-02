@@ -9,9 +9,10 @@ from prettytable import PrettyTable
 from fpl import FPL
 
 from .constants import MYTEAM_FORMAT, PICKS_FORMAT
-from .utils import chip_converter
+from .utils import chip_converter, coroutine, position_converter
 
 data_directory = user_data_dir("fpl", "fpl")
+os.makedirs(data_directory, exist_ok=True)
 sql_file = os.path.join(data_directory, "fpl.sqlite")
 connection = sqlite3.connect(sql_file)
 
@@ -35,7 +36,7 @@ def cli():
 
 def get_starters(players, position):
     """Helper function that returns starting players in a given position."""
-    starters = [player for player in players if player.position == position]
+    starters = [player for player in players if position_converter(player.element_type) == position]
     return starters
 
 
@@ -50,12 +51,12 @@ async def get_picks(team):
 
     for player_data in team:
         for player in players:
-            if player_data["element"] != player.player_id:
+            if player_data["element"] != player.id:
                 continue
 
             player.role = ""
-            player.gameweek_points = (player.gameweek_points *
-                                      player_data["multiplier"])
+            player.event_points = (player.event_points *
+                                   player_data["multiplier"])
             player.team_position = player_data["position"]
 
             player.is_captain = player_data["is_captain"]
@@ -83,11 +84,11 @@ def team_width(positions, points=False):
     for position in positions:
         if points:
             player_names = [PICKS_FORMAT.format(
-                player.name, player.gameweek_points,
+                player.web_name, player.event_points,
                 player.role) for player in position]
         else:
             player_names = [MYTEAM_FORMAT.format(
-                player.name, player.role) for player in position]
+                player.web_name, player.role) for player in position]
 
         position_width = len(" - ".join(player_names))
 
@@ -133,9 +134,9 @@ def team_printer(positions, formatter, points=False):
         for player in position:
             if points:
                 player_information = (
-                    player.gameweek_points, player.name, player.role)
+                    player.event_points, player.web_name, player.role)
             else:
-                player_information = (player.name, player.role)
+                player_information = (player.web_name, player.role)
 
             normal_string = formatter.format(*player_information)
             ansi_string = click.style(normal_string, fg=player.colour)
@@ -147,17 +148,17 @@ def team_printer(positions, formatter, points=False):
         click.echo(formatted_string)
 
 
-def myteam_table(user):
+async def myteam_table(user):
     """Print user's myteam data in a pretty table."""
     table = PrettyTable()
     table.field_names = ["Key", "Value"]
-    table.add_row(["Overall points", "{:,}".format(user.overall_points)])
-    table.add_row(["Overall rank", "{:,}".format(user.overall_rank)])
-    table.add_row(["Gameweek points", user.gameweek_points])
-    table.add_row(["Squad value", "£{}m".format(user.team_value)])
+    table.add_row(["Overall points", "{:,}".format(user.summary_overall_points)])
+    table.add_row(["Overall rank", "{:,}".format(user.summary_overall_rank)])
+    table.add_row(["Gameweek points", user.summary_event_points])
+    table.add_row(["Squad value", "£{}m".format(user.value)])
     table.add_row(["In the bank", "£{}m".format(user.bank)])
-    table.add_row(["Chips used", used_chips(user.chips)])
-    table.add_row(["Chips available", available_chips(user.chips)])
+    table.add_row(["Chips used", used_chips(await user.get_chips_history())])
+    table.add_row(["Chips available", available_chips(await user.get_chips_history())])
 
     table.align["Key"] = "l"
     table.align["Value"] = "r"
@@ -165,10 +166,10 @@ def myteam_table(user):
     click.echo(str(table).split("\n", 2)[2])
 
 
-def format_myteam(user):
+async def format_myteam(user):
     """Formats a user's team and echoes it to the terminal."""
-    team = user.my_team()
-    players = sorted(get_picks(team), key=lambda x: x.team_position)
+    team = await user.get_team()
+    players = sorted(await get_picks(team), key=lambda x: x.team_position)
 
     goalkeeper, defenders, midfielders, forwards, bench = split_by_position(
         players)
@@ -176,10 +177,10 @@ def format_myteam(user):
     team_printer([goalkeeper, defenders, midfielders, forwards], MYTEAM_FORMAT)
 
     click.echo("\nSubstitutes: {}".format(", ".join(
-        [click.style("{}".format(player.name), fg=player.colour)
+        [click.style("{}".format(player.web_name), fg=player.colour)
          for player in bench])))
 
-    myteam_table(user)
+    await myteam_table(user)
 
 
 def get_account_data(index):
@@ -207,6 +208,7 @@ def get_account_data(index):
               envvar="FPL_PASSWORD", default=get_account_data(3),
               help="FPL password",
               show_default="password saved in SQLite database")
+@coroutine
 async def myteam(user_id, email, password):
     """Echoes a logged in user's team to the terminal."""
     async with aiohttp.ClientSession() as session:
@@ -214,7 +216,7 @@ async def myteam(user_id, email, password):
         await fpl.login(email, password)
         try:
             user = await fpl.get_user(user_id)
-            format_myteam(user)
+            await format_myteam(user)
         except KeyError:
             raise click.BadParameter("email address or password.")
 
@@ -232,9 +234,9 @@ def automatic_substitutions(user_information, players):
                       if player.player_id == player_out_id][0]
 
         substitutions.append("{} {} -> {} {}".format(
-            player_out.gameweek_points,
+            player_out.event_points,
             click.style(player_out.name, fg=player_out.colour),
-            player_in.gameweek_points,
+            player_in.event_points,
             click.style(player_in.name, fg=player_in.colour)))
 
     return ", ".join(substitutions)
@@ -244,8 +246,8 @@ def picks_table(user, user_information, players):
     """Print user's picks data in a pretty table."""
     table = PrettyTable()
     table.field_names = ["Key", "Value"]
-    table.add_row(["Gamweek points", user.gameweek_points])
-    table.add_row(["Gameweek rank", "{:,}".format(user.overall_rank)])
+    table.add_row(["Gamweek points", user.summary_overall_points])
+    table.add_row(["Gameweek rank", "{:,}".format(user.summary_overall_rank)])
 
     gameweek_transfers = user_information["entry_history"]["event_transfers"]
     point_hit = user_information["entry_history"]["event_transfers_cost"]
@@ -266,10 +268,11 @@ def picks_table(user, user_information, players):
     click.echo(str(table).split("\n", 2)[2])
 
 
-def format_picks(user):
+async def format_picks(user):
     """Formats a user's picks and echoes it to the terminal."""
-    user_information = user.picks[len(user.picks)]
-    players = sorted(get_picks(user_information["picks"]),
+    user_picks = await user.get_picks()
+    user_information = user_picks[len(user_picks)]
+    players = sorted(await get_picks(user_information["picks"]),
                      key=lambda x: x.team_position)
 
     goalkeeper, defenders, midfielders, forwards, bench = split_by_position(
@@ -279,20 +282,21 @@ def format_picks(user):
                  PICKS_FORMAT, True)
 
     click.echo("\nSubstitutes: {}".format(", ".join(
-        ["{} {}".format(player.gameweek_points, click.style(
-            player.name, fg=player.colour)) for player in bench])))
+        ["{} {}".format(player.event_points, click.style(
+            player.web_name, fg=player.colour)) for player in bench])))
 
     picks_table(user, user_information, players)
 
 
 @cli.command()
 @click.argument("user_id")
+@coroutine
 async def picks(user_id):
     """Echoes a user's picks to the terminal."""
     async with aiohttp.ClientSession() as session:
         fpl = FPL(session)
         user = await fpl.get_user(user_id)
-    format_picks(user)
+        await format_picks(user)
 
 
 @cli.command()
@@ -301,7 +305,8 @@ async def picks(user_id):
               help="FPL email address")
 @click.option("--password", prompt=True, hide_input=True,
               envvar="FPL_PASSWORD", help="FPL password")
-def importaccount(user_id, email, password):
+@coroutine
+async def importaccount(user_id, email, password):
     """Imports an FPL account."""
     if not os.path.isdir(data_directory):
         os.makedirs(data_directory)
@@ -369,12 +374,13 @@ def importaccount(user_id, email, password):
     if not table_exists("accounts"):
         create_table()
 
-    add_account(user_id, email, password)
+    await add_account(user_id, email, password)
 
 
 @cli.command()
 @click.argument("email")
-def deleteaccount(email):
+@coroutine
+async def deleteaccount(email):
     """Deletes an imported FPL account."""
     query = ("DELETE FROM accounts WHERE email=?", (email,))
     cursor = connection.cursor()
@@ -383,7 +389,8 @@ def deleteaccount(email):
 
 
 @cli.command()
-def listaccounts():
+@coroutine
+async def listaccounts():
     """Lists all imported FPL accounts."""
     cursor = connection.cursor()
     if table_exists("accounts"):

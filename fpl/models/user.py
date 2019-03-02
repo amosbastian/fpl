@@ -105,13 +105,15 @@ class User():
         return history["chips"]
 
     async def get_picks(self, gameweek=None):
-        """Returns a list containing the user's picks each gameweek.
+        """Returns a dict containing the user's picks each gameweek.
+
+        Key is the gameweek number, value contains picks of the gameweek.
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
-        :rtype: list
+        :rtype: dict
         """
         if hasattr(self, "_picks"):
             picks = self._picks
@@ -123,12 +125,23 @@ class User():
             picks = await asyncio.gather(*tasks)
             self._picks = picks
 
-        if gameweek:
+        if gameweek is not None:
             valid_gameweek(gameweek)
-            return next(pick["picks"] for pick in picks
-                        if pick["event"]["id"] == gameweek)
+            try:
+                pick = next(pick for pick in picks
+                            if pick["event"]["id"] == gameweek)
+            except StopIteration:
+                return {}
+            else:
+                return {pick["event"]["id"]: pick}
 
-        return [p for pick in picks for p in pick["picks"]]
+        picks_out = {}
+        for pick in picks:
+            try:
+                picks_out[pick["event"]["id"]] = pick
+            except KeyError:
+                pass
+        return picks_out
 
     async def get_active_chips(self, gameweek=None):
         """Returns a list containing the user's active chips each gameweek.

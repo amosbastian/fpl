@@ -157,22 +157,73 @@ class TestUser(object):
         leagues = user.leagues
         assert isinstance(leagues, dict)
 
+    async def test_get_picks_should_return_dict(self, loop, mocker, user):
+        picks_list = [{"element": 282}, {"element": 280}]
+        data = {"event": {"id": 1}, "picks": picks_list}
+        mocker.patch("fpl.models.user.fetch",
+                     return_value=data,
+                     new_callable=AsyncMock)
+
+        picks = await user.get_picks()
+
+        assert isinstance(picks, dict)
+
+    async def test_get_picks_invalid_gameweek_should_raise_exception(self, loop, mocker, user):
+        gameweek = 0
+        mocker.patch("fpl.models.user.fetch",
+                     return_value={},
+                     new_callable=AsyncMock)
+
+        with pytest.raises(ValueError):
+            await user.get_picks(gameweek)
+
+    async def test_get_picks_valid_output_dict(self, loop, mocker, user):
+        gameweeks = [1, 2]
+        picks_list = [{"element": 282}, {"element": 280}, {"element": 284}, {"element": 286}]
+        picks_in = [{"event": {"id": gameweeks[0]}, "picks": picks_list[:2]},
+                    {"event": {"id": gameweeks[1]}, "picks": picks_list[2:]}]
+        user._picks = picks_in
+
+        picks = await user.get_picks()
+
+        keys = set(picks.keys())
+        assert keys == set(gameweeks)
+
+        for pick in picks_in:
+            gameweek = pick["event"]["id"]
+            assert picks[gameweek]["event"]["id"] == gameweek, "Key should be the event id (gameweek)"
+            assert picks[gameweek] == pick, "Dict value is not expected pick"
+
+    async def test_get_picks_valid_gameweek_should_return_dict_with_one_item(self, loop, mocker, user):
+        picks_list = [{"element": 282}, {"element": 280}, {"element": 284}, {"element": 286}]
+        picks_in = [{"event": {"id": 1}, "picks": picks_list[:2]},
+                    {"event": {"id": 2}, "picks": picks_list[2:]}]
+        user._picks = picks_in
+
+        picks = await user.get_picks(1)
+
+        assert len(picks) == 1
+
     async def test_get_picks_cached_with_unknown_gameweek(self, loop, mocker, user):
         picks_list = [{"element": 282}, {"element": 280}, {"element": 284}, {"element": 286}]
-        user._picks = [{"event": {"id": 1}, "picks": picks_list[:2]},
-                       {"event": {"id": 2}, "picks": picks_list[2:]}]
+        picks_in = [{"event": {"id": 1}, "picks": picks_list[:2]},
+                   {"event": {"id": 2}, "picks": picks_list[2:]}]
+        user._picks = picks_in
         mocked_fetch = mocker.patch("fpl.models.user.fetch", return_value={}, new_callable=AsyncMock)
+
         picks = await user.get_picks()
-        assert picks == picks_list
+
+        assert len(picks) == len(picks_in)
         mocked_fetch.assert_not_called()
 
     async def test_get_picks_non_cached_with_unknown_gameweek(self, loop, mocker, user):
         picks_list = [{"element": 282}, {"element": 280}]
         data = {"event": {"id": 1}, "picks": picks_list}
         mocked_fetch = mocker.patch("fpl.models.user.fetch", return_value=data, new_callable=AsyncMock)
+
         picks = await user.get_picks()
-        assert isinstance(picks, list)
-        assert len(picks) == user.current_event * len(picks_list)
+
+        assert len(picks[1]["picks"]) == len(picks_list)
         assert mocked_fetch.call_count == user.current_event
 
     async def test_get_picks_cached_with_known_gameweek(self, loop, mocker, user):
@@ -180,17 +231,22 @@ class TestUser(object):
         user._picks = [{"event": {"id": 1}, "picks": picks_list[:2]},
                        {"event": {"id": 2}, "picks": picks_list[2:]}]
         mocked_fetch = mocker.patch("fpl.models.user.fetch", return_value={}, new_callable=AsyncMock)
-        picks = await user.get_picks(1)
-        assert picks == picks_list[:2]
+        gameweek = 1
+
+        picks = await user.get_picks(gameweek)
+
+        assert picks[gameweek]["picks"] == picks_list[:2]
         mocked_fetch.assert_not_called()
 
     async def test_get_picks_non_cached_with_known_gameweek(self, loop, mocker, user):
         picks_list = [{"element": 282}, {"element": 280}]
         data = {"event": {"id": 1}, "picks": picks_list}
         mocked_fetch = mocker.patch("fpl.models.user.fetch", return_value=data, new_callable=AsyncMock)
-        picks = await user.get_picks(1)
-        assert isinstance(picks, list)
-        assert picks == picks_list
+        gameweek = 1
+
+        picks = await user.get_picks(gameweek)
+
+        assert picks[gameweek]["picks"] == picks_list
         assert mocked_fetch.call_count == user.current_event
 
     async def test_get_active_chips_cached_with_unknown_gameweek(self, loop, mocker, user):
