@@ -123,15 +123,22 @@ class User():
             picks = await asyncio.gather(*tasks)
             self._picks = picks
 
-        if gameweek:
+        if gameweek is not None:
             valid_gameweek(gameweek)
-            pick = next(pick for pick in picks
-                        if pick["event"]["id"] == gameweek)
-            return {pick["event"]["id"]: pick}
+            try:
+                pick = next(pick for pick in picks
+                            if pick["event"]["id"] == gameweek)
+            except StopIteration:
+                return {}
+            else:
+                return {pick["event"]["id"]: pick}
 
         picks_out = {}
         for pick in picks:
-            picks_out[pick["event"]["id"]] = pick
+            try:
+                picks_out[pick["event"]["id"]] = pick
+            except KeyError:
+                pass
         return picks_out
 
     async def get_active_chips(self, gameweek=None):
