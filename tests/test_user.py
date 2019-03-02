@@ -178,12 +178,16 @@ class TestUser(object):
             await user.get_picks(gameweek)
 
     async def test_get_picks_valid_output_dict(self, loop, mocker, user):
+        gameweeks = [1, 2]
         picks_list = [{"element": 282}, {"element": 280}, {"element": 284}, {"element": 286}]
-        picks_in = [{"event": {"id": 1}, "picks": picks_list[:2]},
-                    {"event": {"id": 2}, "picks": picks_list[2:]}]
+        picks_in = [{"event": {"id": gameweeks[0]}, "picks": picks_list[:2]},
+                    {"event": {"id": gameweeks[1]}, "picks": picks_list[2:]}]
         user._picks = picks_in
 
         picks = await user.get_picks()
+
+        keys = set(picks.keys())
+        assert keys == set(gameweeks)
 
         for pick in picks_in:
             gameweek = pick["event"]["id"]
