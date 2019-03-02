@@ -105,13 +105,15 @@ class User():
         return history["chips"]
 
     async def get_picks(self, gameweek=None):
-        """Returns a list containing the user's picks each gameweek.
+        """Returns a dict containing the user's picks each gameweek.
+
+        Key is the gameweek number, value contains picks of the gameweek.
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
-        :rtype: list
+        :rtype: dict
         """
         if hasattr(self, "_picks"):
             picks = self._picks
