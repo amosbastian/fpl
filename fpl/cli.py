@@ -84,7 +84,7 @@ def team_width(positions, points=False):
     for position in positions:
         if points:
             player_names = [PICKS_FORMAT.format(
-                player.name, player.gameweek_points,
+                player.web_name, player.event_points,
                 player.role) for player in position]
         else:
             player_names = [MYTEAM_FORMAT.format(
@@ -134,7 +134,7 @@ def team_printer(positions, formatter, points=False):
         for player in position:
             if points:
                 player_information = (
-                    player.gameweek_points, player.web_name, player.role)
+                    player.event_points, player.web_name, player.role)
             else:
                 player_information = (player.web_name, player.role)
 
@@ -234,9 +234,9 @@ def automatic_substitutions(user_information, players):
                       if player.player_id == player_out_id][0]
 
         substitutions.append("{} {} -> {} {}".format(
-            player_out.gameweek_points,
+            player_out.event_points,
             click.style(player_out.name, fg=player_out.colour),
-            player_in.gameweek_points,
+            player_in.event_points,
             click.style(player_in.name, fg=player_in.colour)))
 
     return ", ".join(substitutions)
@@ -246,8 +246,8 @@ def picks_table(user, user_information, players):
     """Print user's picks data in a pretty table."""
     table = PrettyTable()
     table.field_names = ["Key", "Value"]
-    table.add_row(["Gamweek points", user.gameweek_points])
-    table.add_row(["Gameweek rank", "{:,}".format(user.overall_rank)])
+    table.add_row(["Gamweek points", user.summary_overall_points])
+    table.add_row(["Gameweek rank", "{:,}".format(user.summary_overall_rank)])
 
     gameweek_transfers = user_information["entry_history"]["event_transfers"]
     point_hit = user_information["entry_history"]["event_transfers_cost"]
@@ -271,8 +271,8 @@ def picks_table(user, user_information, players):
 async def format_picks(user):
     """Formats a user's picks and echoes it to the terminal."""
     user_picks = await user.get_picks()
-    user_information = user_picks[-1]
-    players = sorted(get_picks(user_information["picks"]),
+    user_information = user_picks[len(user_picks)]
+    players = sorted(await get_picks(user_information["picks"]),
                      key=lambda x: x.team_position)
 
     goalkeeper, defenders, midfielders, forwards, bench = split_by_position(
@@ -282,8 +282,8 @@ async def format_picks(user):
                  PICKS_FORMAT, True)
 
     click.echo("\nSubstitutes: {}".format(", ".join(
-        ["{} {}".format(player.gameweek_points, click.style(
-            player.name, fg=player.colour)) for player in bench])))
+        ["{} {}".format(player.event_points, click.style(
+            player.web_name, fg=player.colour)) for player in bench])))
 
     picks_table(user, user_information, players)
 
@@ -296,7 +296,7 @@ async def picks(user_id):
     async with aiohttp.ClientSession() as session:
         fpl = FPL(session)
         user = await fpl.get_user(user_id)
-    await format_picks(user)
+        await format_picks(user)
 
 
 @cli.command()
