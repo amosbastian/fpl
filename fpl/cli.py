@@ -17,6 +17,14 @@ sql_file = os.path.join(data_directory, "fpl.sqlite")
 connection = sqlite3.connect(sql_file)
 
 
+class HiddenPassword(object):
+    def __init__(self, password=""):
+        self.password = password
+
+    def __str__(self):
+        return "*" * len(self.password)
+
+
 def table_exists(table_name):
     """Returns True if `accounts` table exists, otherwise False."""
     query = ("SELECT name FROM sqlite_master "
@@ -36,7 +44,8 @@ def cli():
 
 def get_starters(players, position):
     """Helper function that returns starting players in a given position."""
-    starters = [player for player in players if position_converter(player.element_type) == position]
+    starters = [player for player in players if position_converter(
+        player.element_type) == position]
     return starters
 
 
@@ -102,7 +111,8 @@ def used_chips(chips):
     """Returns formatted string of used chips."""
     if not chips:
         return "NONE."
-    used = ["{} (GW {})".format(chip_converter(chip["name"]), chip["event"]) for chip in chips]
+    used = ["{} (GW {})".format(chip_converter(chip["name"]), chip["event"])
+            for chip in chips]
     return ", ".join(used)
 
 
@@ -152,7 +162,8 @@ async def myteam_table(user):
     """Print user's myteam data in a pretty table."""
     table = PrettyTable()
     table.field_names = ["Key", "Value"]
-    table.add_row(["Overall points", "{:,}".format(user.summary_overall_points)])
+    table.add_row(
+        ["Overall points", "{:,}".format(user.summary_overall_points)])
     table.add_row(["Overall rank", "{:,}".format(user.summary_overall_rank)])
     table.add_row(["Gameweek points", user.summary_event_points])
     table.add_row(["Squad value", "£{}m".format(user.value)])
@@ -200,17 +211,27 @@ def get_account_data(index):
 
 
 @cli.command()
-@click.argument("user_id", default=get_account_data(1))
-@click.option("--email", prompt="Email address", envvar="FPL_EMAIL",
-              default=get_account_data(2), help="FPL email address",
+@click.argument("user_id",
+                default=get_account_data(1))
+@click.option("--email",
+              prompt="Email address",
+              envvar="FPL_EMAIL",
+              default=get_account_data(2),
+              help="FPL email address",
               show_default="email saved in SQLite database")
-@click.option("--password", prompt=True, hide_input=True,
-              envvar="FPL_PASSWORD", default=get_account_data(3),
+@click.option("--password",
+              prompt=True,
+              hide_input=True,
+              envvar="FPL_PASSWORD",
+              default=HiddenPassword(get_account_data(3)),
               help="FPL password",
               show_default="password saved in SQLite database")
 @coroutine
 async def myteam(user_id, email, password):
     """Echoes a logged in user's team to the terminal."""
+    if isinstance(password, HiddenPassword):
+        password = password.password
+
     async with aiohttp.ClientSession() as session:
         fpl = FPL(session)
         await fpl.login(email, password)
