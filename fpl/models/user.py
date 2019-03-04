@@ -314,6 +314,32 @@ class User():
         if set(player_ids).isdisjoint(players_in):
             raise Exception("Player ID in `players_in` does not exist.")
 
+        payload = {
+            "confirmed": False,
+            "entry": self.id,
+            "event": self.current_event + 1,
+            "transfers": [],
+            "wildcard": False,
+            "freehit": False
+        }
+
+        for player_out_id, player_in_id in zip(players_out, players_in):
+            player_out = next(player for player in user_team
+                              if player["element"] == player_out_id)
+            player_in = next(player for player in players
+                             if player["id"] == player_in_id)
+            payload["transfers"].append({
+                "element_in": player_in["id"],
+                "element_out": player_out["element"],
+                "purchase_price": player_in["now_cost"],
+                "selling_price": player_out["selling_price"]
+            })
+
+        async with self._session.post(
+                API_URLS["transfers"], data=payload) as response:
+            response_text = await response.text()
+            print(response_text)
+
     def __str__(self):
         return (f"{self.player_first_name} {self.player_last_name} - "
                 f"{self.player_region_name}")
