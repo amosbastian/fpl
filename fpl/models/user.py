@@ -1,5 +1,7 @@
 import asyncio
 
+import aiohttp
+
 from ..constants import API_URLS
 from ..utils import fetch, logged_in
 
@@ -33,6 +35,7 @@ class User():
       >>> asyncio.run(main())
       Amos Bastian - Netherlands
     """
+
     def __init__(self, user_information, session):
         self._session = session
         for k, v in user_information["entry"].items():
@@ -270,6 +273,46 @@ class User():
             raise Exception("User must be logged in.")
 
         return await fetch(self._session, API_URLS["watchlist"])
+
+    async def transfer(self, players_out, players_in):
+        """Transfers given players out and transfers given players in.
+
+        :param players_out: List of IDs of players who will be transferred out.
+        :type players_out: list
+        :param players_in: List of IDs of players who will be transferred in.
+        :type players_in: list
+        :raises Exception: [description]
+        """
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
+        if not players_out or not players_in:
+            raise Exception(
+                "Lists must both contain at least one player's ID.")
+
+        if len(players_out) != len(players_in):
+            raise Exception("Number of players transferred in must be same as "
+                            "number transferred out.")
+
+        if not set(players_in).isdisjoint(players_out):
+            raise Exception("Player ID can't be in both lists.")
+
+        user_team = await self.get_team()
+        team_ids = [player["element"] for player in user_team]
+
+        if not set(team_ids).isdisjoint(players_in):
+            raise Exception(
+                "Cannot transfer a player in who is already in the user's team.")
+
+        if set(team_ids).isdisjoint(players_out):
+            raise Exception(
+                "Cannot transfer a player out who is not in the user's team.")
+
+        players = await fetch(self._session, API_URLS["players"])
+        player_ids = [player["id"] for player in players]
+
+        if set(player_ids).isdisjoint(players_in):
+            raise Exception("Player ID in `players_in` does not exist.")
 
     def __str__(self):
         return (f"{self.player_first_name} {self.player_last_name} - "
