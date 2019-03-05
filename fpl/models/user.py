@@ -22,18 +22,46 @@ def valid_gameweek(gameweek):
 
 
 def _ids_to_lineup(player_ids, user_team):
+    """Helper for converting list of player IDs to usable lineup.
+
+    :param player_ids: List of player IDS.
+    :type player_ids: list
+    :param user_team: The user's current team.
+    :type user_team: list
+    :return: A usable lineup.
+    :rtype: list
+    """
+
     return [next(player for player in user_team
                  if player["element"] == player_id)
             for player_id in player_ids]
 
 
 def _id_to_element_type(player_id, players):
+    """Helper for converting a player's ID to their respective element type:
+    1, 2, 3 or 4.
+
+    :param player_id: A player's ID.
+    :type player_id: int
+    :param players: List of all players in the Fantasy Premier League.
+    :type players: list
+    :return: The player's element type.
+    :rtype: int
+    """
     player = next(player for player in players
                   if player["id"] == player_id)
     return player["element_type"]
 
 
 def _set_element_type(lineup, players):
+    """Helper for setting the players' element types.
+    
+    :param lineup: The user's current lineup.
+    :type lineup: list
+    :param players: List of all players in the Fantasy Premier League.
+    :type players: list
+    """
+
     for player in lineup:
         element_type = _id_to_element_type(player["element"], players)
         player["element_type"] = element_type
@@ -437,6 +465,18 @@ class User():
         return post_response
 
     async def _create_new_lineup(self, players_in, players_out, lineup):
+        """Helper for creating the new lineup of players.
+
+        :param players_in: List of IDs of players who will be substituted in.
+        :type players_in: list
+        :param players_out: List of IDs of players who will be substituted out.
+        :type players_out: list
+        :param lineup: List containing the user's current lineup.
+        :type lineup: list
+        :return: Returns the new lineup.
+        :rtype: list
+        """
+
         players = await fetch(self._session, API_URLS["players"])
         _set_element_type(lineup, players)
         subs_in = _ids_to_lineup(players_in, lineup)
@@ -474,6 +514,11 @@ class User():
         return new_lineup
 
     async def _post_substitutions(self, lineup):
+        """Helper for sending the POST requests with the new lineup.
+
+        :param lineup: The new lineup.
+        :type lineup: list
+        """
         # Get CSRF token and create payload + headers
         csrf_token = await get_csrf_token(self._session)
         payload = json.dumps({"picks": lineup})
@@ -485,6 +530,7 @@ class User():
             payload=payload, headers=headers)
 
     async def _captain_helper(self, captain, captain_type):
+        """Helper for setting the (vice) captain of the user's team."""
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
@@ -496,13 +542,35 @@ class User():
         await self._post_substitutions(lineup)
 
     async def captain(self, captain):
+        """Set the captain of the user's team.
+
+        :param captain: ID of the captain.
+        :type captain: int
+        """
         await self._captain_helper(captain, "is_captain")
 
     async def vice_captain(self, vice_captain):
+        """Set the vice captain of the user's team.
+
+        :param vice_captain: ID of the vice captain.
+        :type vice_captain: int
+        """
         await self._captain_helper(vice_captain, "is_vice_captain")
 
     async def substitute(self, players_in, players_out, captain=None,
                          vice_captain=None):
+        """Substitute players on the bench for players in the starting eleven.
+        Also allows the user to simultaneously set the new (vice) captain(s).
+
+        :param players_in: List of IDs of players who will be substituted in.
+        :type players_in: list
+        :param players_out: List of IDS of players who will be substituted out.
+        :type players_out: list
+        :param captain: ID of the captain, defaults to None.
+        :param captain: int, optional
+        :param vice_captain: ID of the vice captain, defaults to None.
+        :param vice_captain: int, optional
+        """
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
