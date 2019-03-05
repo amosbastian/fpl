@@ -286,15 +286,15 @@ class User():
         }
 
     def _get_transfer_payload(
-            self, players_out, players_in, user_team, players):
+            self, players_out, players_in, user_team, players, wildcard, free_hit):
         """Returns the payload needed to make the desired transfers."""
         payload = {
             "confirmed": False,
             "entry": self.id,
             "event": self.current_event + 1,
             "transfers": [],
-            "wildcard": False,
-            "freehit": False
+            "wildcard": wildcard,
+            "freehit": free_hit
         }
 
         for player_out_id, player_in_id in zip(players_out, players_in):
@@ -311,16 +311,26 @@ class User():
 
         return payload
 
-    async def transfer(self, players_out, players_in):
+    async def transfer(self, players_out, players_in, max_hit=60,
+                       wildcard=False, free_hit=False):
         """Transfers given players out and transfers given players in.
 
         :param players_out: List of IDs of players who will be transferred out.
         :type players_out: list
         :param players_in: List of IDs of players who will be transferred in.
         :type players_in: list
+        :param max_hit: Maximum hit that should be taken by making the
+            transfer(s), defaults to 60
+        :param max_hit: int, optional
+        :param wildcard: Boolean for playing wildcard, defaults to False
+        :param wildcard: bool, optional
+        :param free_hit: Boolean for playing free hit, defaults to False
+        :param free_hit: bool, optional
         :return: Returns the response given by a succesful transfer.
         :rtype: dict
         """
+        if wildcard and free_hit:
+            raise Exception("Can only use 1 of wildcard and free hit.")
 
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
@@ -357,7 +367,7 @@ class User():
         # checks if there are any errors from FPL's side for this transfer,
         # e.g. too many players from the same team, or not enough money.
         payload = self._get_transfer_payload(
-            players_out, players_in, user_team, players)
+            players_out, players_in, user_team, players, wildcard, free_hit)
         csrf_token = await get_csrf_token(self._session)
         headers = self._get_headers(csrf_token)
         post_response = await post(
@@ -365,6 +375,11 @@ class User():
 
         if "non_form_errors" in post_response:
             raise Exception(post_response["non_form_errors"])
+
+        if post_response["spent_points"] > max_hit:
+            raise Exception(
+                f"Point hit for transfer(s) [-{post_response['spent_points']}]"
+                f" exceeds max_hit [{max_hit}].")
 
         # Everything is okay, so push the transfer through!
         payload["confirmed"] = True
