@@ -523,7 +523,7 @@ class User():
         headers = get_headers(
             csrf_token, "https://fantasy.premierleague.com/a/team/my")
 
-        post_response = await post(
+        await post(
             self._session, API_URLS["user_team"].format(self.id) + "/",
             payload=payload, headers=headers)
 

@@ -1,4 +1,3 @@
-import aiohttp
 import pytest
 
 from fpl.utils import (chip_converter, get_csrf_token, get_current_gameweek,
@@ -19,12 +18,14 @@ class TestUtils(object):
         for team in teams:
             assert team_converter(team.id) == team.name
 
-    def test_position_converter(self):
+    @staticmethod
+    def test_position_converter():
         positions = ["Goalkeeper", "Defender", "Midfielder", "Forward"]
         converted = [position_converter(position) for position in range(1, 5)]
         assert positions == converted
 
-    def test_chip_converter(self):
+    @staticmethod
+    def test_chip_converter():
         chips = ["TC", "WC", "BB", "FH"]
         converted = [chip_converter(chip) for chip in [
             "3xc", "wildcard", "bboost", "freehit"]]
@@ -42,6 +43,7 @@ class TestUtils(object):
         csrf_token = await get_csrf_token(fpl.session)
         assert isinstance(csrf_token, str)
 
-    def test_get_headers(self):
+    @staticmethod
+    def test_get_headers():
         headers = get_headers("123", "456")
         assert isinstance(headers, dict)
