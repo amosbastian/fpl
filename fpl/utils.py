@@ -126,7 +126,7 @@ async def get_csrf_token(session):
 def get_headers(csrf_token, referer):
     """Returns the headers needed for the transfer request."""
     return {
-        "Content-Type": "application/json; charse:UTF-8",
+        "Content-Type": "application/json; charset=UTF-8",
         "X-CSRFToken": csrf_token,
         "X-Requested-With": "XMLHttpRequest",
         "Referer": referer
