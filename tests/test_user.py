@@ -49,40 +49,41 @@ user_data = {
     }
 }
 
-user_picks = [
-    {
-      "element": 145,
-      "position": 5,
-      "is_captain": False,
-      "is_vice_captain": False,
-      "can_captain": True,
-    },
-    {
-      "element": 302,
-      "position": 6,
-      "is_captain": False,
-      "is_vice_captain": True,
-      "can_captain": True,
-    },
-    {
-      "element": 253,
-      "position": 7,
-      "is_captain": False,
-      "is_vice_captain": False,
-      "can_captain": True,
-    },
-    {
-      "element": 270,
-      "position": 8,
-      "is_captain": True,
-      "is_vice_captain": False,
-      "can_captain": True,
-    }
-]
+def get_picks():
+    return [
+        {
+            "element": 145,
+            "position": 5,
+            "is_captain": False,
+            "is_vice_captain": False,
+            "can_captain": True,
+        },
+        {
+            "element": 302,
+            "position": 6,
+            "is_captain": False,
+            "is_vice_captain": True,
+            "can_captain": True,
+        },
+        {
+            "element": 253,
+            "position": 7,
+            "is_captain": False,
+            "is_vice_captain": False,
+            "can_captain": True,
+        },
+        {
+            "element": 270,
+            "position": 8,
+            "is_captain": True,
+            "is_vice_captain": False,
+            "can_captain": True,
+        }
+    ]
 user_player_ids = [145, 302, 253, 270]
 
 
-class TestHelpers:
+class TestHelpers(object):
     @staticmethod
     def test_valid_gameweek_gameweek_out_of_range():
         with pytest.raises(ValueError):
@@ -123,6 +124,7 @@ class TestHelpers:
 
     @staticmethod
     def test__set_captain_captain_to_captain():
+        user_picks = get_picks()
         captain = next(p for p in user_picks if p["is_captain"])
         _set_captain(user_picks, 270, "is_captain", user_player_ids)
         new_captain = next(p for p in user_picks if p["is_captain"])
@@ -131,6 +133,7 @@ class TestHelpers:
 
     @staticmethod
     def test__set_captain_vice_to_vice():
+        user_picks = get_picks()
         vice_captain = next(p for p in user_picks if p["is_vice_captain"])
         _set_captain(user_picks, 302, "is_vice_captain", user_player_ids)
         new_vice_captain = next(p for p in user_picks if p["is_vice_captain"])
@@ -139,6 +142,7 @@ class TestHelpers:
 
     @staticmethod
     def test__set_captain_captain_to_vice():
+        user_picks = get_picks()
         captain = next(p for p in user_picks if p["is_captain"])
         vice_captain = next(p for p in user_picks if p["is_vice_captain"])
         _set_captain(user_picks, 270, "is_vice_captain", user_player_ids)
@@ -151,6 +155,7 @@ class TestHelpers:
 
     @staticmethod
     def test__set_captain_vice_to_captain():
+        user_picks = get_picks()
         captain = next(p for p in user_picks if p["is_captain"])
         vice_captain = next(p for p in user_picks if p["is_vice_captain"])
         _set_captain(user_picks, 302, "is_captain", user_player_ids)
@@ -158,11 +163,12 @@ class TestHelpers:
         new_captain = next(p for p in user_picks if p["is_captain"])
         new_vice_captain = next(p for p in user_picks if p["is_vice_captain"])
 
-        assert new_captain["element"] == vice_captain["element"]
         assert new_vice_captain["element"] == captain["element"]
+        assert new_captain["element"] == vice_captain["element"]
 
     @staticmethod
     def test__set_captain_captain():
+        user_picks = get_picks()
         captain = next(p for p in user_picks if p["is_captain"])
         _set_captain(user_picks, 145, "is_captain", user_player_ids)
 
@@ -173,6 +179,7 @@ class TestHelpers:
 
     @staticmethod
     def test__set_captain_vice():
+        user_picks = get_picks()
         vice_captain = next(p for p in user_picks if p["is_vice_captain"])
         _set_captain(user_picks, 145, "is_vice_captain", user_player_ids)
 
