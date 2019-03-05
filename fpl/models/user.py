@@ -318,8 +318,10 @@ class User():
         :type players_out: list
         :param players_in: List of IDs of players who will be transferred in.
         :type players_in: list
-        :raises Exception: [description]
+        :return: Returns the response given by a succesful transfer.
+        :rtype: dict
         """
+
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
@@ -357,8 +359,14 @@ class User():
         headers = self._get_headers(csrf_token)
         post_response = await post(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
+
         if "non_form_errors" in post_response:
             raise Exception(post_response["non_form_errors"])
+
+        payload["confirmed"] = True
+        post_repsonse = await post(
+            self._session, API_URLS["transfers"], json.dumps(payload), headers)
+        return post_response
 
     def __str__(self):
         return (f"{self.player_first_name} {self.player_last_name} - "
