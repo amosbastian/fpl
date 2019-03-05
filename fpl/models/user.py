@@ -1,7 +1,11 @@
 import asyncio
+import json
+
+import aiohttp
+from urllib3.util import response
 
 from ..constants import API_URLS
-from ..utils import fetch, logged_in
+from ..utils import fetch, get_csrf_token, logged_in, post
 
 
 def valid_gameweek(gameweek):
@@ -33,6 +37,7 @@ class User():
       >>> asyncio.run(main())
       Amos Bastian - Netherlands
     """
+
     def __init__(self, user_information, session):
         self._session = session
         for k, v in user_information["entry"].items():
@@ -270,6 +275,117 @@ class User():
             raise Exception("User must be logged in.")
 
         return await fetch(self._session, API_URLS["watchlist"])
+
+    def _get_headers(self, csrf_token):
+        """Returns the headers needed for the transfer request."""
+        return {
+            "Content-Type": "application/json; charse:UTF-8",
+            "X-CSRFToken": csrf_token,
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "https://fantasy.premierleague.com/a/squad/transfers"
+        }
+
+    def _get_transfer_payload(
+            self, players_out, players_in, user_team, players, wildcard, free_hit):
+        """Returns the payload needed to make the desired transfers."""
+        payload = {
+            "confirmed": False,
+            "entry": self.id,
+            "event": self.current_event + 1,
+            "transfers": [],
+            "wildcard": wildcard,
+            "freehit": free_hit
+        }
+
+        for player_out_id, player_in_id in zip(players_out, players_in):
+            player_out = next(player for player in user_team
+                              if player["element"] == player_out_id)
+            player_in = next(player for player in players
+                             if player["id"] == player_in_id)
+            payload["transfers"].append({
+                "element_in": player_in["id"],
+                "element_out": player_out["element"],
+                "purchase_price": player_in["now_cost"],
+                "selling_price": player_out["selling_price"]
+            })
+
+        return payload
+
+    async def transfer(self, players_out, players_in, max_hit=60,
+                       wildcard=False, free_hit=False):
+        """Transfers given players out and transfers given players in.
+
+        :param players_out: List of IDs of players who will be transferred out.
+        :type players_out: list
+        :param players_in: List of IDs of players who will be transferred in.
+        :type players_in: list
+        :param max_hit: Maximum hit that should be taken by making the
+            transfer(s), defaults to 60
+        :param max_hit: int, optional
+        :param wildcard: Boolean for playing wildcard, defaults to False
+        :param wildcard: bool, optional
+        :param free_hit: Boolean for playing free hit, defaults to False
+        :param free_hit: bool, optional
+        :return: Returns the response given by a succesful transfer.
+        :rtype: dict
+        """
+        if wildcard and free_hit:
+            raise Exception("Can only use 1 of wildcard and free hit.")
+
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
+        if not players_out or not players_in:
+            raise Exception(
+                "Lists must both contain at least one player's ID.")
+
+        if len(players_out) != len(players_in):
+            raise Exception("Number of players transferred in must be same as "
+                            "number transferred out.")
+
+        if not set(players_in).isdisjoint(players_out):
+            raise Exception("Player ID can't be in both lists.")
+
+        user_team = await self.get_team()
+        team_ids = [player["element"] for player in user_team]
+
+        if not set(team_ids).isdisjoint(players_in):
+            raise Exception(
+                "Cannot transfer a player in who is already in the user's team.")
+
+        if set(team_ids).isdisjoint(players_out):
+            raise Exception(
+                "Cannot transfer a player out who is not in the user's team.")
+
+        players = await fetch(self._session, API_URLS["players"])
+        player_ids = [player["id"] for player in players]
+
+        if set(player_ids).isdisjoint(players_in):
+            raise Exception("Player ID in `players_in` does not exist.")
+
+        # Send POST requests with `confirmed` set to False; this basically
+        # checks if there are any errors from FPL's side for this transfer,
+        # e.g. too many players from the same team, or not enough money.
+        payload = self._get_transfer_payload(
+            players_out, players_in, user_team, players, wildcard, free_hit)
+        csrf_token = await get_csrf_token(self._session)
+        headers = self._get_headers(csrf_token)
+        post_response = await post(
+            self._session, API_URLS["transfers"], json.dumps(payload), headers)
+
+        if "non_form_errors" in post_response:
+            raise Exception(post_response["non_form_errors"])
+
+        if post_response["spent_points"] > max_hit:
+            raise Exception(
+                f"Point hit for transfer(s) [-{post_response['spent_points']}]"
+                f" exceeds max_hit [{max_hit}].")
+
+        # Everything is okay, so push the transfer through!
+        payload["confirmed"] = True
+        post_repsonse = await post(
+            self._session, API_URLS["transfers"], json.dumps(payload), headers)
+        return post_response
 
     def __str__(self):
         return (f"{self.player_first_name} {self.player_last_name} - "

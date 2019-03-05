@@ -1,6 +1,7 @@
 import asyncio
 from functools import update_wrapper
 
+
 async def fetch(session, url):
     while True:
         try:
@@ -9,6 +10,11 @@ async def fetch(session, url):
                 return await response.json()
         except Exception:
             pass
+
+
+async def post(session, url, payload, headers):
+    async with session.post(url, data=payload, headers=headers) as response:
+        return await response.json()
 
 
 async def get_current_gameweek(session):
@@ -95,7 +101,8 @@ def logged_in(session):
     :return: True if user is logged in else False
     :rtype: bool
     """
-    return "csrftoken" in session.cookie_jar.filter_cookies("https://users.premierleague.com/")
+    return "csrftoken" in session.cookie_jar.filter_cookies(
+        "https://users.premierleague.com/")
 
 
 def coroutine(func):
@@ -105,3 +112,12 @@ def coroutine(func):
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(func(*args, **kwargs))
     return update_wrapper(wrapper, func)
+
+
+async def get_csrf_token(session):
+    """Returns the Cross-Site Request Forgery token from the current session.
+    """
+    url = "https://fantasy.premierleague.com/"
+    filtered = session.cookie_jar.filter_cookies(url)
+    csrf_token = filtered["csrftoken"].value
+    return csrf_token
