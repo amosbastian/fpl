@@ -295,7 +295,8 @@ class User():
         return await fetch(self._session, API_URLS["watchlist"])
 
     def _get_transfer_payload(
-            self, players_out, players_in, user_team, players, wildcard, free_hit):
+            self, players_out, players_in, user_team, players, wildcard,
+            free_hit):
         """Returns the payload needed to make the desired transfers."""
         payload = {
             "confirmed": False,
@@ -378,7 +379,8 @@ class User():
         payload = self._get_transfer_payload(
             players_out, players_in, user_team, players, wildcard, free_hit)
         csrf_token = await get_csrf_token(self._session)
-        headers = get_headers(csrf_token)
+        headers = get_headers(
+            csrf_token, "https://fantasy.premierleague.com/a/squad/transfers")
         post_response = await post(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
 
@@ -392,7 +394,7 @@ class User():
 
         # Everything is okay, so push the transfer through!
         payload["confirmed"] = True
-        post_repsonse = await post(
+        post_response = await post(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
         return post_response
 
@@ -414,13 +416,15 @@ class User():
             # If players don't play in the same position, and aren't both
             # substitutes, then sort them
             if not same_position and not both_subs:
+                lineup[out_i]["position"] = lineup[in_i]["position"]
+                lineup[in_i]["position"] = lineup[out_i]["position"]
                 starters, subs = lineup[:11], lineup[11:]
                 new_starters = sorted(starters, key=lambda x: (
                     x["element_type"] - 1) * 100 + x["position"])
                 lineup = new_starters + subs
 
-            for position, player in enumerate(lineup):
-                player["position"] = position + 1
+                for position, player in enumerate(lineup):
+                    player["position"] = position + 1
 
         new_lineup = [{
             "element": player["element"],
@@ -434,10 +438,6 @@ class User():
     async def substitute(self, players_in, players_out, captain, vice_captain):
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
-
-        if not players_out or not players_in:
-            raise Exception(
-                "Lists must both contain at least one player's ID.")
 
         if len(players_out) != len(players_in):
             raise Exception("Number of players transferred in must be same as "
@@ -456,6 +456,16 @@ class User():
 
         lineup = await self._create_new_lineup(
             players_in, players_out, user_team)
+
+        # Get CSRF token and create payload + headers
+        csrf_token = await get_csrf_token(self._session)
+        payload = json.dumps({"picks": lineup})
+        headers = get_headers(
+            csrf_token, "https://fantasy.premierleague.com/a/team/my")
+
+        post_response = await post(
+            self._session, API_URLS["user_team"].format(self.id) + "/",
+            payload=payload, headers=headers)
 
     def __str__(self):
         return (f"{self.player_first_name} {self.player_last_name} - "
