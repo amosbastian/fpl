@@ -31,7 +31,6 @@ def _ids_to_lineup(player_ids, user_team):
     :return: A usable lineup.
     :rtype: list
     """
-
     return [next(player for player in user_team
                  if player["element"] == player_id)
             for player_id in player_ids]
@@ -55,13 +54,12 @@ def _id_to_element_type(player_id, players):
 
 def _set_element_type(lineup, players):
     """Helper for setting the players' element types.
-    
+
     :param lineup: The user's current lineup.
     :type lineup: list
     :param players: List of all players in the Fantasy Premier League.
     :type players: list
     """
-
     for player in lineup:
         element_type = _id_to_element_type(player["element"], players)
         player["element_type"] = element_type

@@ -471,7 +471,8 @@ class TestUser(object):
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
 
-    async def test_transfer(self, loop, user):
+    async def test_transfer(self, loop, mocker, user):
+        # TODO: expand tests
         data = {
             "transfers": [{
                 "element_in": 172, "cost": 4, "purchase_price": 72,
@@ -484,3 +485,18 @@ class TestUser(object):
 
         with pytest.raises(Exception):
             await user.transfer([1], [2])
+
+    async def test_substitute(self, loop, mocker, user):
+        # TODO: expand tests
+        with pytest.raises(Exception):
+            await user.substitute([1], [2])
+
+    async def test_captain(self, loop, mocker, user):
+        # TODO: expand tests
+        with pytest.raises(Exception):
+            await user.captain(1)
+
+    async def test_vice_captain(self, loop, mocker, user):
+        # TODO: expand tests
+        with pytest.raises(Exception):
+            await user.vice_captain(1)
