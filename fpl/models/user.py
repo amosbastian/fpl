@@ -480,21 +480,26 @@ class User():
         headers = get_headers(
             csrf_token, "https://fantasy.premierleague.com/a/team/my")
 
-        print(payload)
-
         post_response = await post(
             self._session, API_URLS["user_team"].format(self.id) + "/",
             payload=payload, headers=headers)
 
-    async def captain(self, captain):
+    async def _captain_helper(self, captain, captain_type):
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
         user_team = await self.get_team()
         team_ids = [player["element"] for player in user_team]
-        _set_captain(user_team, captain, "is_captain", team_ids)
+        _set_captain(user_team, captain, captain_type, team_ids)
         lineup = await self._create_new_lineup([], [], user_team)
+
         await self._post_substitutions(lineup)
+
+    async def captain(self, captain):
+        await self._captain_helper(captain, "is_captain")
+
+    async def vice_captain(self, vice_captain):
+        await self._captain_helper(vice_captain, "is_vice_captain")
 
     async def substitute(self, players_in, players_out, captain=None,
                          vice_captain=None):
