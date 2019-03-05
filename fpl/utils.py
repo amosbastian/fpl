@@ -1,6 +1,7 @@
 import asyncio
 from functools import update_wrapper
 
+
 async def fetch(session, url):
     while True:
         try:
@@ -105,3 +106,12 @@ def coroutine(func):
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(func(*args, **kwargs))
     return update_wrapper(wrapper, func)
+
+
+async def get_csrf_token(session):
+    """Returns the Cross-Site Request Forgery token from the current session.
+    """
+    url = "https://fantasy.premierleague.com/"
+    filtered = session.cookie_jar.filter_cookies(url)
+    csrf_token = filtered["csrftoken"].value
+    return csrf_token
