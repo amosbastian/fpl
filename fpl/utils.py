@@ -12,6 +12,11 @@ async def fetch(session, url):
             pass
 
 
+async def post(session, url, payload, headers):
+    async with session.post(url, data=payload, headers=headers) as response:
+        return await response.json()
+
+
 async def get_current_gameweek(session):
     """Returns the current gameweek.
 
