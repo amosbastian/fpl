@@ -21,6 +21,24 @@ def valid_gameweek(gameweek):
     return True
 
 
+def _ids_to_lineup(player_ids, user_team):
+    return [next(player for player in user_team
+                 if player["element"] == player_id)
+            for player_id in player_ids]
+
+
+def _id_to_element_type(player_id, players):
+    player = next(player for player in players
+                  if player["id"] == player_id)
+    return player["element_type"]
+
+
+def _set_element_type(lineup, players):
+    for player in lineup:
+        element_type = _id_to_element_type(player["element"], players)
+        player["element_type"] = element_type
+
+
 class User():
     """A class representing a user of the Fantasy Premier League.
 
@@ -386,6 +404,59 @@ class User():
         post_repsonse = await post(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
         return post_response
+
+    async def _create_new_lineup(self, players_in, players_out, lineup):
+        players = await fetch(self._session, API_URLS["players"])
+        _set_element_type(lineup, players)
+        subs_in = _ids_to_lineup(players_in, lineup)
+        subs_out = _ids_to_lineup(players_out, lineup)
+
+        for sub_out, sub_in in zip(subs_out, subs_in):
+            # Get indices of sub out and sub in, then swap their position in
+            # the lineup
+            out_i, in_i = lineup.index(sub_out), lineup.index(sub_in)
+            lineup[out_i], lineup[in_i] = lineup[in_i], lineup[out_i]
+
+            same_position = sub_out["element_type"] == sub_in["element_type"]
+            both_subs = sub_out["is_sub"] and sub_in["is_sub"]
+
+            # If players don't play in the same position, and aren't both
+            # substitutes, then sort them
+            if not same_position and not both_subs:
+                starters, subs = lineup[:11], lineup[11:]
+                new_starters = sorted(starters, key=lambda x: (
+                    x["element_type"] - 1) * 100 + x["position"])
+                lineup = new_starters + subs
+
+            for position, player in enumerate(lineup):
+                player["position"] = position + 1
+
+        return lineup
+
+    async def substitute(self, players_in, players_out, captain, vice_captain):
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
+        if not players_out or not players_in:
+            raise Exception(
+                "Lists must both contain at least one player's ID.")
+
+        if len(players_out) != len(players_in):
+            raise Exception("Number of players transferred in must be same as "
+                            "number transferred out.")
+
+        if not set(players_in).isdisjoint(players_out):
+            raise Exception("Player ID can't be in both lists.")
+
+        user_team = await self.get_team()
+        team_ids = [player["element"] for player in user_team]
+        substitution_ids = [*players_out, *players_in, captain, vice_captain]
+
+        if not set(substitution_ids).issubset(team_ids):
+            raise Exception(
+                "Cannot substitute players who aren't in the user's team.")
+
+        await self._create_new_lineup(players_in, players_out, user_team)
 
     def __str__(self):
         return (f"{self.player_first_name} {self.player_last_name} - "
