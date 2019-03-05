@@ -353,6 +353,9 @@ class User():
         if set(player_ids).isdisjoint(players_in):
             raise Exception("Player ID in `players_in` does not exist.")
 
+        # Send POST requests with `confirmed` set to False; this basically
+        # checks if there are any errors from FPL's side for this transfer,
+        # e.g. too many players from the same team, or not enough money.
         payload = self._get_transfer_payload(
             players_out, players_in, user_team, players)
         csrf_token = await get_csrf_token(self._session)
@@ -363,6 +366,7 @@ class User():
         if "non_form_errors" in post_response:
             raise Exception(post_response["non_form_errors"])
 
+        # Everything is okay, so push the transfer through!
         payload["confirmed"] = True
         post_repsonse = await post(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
