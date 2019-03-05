@@ -5,7 +5,7 @@ import aiohttp
 from urllib3.util import response
 
 from ..constants import API_URLS
-from ..utils import fetch, get_csrf_token, logged_in, post
+from ..utils import fetch, get_csrf_token, logged_in, post, get_headers
 
 
 def valid_gameweek(gameweek):
@@ -294,15 +294,6 @@ class User():
 
         return await fetch(self._session, API_URLS["watchlist"])
 
-    def _get_headers(self, csrf_token):
-        """Returns the headers needed for the transfer request."""
-        return {
-            "Content-Type": "application/json; charse:UTF-8",
-            "X-CSRFToken": csrf_token,
-            "X-Requested-With": "XMLHttpRequest",
-            "Referer": "https://fantasy.premierleague.com/a/squad/transfers"
-        }
-
     def _get_transfer_payload(
             self, players_out, players_in, user_team, players, wildcard, free_hit):
         """Returns the payload needed to make the desired transfers."""
@@ -387,7 +378,7 @@ class User():
         payload = self._get_transfer_payload(
             players_out, players_in, user_team, players, wildcard, free_hit)
         csrf_token = await get_csrf_token(self._session)
-        headers = self._get_headers(csrf_token)
+        headers = get_headers(csrf_token)
         post_response = await post(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
 
@@ -431,7 +422,14 @@ class User():
             for position, player in enumerate(lineup):
                 player["position"] = position + 1
 
-        return lineup
+        new_lineup = [{
+            "element": player["element"],
+            "position": player["position"],
+            "is_captain": player["is_captain"],
+            "is_vice_captain": player["is_vice_captain"]
+        } for player in lineup]
+
+        return new_lineup
 
     async def substitute(self, players_in, players_out, captain, vice_captain):
         if not logged_in(self._session):
@@ -456,7 +454,8 @@ class User():
             raise Exception(
                 "Cannot substitute players who aren't in the user's team.")
 
-        await self._create_new_lineup(players_in, players_out, user_team)
+        lineup = await self._create_new_lineup(
+            players_in, players_out, user_team)
 
     def __str__(self):
         return (f"{self.player_first_name} {self.player_last_name} - "
