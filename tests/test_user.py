@@ -1,7 +1,8 @@
 import aiohttp
 import pytest
 
-from fpl.models.user import User, valid_gameweek
+from fpl.models.user import (User, _id_to_element_type, _ids_to_lineup,
+                             _set_captain, _set_element_type, valid_gameweek)
 from tests.helper import AsyncMock
 
 user_data = {
@@ -48,6 +49,38 @@ user_data = {
     }
 }
 
+user_picks = [
+    {
+      "element": 145,
+      "position": 5,
+      "is_captain": False,
+      "is_vice_captain": False,
+      "can_captain": True,
+    },
+    {
+      "element": 302,
+      "position": 6,
+      "is_captain": False,
+      "is_vice_captain": True,
+      "can_captain": True,
+    },
+    {
+      "element": 253,
+      "position": 7,
+      "is_captain": False,
+      "is_vice_captain": False,
+      "can_captain": True,
+    },
+    {
+      "element": 270,
+      "position": 8,
+      "is_captain": True,
+      "is_vice_captain": False,
+      "can_captain": True,
+    }
+]
+user_player_ids = [145, 302, 253, 270]
+
 
 class TestHelpers:
     @staticmethod
@@ -60,6 +93,93 @@ class TestHelpers:
     @staticmethod
     def test_valid_gameweek_valid_gameweek():
         assert valid_gameweek(1) is True
+
+    @staticmethod
+    def test__ids_to_lineup():
+        lineup = [{
+            "element": 400
+        }]
+        assert _ids_to_lineup([400], lineup) == lineup
+
+    @staticmethod
+    def test__id_to_element_type():
+        players = [{
+            "id": 1,
+            "element_type": 1
+        }]
+        assert _id_to_element_type(1, players) == 1
+
+    @staticmethod
+    def test__set_element_type():
+        lineup = [{
+            "element": 400
+        }]
+        players = [{
+            "id": 400,
+            "element_type": 1
+        }]
+        _set_element_type(lineup, players)
+        assert lineup[0]["element_type"] == players[0]["element_type"]
+
+    @staticmethod
+    def test__set_captain_captain_to_captain():
+        captain = next(p for p in user_picks if p["is_captain"])
+        _set_captain(user_picks, 270, "is_captain", user_player_ids)
+        new_captain = next(p for p in user_picks if p["is_captain"])
+
+        assert new_captain["element"] == captain["element"]
+
+    @staticmethod
+    def test__set_captain_vice_to_vice():
+        vice_captain = next(p for p in user_picks if p["is_vice_captain"])
+        _set_captain(user_picks, 302, "is_vice_captain", user_player_ids)
+        new_vice_captain = next(p for p in user_picks if p["is_vice_captain"])
+
+        assert new_vice_captain["element"] == vice_captain["element"]
+
+    @staticmethod
+    def test__set_captain_captain_to_vice():
+        captain = next(p for p in user_picks if p["is_captain"])
+        vice_captain = next(p for p in user_picks if p["is_vice_captain"])
+        _set_captain(user_picks, 270, "is_vice_captain", user_player_ids)
+
+        new_captain = next(p for p in user_picks if p["is_captain"])
+        new_vice_captain = next(p for p in user_picks if p["is_vice_captain"])
+
+        assert new_captain["element"] == vice_captain["element"]
+        assert new_vice_captain["element"] == captain["element"]
+
+    @staticmethod
+    def test__set_captain_vice_to_captain():
+        captain = next(p for p in user_picks if p["is_captain"])
+        vice_captain = next(p for p in user_picks if p["is_vice_captain"])
+        _set_captain(user_picks, 302, "is_captain", user_player_ids)
+
+        new_captain = next(p for p in user_picks if p["is_captain"])
+        new_vice_captain = next(p for p in user_picks if p["is_vice_captain"])
+
+        assert new_captain["element"] == vice_captain["element"]
+        assert new_vice_captain["element"] == captain["element"]
+
+    @staticmethod
+    def test__set_captain_captain():
+        captain = next(p for p in user_picks if p["is_captain"])
+        _set_captain(user_picks, 145, "is_captain", user_player_ids)
+
+        new_captain = next(p for p in user_picks if p["is_captain"])
+
+        assert new_captain["element"] == 145
+        assert not captain["is_captain"]
+
+    @staticmethod
+    def test__set_captain_vice():
+        vice_captain = next(p for p in user_picks if p["is_vice_captain"])
+        _set_captain(user_picks, 145, "is_vice_captain", user_player_ids)
+
+        new_vice_captain = next(p for p in user_picks if p["is_vice_captain"])
+
+        assert new_vice_captain["element"] == 145
+        assert not vice_captain["is_vice_captain"]
 
 
 class TestUser(object):
@@ -471,6 +591,9 @@ class TestUser(object):
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
 
+    async def test__get_transfer_payload(self, loop, mocker, user):
+        pass
+
     async def test_transfer(self, loop, mocker, user):
         # TODO: expand tests
         data = {
@@ -486,10 +609,14 @@ class TestUser(object):
         with pytest.raises(Exception):
             await user.transfer([1], [2])
 
-    async def test_substitute(self, loop, mocker, user):
-        # TODO: expand tests
-        with pytest.raises(Exception):
-            await user.substitute([1], [2])
+    async def test__create_new_lineup(self, loop, mocker, user):
+        pass
+
+    async def test__post_substitutions(self, loop, mocker, user):
+        pass
+
+    async def test__captain_helper(self, loop, mocker, user):
+        pass
 
     async def test_captain(self, loop, mocker, user):
         # TODO: expand tests
@@ -500,3 +627,8 @@ class TestUser(object):
         # TODO: expand tests
         with pytest.raises(Exception):
             await user.vice_captain(1)
+
+    async def test_substitute(self, loop, mocker, user):
+        # TODO: expand tests
+        with pytest.raises(Exception):
+            await user.substitute([1], [2])
