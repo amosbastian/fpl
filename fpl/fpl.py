@@ -40,6 +40,7 @@ from .utils import average, fetch, position_converter, scale, team_converter
 
 class FPL():
     """The FPL class."""
+
     def __init__(self, session):
         self.session = session
 
@@ -130,7 +131,8 @@ class FPL():
             19 - West Ham
             20 - Wolves
         """
-        assert 0 < int(team_id) < 21, "Team ID must be a number between 1 and 20."
+        assert 0 < int(
+            team_id) < 21, "Team ID must be a number between 1 and 20."
         url = API_URLS["teams"]
         teams = await fetch(self.session, url)
         team = next(team for team in teams if team["id"] == int(team_id))
@@ -291,7 +293,8 @@ class FPL():
             fixture = next(fixture for fixture in gameweek_fixtures
                            if fixture["id"] == fixture_id)
         except StopIteration:
-            raise ValueError(f"Fixture with ID {fixture_id} not found in gameweek fixtures")
+            raise ValueError(
+                f"Fixture with ID {fixture_id} not found in gameweek fixtures")
 
         if return_json:
             return fixture

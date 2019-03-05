@@ -1,9 +1,10 @@
 import asyncio
+import json
 
 import aiohttp
 
 from ..constants import API_URLS
-from ..utils import fetch, logged_in
+from ..utils import fetch, get_csrf_token, logged_in
 
 
 def valid_gameweek(gameweek):
@@ -274,6 +275,41 @@ class User():
 
         return await fetch(self._session, API_URLS["watchlist"])
 
+    def _get_headers(self, csrf_token):
+        """Returns the headers needed for the transfer request."""
+        return {
+            "Content-Type": "application/json; charse:UTF-8",
+            "X-CSRFToken": csrf_token,
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "https://fantasy.premierleague.com/a/squad/transfers"
+        }
+
+    def _get_transfer_payload(
+            self, players_out, players_in, user_team, players):
+        """Returns the payload needed to make the desired transfers."""
+        payload = {
+            "confirmed": False,
+            "entry": self.id,
+            "event": self.current_event + 1,
+            "transfers": [],
+            "wildcard": False,
+            "freehit": False
+        }
+
+        for player_out_id, player_in_id in zip(players_out, players_in):
+            player_out = next(player for player in user_team
+                              if player["element"] == player_out_id)
+            player_in = next(player for player in players
+                             if player["id"] == player_in_id)
+            payload["transfers"].append({
+                "element_in": player_in["id"],
+                "element_out": player_out["element"],
+                "purchase_price": player_in["now_cost"],
+                "selling_price": player_out["selling_price"]
+            })
+
+        return payload
+
     async def transfer(self, players_out, players_in):
         """Transfers given players out and transfers given players in.
 
@@ -314,29 +350,13 @@ class User():
         if set(player_ids).isdisjoint(players_in):
             raise Exception("Player ID in `players_in` does not exist.")
 
-        payload = {
-            "confirmed": False,
-            "entry": self.id,
-            "event": self.current_event + 1,
-            "transfers": [],
-            "wildcard": False,
-            "freehit": False
-        }
-
-        for player_out_id, player_in_id in zip(players_out, players_in):
-            player_out = next(player for player in user_team
-                              if player["element"] == player_out_id)
-            player_in = next(player for player in players
-                             if player["id"] == player_in_id)
-            payload["transfers"].append({
-                "element_in": player_in["id"],
-                "element_out": player_out["element"],
-                "purchase_price": player_in["now_cost"],
-                "selling_price": player_out["selling_price"]
-            })
+        payload = self._get_transfer_payload(
+            players_out, players_in, user_team, players)
+        csrf_token = await get_csrf_token(self._session)
+        headers = self._get_headers(csrf_token)
 
         async with self._session.post(
-                API_URLS["transfers"], data=payload) as response:
+                API_URLS["transfers"], data=json.dumps(payload), headers=headers) as response:
             response_text = await response.text()
             print(response_text)
 
