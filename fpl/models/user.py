@@ -39,6 +39,31 @@ def _set_element_type(lineup, players):
         player["element_type"] = element_type
 
 
+def _set_captains(lineup, captain, vice_captain, player_ids):
+    if captain and captain not in player_ids:
+        raise ValueError("Cannot captain player who isn't in user's team.")
+
+    if vice_captain and vice_captain not in player_ids:
+        raise ValueError(
+            "Cannot vice captain player who isn't in user's team.")
+
+    for player in lineup:
+        if not player["can_captain"]:
+            continue
+
+        if captain:
+            player["is_captain"] = False
+
+        if vice_captain:
+            player["is_vice_captain"] = False
+
+        if player["element"] == captain:
+            player["is_captain"] = True
+
+        if player["element"] == vice_captain:
+            player["is_vice_captain"] = True
+
+
 class User():
     """A class representing a user of the Fantasy Premier League.
 
@@ -435,24 +460,29 @@ class User():
 
         return new_lineup
 
-    async def substitute(self, players_in, players_out, captain, vice_captain):
+    async def substitute(self, players_in, players_out, captain=None,
+                         vice_captain=None):
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
         if len(players_out) != len(players_in):
-            raise Exception("Number of players transferred in must be same as "
-                            "number transferred out.")
+            raise Exception("Number of players substituted in must be same as "
+                            "number substituted out.")
 
         if not set(players_in).isdisjoint(players_out):
             raise Exception("Player ID can't be in both lists.")
 
         user_team = await self.get_team()
         team_ids = [player["element"] for player in user_team]
-        substitution_ids = [*players_out, *players_in, captain, vice_captain]
+        substitution_ids = players_out + players_in
 
         if not set(substitution_ids).issubset(team_ids):
             raise Exception(
                 "Cannot substitute players who aren't in the user's team.")
+
+        # Set new captain or vice captain if applicable
+        if captain or vice_captain:
+            _set_captains(user_team, captain, vice_captain, team_ids)
 
         lineup = await self._create_new_lineup(
             players_in, players_out, user_team)
