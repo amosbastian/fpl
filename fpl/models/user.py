@@ -2,9 +2,10 @@ import asyncio
 import json
 
 import aiohttp
+from urllib3.util import response
 
 from ..constants import API_URLS
-from ..utils import fetch, get_csrf_token, logged_in
+from ..utils import fetch, get_csrf_token, logged_in, post
 
 
 def valid_gameweek(gameweek):
@@ -354,11 +355,10 @@ class User():
             players_out, players_in, user_team, players)
         csrf_token = await get_csrf_token(self._session)
         headers = self._get_headers(csrf_token)
-
-        async with self._session.post(
-                API_URLS["transfers"], data=json.dumps(payload), headers=headers) as response:
-            response_text = await response.text()
-            print(response_text)
+        post_response = await post(
+            self._session, API_URLS["transfers"], json.dumps(payload), headers)
+        if "non_form_errors" in post_response:
+            raise Exception(post_response["non_form_errors"])
 
     def __str__(self):
         return (f"{self.player_first_name} {self.player_last_name} - "
