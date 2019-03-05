@@ -101,7 +101,8 @@ def logged_in(session):
     :return: True if user is logged in else False
     :rtype: bool
     """
-    return "csrftoken" in session.cookie_jar.filter_cookies("https://users.premierleague.com/")
+    return "csrftoken" in session.cookie_jar.filter_cookies(
+        "https://users.premierleague.com/")
 
 
 def coroutine(func):

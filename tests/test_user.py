@@ -472,5 +472,15 @@ class TestUser(object):
         mocked_fetch.assert_called_once()
 
     async def test_transfer(self, loop, user):
+        data = {
+            "transfers": [{
+                "element_in": 172, "cost": 4, "purchase_price": 72,
+                "element_out": 300, "selling_price": 67
+            }],
+            "freehit": False,
+            "wildcard": False,
+            "spent_points": 4
+        }
+
         with pytest.raises(Exception):
             await user.transfer([1], [2])
