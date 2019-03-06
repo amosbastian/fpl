@@ -5,7 +5,7 @@ import aiohttp
 from urllib3.util import response
 
 from ..constants import API_URLS
-from ..utils import fetch, get_csrf_token, logged_in, post
+from ..utils import fetch, get_csrf_token, logged_in, post, get_headers
 
 
 def valid_gameweek(gameweek):
@@ -19,6 +19,88 @@ def valid_gameweek(gameweek):
     if (gameweek < 1) or (gameweek > 38):
         raise ValueError("Gameweek must be a number between 1 and 38.")
     return True
+
+
+def _ids_to_lineup(player_ids, user_team):
+    """Helper for converting list of player IDs to usable lineup.
+
+    :param player_ids: List of player IDS.
+    :type player_ids: list
+    :param user_team: The user's current team.
+    :type user_team: list
+    :return: A usable lineup.
+    :rtype: list
+    """
+    return [next(player for player in user_team
+                 if player["element"] == player_id)
+            for player_id in player_ids]
+
+
+def _id_to_element_type(player_id, players):
+    """Helper for converting a player's ID to their respective element type:
+    1, 2, 3 or 4.
+
+    :param player_id: A player's ID.
+    :type player_id: int
+    :param players: List of all players in the Fantasy Premier League.
+    :type players: list
+    :return: The player's element type.
+    :rtype: int
+    """
+    player = next(player for player in players
+                  if player["id"] == player_id)
+    return player["element_type"]
+
+
+def _set_element_type(lineup, players):
+    """Helper for setting the players' element types.
+
+    :param lineup: The user's current lineup.
+    :type lineup: list
+    :param players: List of all players in the Fantasy Premier League.
+    :type players: list
+    """
+    for player in lineup:
+        element_type = _id_to_element_type(player["element"], players)
+        player["element_type"] = element_type
+
+
+def _set_captain(lineup, captain, captain_type, player_ids):
+    """Sets the given captain's captain_type to True.
+
+    :param lineup: List of players.
+    :type lineup: list
+    :param captain: ID of the captain.
+    :type captain: int or str
+    :param captain_type: The captain type: 'is_captain' or 'is_vice_captain'.
+    :type captain_type: string
+    :param player_ids: List of the team's players' IDs.
+    :type player_ids: list
+    """
+    if captain and captain not in player_ids:
+        raise ValueError(
+            "Cannot (vice) captain player who isn't in user's team.")
+
+    current_captain = next(player for player in lineup if player[captain_type])
+    chosen_captain = next(player for player in lineup
+                          if player["element"] == captain)
+
+    # If the chosen captain is already a (vice) captain, then give his previous
+    # role to the current (vice) captain.
+    if chosen_captain["is_captain"] or chosen_captain["is_vice_captain"]:
+        current_captain["is_captain"] = True
+        current_captain["is_vice_captain"] = True
+        chosen_captain["is_captain"] = False
+        chosen_captain["is_vice_captain"] = False
+
+    for player in lineup:
+        if not player["can_captain"]:
+            continue
+
+        player[captain_type] = False
+
+        if player["element"] == captain:
+            player[captain_type] = True
 
 
 class User():
@@ -276,17 +358,9 @@ class User():
 
         return await fetch(self._session, API_URLS["watchlist"])
 
-    def _get_headers(self, csrf_token):
-        """Returns the headers needed for the transfer request."""
-        return {
-            "Content-Type": "application/json; charse:UTF-8",
-            "X-CSRFToken": csrf_token,
-            "X-Requested-With": "XMLHttpRequest",
-            "Referer": "https://fantasy.premierleague.com/a/squad/transfers"
-        }
-
     def _get_transfer_payload(
-            self, players_out, players_in, user_team, players, wildcard, free_hit):
+            self, players_out, players_in, user_team, players, wildcard,
+            free_hit):
         """Returns the payload needed to make the desired transfers."""
         payload = {
             "confirmed": False,
@@ -369,7 +443,8 @@ class User():
         payload = self._get_transfer_payload(
             players_out, players_in, user_team, players, wildcard, free_hit)
         csrf_token = await get_csrf_token(self._session)
-        headers = self._get_headers(csrf_token)
+        headers = get_headers(
+            csrf_token, "https://fantasy.premierleague.com/a/squad/transfers")
         post_response = await post(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
 
@@ -383,9 +458,146 @@ class User():
 
         # Everything is okay, so push the transfer through!
         payload["confirmed"] = True
-        post_repsonse = await post(
+        post_response = await post(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
         return post_response
+
+    async def _create_new_lineup(self, players_in, players_out, lineup):
+        """Helper for creating the new lineup of players.
+
+        :param players_in: List of IDs of players who will be substituted in.
+        :type players_in: list
+        :param players_out: List of IDs of players who will be substituted out.
+        :type players_out: list
+        :param lineup: List containing the user's current lineup.
+        :type lineup: list
+        :return: Returns the new lineup.
+        :rtype: list
+        """
+
+        players = await fetch(self._session, API_URLS["players"])
+        _set_element_type(lineup, players)
+        subs_in = _ids_to_lineup(players_in, lineup)
+        subs_out = _ids_to_lineup(players_out, lineup)
+
+        for sub_out, sub_in in zip(subs_out, subs_in):
+            # Get indices of sub out and sub in, then swap their position in
+            # the lineup
+            out_i, in_i = lineup.index(sub_out), lineup.index(sub_in)
+            lineup[out_i], lineup[in_i] = lineup[in_i], lineup[out_i]
+
+            same_position = sub_out["element_type"] == sub_in["element_type"]
+            both_subs = sub_out["is_sub"] and sub_in["is_sub"]
+
+            # If players don't play in the same position, and aren't both
+            # substitutes, then sort them
+            if not same_position and not both_subs:
+                lineup[out_i]["position"] = lineup[in_i]["position"]
+                lineup[in_i]["position"] = lineup[out_i]["position"]
+                starters, subs = lineup[:11], lineup[11:]
+                new_starters = sorted(starters, key=lambda x: (
+                    x["element_type"] - 1) * 100 + x["position"])
+                lineup = new_starters + subs
+
+                for position, player in enumerate(lineup):
+                    player["position"] = position + 1
+
+        new_lineup = [{
+            "element": player["element"],
+            "position": player["position"],
+            "is_captain": player["is_captain"],
+            "is_vice_captain": player["is_vice_captain"]
+        } for player in lineup]
+
+        return new_lineup
+
+    async def _post_substitutions(self, lineup):
+        """Helper for sending the POST requests with the new lineup.
+
+        :param lineup: The new lineup.
+        :type lineup: list
+        """
+        # Get CSRF token and create payload + headers
+        csrf_token = await get_csrf_token(self._session)
+        payload = json.dumps({"picks": lineup})
+        headers = get_headers(
+            csrf_token, "https://fantasy.premierleague.com/a/team/my")
+
+        await post(
+            self._session, API_URLS["user_team"].format(self.id) + "/",
+            payload=payload, headers=headers)
+
+    async def _captain_helper(self, captain, captain_type):
+        """Helper for setting the (vice) captain of the user's team."""
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
+        user_team = await self.get_team()
+        team_ids = [player["element"] for player in user_team]
+        _set_captain(user_team, captain, captain_type, team_ids)
+        lineup = await self._create_new_lineup([], [], user_team)
+
+        await self._post_substitutions(lineup)
+
+    async def captain(self, captain):
+        """Set the captain of the user's team.
+
+        :param captain: ID of the captain.
+        :type captain: int
+        """
+        await self._captain_helper(captain, "is_captain")
+
+    async def vice_captain(self, vice_captain):
+        """Set the vice captain of the user's team.
+
+        :param vice_captain: ID of the vice captain.
+        :type vice_captain: int
+        """
+        await self._captain_helper(vice_captain, "is_vice_captain")
+
+    async def substitute(self, players_in, players_out, captain=None,
+                         vice_captain=None):
+        """Substitute players on the bench for players in the starting eleven.
+        Also allows the user to simultaneously set the new (vice) captain(s).
+
+        :param players_in: List of IDs of players who will be substituted in.
+        :type players_in: list
+        :param players_out: List of IDS of players who will be substituted out.
+        :type players_out: list
+        :param captain: ID of the captain, defaults to None.
+        :param captain: int, optional
+        :param vice_captain: ID of the vice captain, defaults to None.
+        :param vice_captain: int, optional
+        """
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
+        if len(players_out) != len(players_in):
+            raise Exception("Number of players substituted in must be same as "
+                            "number substituted out.")
+
+        if not set(players_in).isdisjoint(players_out):
+            raise Exception("Player ID can't be in both lists.")
+
+        user_team = await self.get_team()
+        team_ids = [player["element"] for player in user_team]
+        substitution_ids = players_out + players_in
+
+        if not set(substitution_ids).issubset(team_ids):
+            raise Exception(
+                "Cannot substitute players who aren't in the user's team.")
+
+        # Set new captain or vice captain if applicable
+        if captain:
+            _set_captain(user_team, captain, "is_captain", team_ids)
+
+        if vice_captain:
+            _set_captain(user_team, vice_captain, "is_vice_captain", team_ids)
+
+        lineup = await self._create_new_lineup(
+            players_in, players_out, user_team)
+
+        await self._post_substitutions(lineup)
 
     def __str__(self):
         return (f"{self.player_first_name} {self.player_last_name} - "
