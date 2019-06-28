@@ -5,8 +5,8 @@ Player
 
 Information for the :class:`Player <fpl.models.player.Player>` is taken from e.g. the following endpoints:
 
-    https://fantasy.premierleague.com/drf/elements
-    https://fantasy.premierleague.com/drf/element-summary/1 (optional)
+    https://fantasy.premierleague.com/api/elements
+    https://fantasy.premierleague.com/api/element-summary/1 (optional)
 
 The information from the latter endpoint is only included when ``include_summary`` is ``True``.
 

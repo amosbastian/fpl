@@ -5,7 +5,7 @@ User
 
 Information for the :class:`User <fpl.models.user.User>` is taken from the following endpoint:
 
-    https://fantasy.premierleague.com/drf/entry/3808385
+    https://fantasy.premierleague.com/api/entry/3808385
 
 An example of what information a :class:`User <fpl.models.user.User>` contains is shown below:
 

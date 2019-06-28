@@ -48,7 +48,7 @@ class FPL():
         """Returns the user with the given ``user_id``.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385
+            https://fantasy.premierleague.com/api/entry/3808385
 
         :param user_id: A user's ID.
         :type user_id: string or int
@@ -70,7 +70,7 @@ class FPL():
         the optional ``team_ids`` list.
 
         Information is taken from:
-            https://fantasy.premierleague.com/drf/teams/
+            https://fantasy.premierleague.com/api/teams/
 
         :param list team_ids: (optional) List containing the IDs of teams.
             If not set a list of *all* teams will be returned.
@@ -97,7 +97,7 @@ class FPL():
         """Returns the team with the given ``team_id``.
 
         Information is taken from:
-            https://fantasy.premierleague.com/drf/teams/
+            https://fantasy.premierleague.com/api/teams/
 
         :param team_id: A team's ID.
         :type team_id: string or int
@@ -146,7 +146,7 @@ class FPL():
         """Returns a summary of the player with the given ``player_id``.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/element-summary/301
+            https://fantasy.premierleague.com/api/element-summary/301
 
         :param int player_id: A player's ID.
         :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
@@ -169,7 +169,7 @@ class FPL():
         in the ``player_ids`` list.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/element-summary/1
+            https://fantasy.premierleague.com/api/element-summary/1
 
         :param list player_ids: A list of player IDs.
         :param return_json: (optional) Boolean. If ``True`` returns a list of
@@ -198,8 +198,8 @@ class FPL():
         """Returns the player with the given ``player_id``.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/elements
-            https://fantasy.premierleague.com/drf/element-summary/1 (optional)
+            https://fantasy.premierleague.com/api/elements
+            https://fantasy.premierleague.com/api/element-summary/1 (optional)
 
         :param player_id: A player's ID.
         :type player_id: string or int
@@ -237,8 +237,8 @@ class FPL():
         IDs are in the given ``player_ids`` list.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/elements
-            https://fantasy.premierleague.com/drf/element-summary/1 (optional)
+            https://fantasy.premierleague.com/api/elements
+            https://fantasy.premierleague.com/api/element-summary/1 (optional)
 
         :param list player_ids: (optional) A list of player IDs
         :param boolean include_summary: (optional) Includes a player's summary
@@ -265,8 +265,8 @@ class FPL():
         """Returns the fixture with the given ``fixture_id``.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/fixtures/
-            https://fantasy.premierleague.com/drf/fixtures/?event=1
+            https://fantasy.premierleague.com/api/fixtures/
+            https://fantasy.premierleague.com/api/fixtures/?event=1
 
         :param int fixture_id: The fixture's ID.
         :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
@@ -306,8 +306,8 @@ class FPL():
         `fixture_ids` list.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/fixtures/
-            https://fantasy.premierleague.com/drf/fixtures/?event=1
+            https://fantasy.premierleague.com/api/fixtures/
+            https://fantasy.premierleague.com/api/fixtures/?event=1
 
         :param list fixture_ids: A list of fixture IDs.
         :param return_json: (optional) Boolean. If ``True`` returns a list of
@@ -342,8 +342,8 @@ class FPL():
         """Returns a list of all fixtures of the given ``gameweek``.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/fixtures/
-            https://fantasy.premierleague.com/drf/fixtures/?event=1
+            https://fantasy.premierleague.com/api/fixtures/
+            https://fantasy.premierleague.com/api/fixtures/?event=1
 
         :param gameweek: A gameweek.
         :type gameweek: string or int
@@ -365,8 +365,8 @@ class FPL():
         """Returns a list of *all* fixtures.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/fixtures/
-            https://fantasy.premierleague.com/drf/fixtures/?event=1
+            https://fantasy.premierleague.com/api/fixtures/
+            https://fantasy.premierleague.com/api/fixtures/?event=1
 
         :param return_json: (optional) Boolean. If ``True`` returns a list of
             ``dict``s, if ``False`` returns a list of  :class:`Fixture`
@@ -393,8 +393,8 @@ class FPL():
         """Returns the gameweek with the ID ``gameweek_id``.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/events/
-            https://fantasy.premierleague.com/drf/event/1/live
+            https://fantasy.premierleague.com/api/events/
+            https://fantasy.premierleague.com/api/event/1/live
 
         :param int gameweek_id: A gameweek's ID.
         :param bool include_summary: (optional) Includes a gameweek's live data
@@ -428,8 +428,8 @@ class FPL():
         whose IDs are in the ``gameweek_ids`` list.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/events/
-            https://fantasy.premierleague.com/drf/event/1/live
+            https://fantasy.premierleague.com/api/events/
+            https://fantasy.premierleague.com/api/event/1/live
 
         :param list gameweek_ids: (optional) A list of gameweek IDs.
         :param return_json: (optional) Boolean. If ``True`` returns a list of
@@ -453,7 +453,7 @@ class FPL():
         """Returns the Fantasy Premier League's rules / settings.
 
         Information is taken from here:
-            https://fantasy.premierleague.com/drf/game-settings/
+            https://fantasy.premierleague.com/api/game-settings/
 
         :rtype: dict
         """
@@ -464,7 +464,7 @@ class FPL():
         """Returns the classic league with the given ``league_id``.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/leagues-classic-standings/1137
+            https://fantasy.premierleague.com/api/leagues-classic-standings/1137
 
         :param string league_id: A classic league's ID.
         :type league_id: string or int
@@ -486,7 +486,7 @@ class FPL():
         """Returns a `H2HLeague` object with the given `league_id`.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/leagues-h2h-standings/829116
+            https://fantasy.premierleague.com/api/leagues-h2h-standings/829116
 
         :param league_id: A H2H league's ID.
         :type league_id: string or int

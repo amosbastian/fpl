@@ -30,7 +30,7 @@ class ClassicLeague():
         """Returns the league's standings of the given page.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/leagues-classic-standings/1137?ls-page=1
+            https://fantasy.premierleague.com/api/leagues-classic-standings/1137?ls-page=1
 
         :param page: A page of the league's standings (default is 50 managers
             per page).

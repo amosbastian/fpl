@@ -24,7 +24,7 @@ async def get_current_gameweek(session):
     :rtype: int
     """
     dynamic = await fetch(
-        session, "https://fantasy.premierleague.com/drf/bootstrap-dynamic")
+        session, "https://fantasy.premierleague.com/api/bootstrap-dynamic")
 
     return dynamic["entry"]["current_event"]
 

@@ -5,8 +5,8 @@ Fixture
 
 Information for the :class:`Fixture <fpl.models.fixture.Fixture>` is taken from e.g. the following endpoints:
 
-    https://fantasy.premierleague.com/drf/fixtures/
-    https://fantasy.premierleague.com/drf/fixtures/?event=1
+    https://fantasy.premierleague.com/api/fixtures/
+    https://fantasy.premierleague.com/api/fixtures/?event=1
 
 An example of what information a :class:`Fixture <fpl.models.fixture.Fixture>` contains is shown below:
 

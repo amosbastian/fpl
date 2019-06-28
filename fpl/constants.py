@@ -1,4 +1,4 @@
-API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+API_BASE_URL = "https://fantasy.premierleague.com/api/"
 
 API_URLS = {
     "dynamic": "{}bootstrap-dynamic".format(API_BASE_URL),

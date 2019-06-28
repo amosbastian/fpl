@@ -3,7 +3,7 @@ ClassicLeague
 
 Information for the :class:`ClassicLeague <fpl.models.classic_league.ClassicLeague>` is taken from e.g. the following endpoint:
 
-    https://fantasy.premierleague.com/drf/leagues-classic-standings/1137
+    https://fantasy.premierleague.com/api/leagues-classic-standings/1137
 
 An example of what information a :class:`ClassicLeague <fpl.models.classic_league.ClassicLeague>` contains is shown below:
 
