@@ -19,6 +19,7 @@ class Player():
       >>> asyncio.run(main())
       Pogba - Midfielder - Man Utd
     """
+
     def __init__(self, player_information):
         for k, v in player_information.items():
             setattr(self, k, v)
@@ -29,7 +30,8 @@ class Player():
 
         :rtype: int
         """
-        return sum([1 for fixture in getattr(self, "fixtures", []) if fixture["minutes"] > 0])
+        return sum([1 for fixture in getattr(self, "fixtures", [])
+                    if fixture["minutes"] > 0])
 
     @property
     def pp90(self):
@@ -40,7 +42,7 @@ class Player():
         minutes = getattr(self, "minutes", 0)
         if minutes == 0:
             return 0
-        return getattr(self, "total_points", 0) / float(minutes)
+        return getattr(self, "total_points", 0) / 90.0
 
     def __str__(self):
         return (f"{self.web_name} - "
@@ -51,6 +53,7 @@ class Player():
 class PlayerSummary:
     """A class representing a player in the Fantasy Premier League's summary.
     """
+
     def __init__(self, player_summary):
         for k, v in player_summary.items():
             setattr(self, k, v)

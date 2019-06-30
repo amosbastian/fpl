@@ -177,4 +177,4 @@ class TestFixture(object):
 
     @staticmethod
     def test_str(fixture):
-        assert str(fixture) == "Man Utd vs. Leicester - 10 Aug 19:00"
+        assert str(fixture) == "Norwich vs. Man City - 10 Aug 19:00"

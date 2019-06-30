@@ -33,20 +33,20 @@ def team_converter(team_id):
     """Converts a team's ID to their actual name."""
     team_map = {
         1: "Arsenal",
-        2: "Bournemouth",
-        3: "Brighton",
-        4: "Burnley",
-        5: "Cardiff",
+        2: "Aston Villa",
+        3: "Bournemouth",
+        4: "Brighton",
+        5: "Burnley",
         6: "Chelsea",
         7: "Crystal Palace",
         8: "Everton",
-        9: "Fulham",
-        10: "Huddersfield",
-        11: "Leicester",
-        12: "Liverpool",
-        13: "Man City",
-        14: "Man Utd",
-        15: "Newcastle",
+        9: "Leicester",
+        10: "Liverpool",
+        11: "Man City",
+        12: "Man Utd",
+        13: "Newcastle",
+        14: "Norwich",
+        15: "Sheffield Utd",
         16: "Southampton",
         17: "Spurs",
         18: "Watford",
@@ -114,20 +114,10 @@ def coroutine(func):
     return update_wrapper(wrapper, func)
 
 
-async def get_csrf_token(session):
-    """Returns the Cross-Site Request Forgery token from the current session.
-    """
-    url = "https://fantasy.premierleague.com/"
-    filtered = session.cookie_jar.filter_cookies(url)
-    csrf_token = filtered["csrftoken"].value
-    return csrf_token
-
-
-def get_headers(csrf_token, referer):
+def get_headers(referer):
     """Returns the headers needed for the transfer request."""
     return {
         "Content-Type": "application/json; charset=UTF-8",
-        "X-CSRFToken": csrf_token,
         "X-Requested-With": "XMLHttpRequest",
         "Referer": referer
     }

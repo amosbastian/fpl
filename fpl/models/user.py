@@ -5,7 +5,7 @@ import aiohttp
 from urllib3.util import response
 
 from ..constants import API_URLS
-from ..utils import fetch, get_csrf_token, logged_in, post, get_headers
+from ..utils import fetch, logged_in, post, get_headers
 
 
 def valid_gameweek(gameweek):
@@ -122,9 +122,8 @@ class User():
 
     def __init__(self, user_information, session):
         self._session = session
-        for k, v in user_information["entry"].items():
+        for k, v in user_information.items():
             setattr(self, k, v)
-        self.leagues = user_information["leagues"]
 
     async def get_gameweek_history(self, gameweek=None):
         """Returns a list containing the gameweek history of the user.
@@ -442,9 +441,8 @@ class User():
         # e.g. too many players from the same team, or not enough money.
         payload = self._get_transfer_payload(
             players_out, players_in, user_team, players, wildcard, free_hit)
-        csrf_token = await get_csrf_token(self._session)
         headers = get_headers(
-            csrf_token, "https://fantasy.premierleague.com/a/squad/transfers")
+            "https://fantasy.premierleague.com/a/squad/transfers")
         post_response = await post(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
 
@@ -518,10 +516,8 @@ class User():
         :type lineup: list
         """
         # Get CSRF token and create payload + headers
-        csrf_token = await get_csrf_token(self._session)
         payload = json.dumps({"picks": lineup})
-        headers = get_headers(
-            csrf_token, "https://fantasy.premierleague.com/a/team/my")
+        headers = get_headers("https://fantasy.premierleague.com/a/team/my")
 
         await post(
             self._session, API_URLS["user_team"].format(self.id) + "/",

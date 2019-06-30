@@ -1,11 +1,11 @@
 import pytest
 
-from fpl.utils import (chip_converter, get_csrf_token, get_current_gameweek,
-                       get_headers, logged_in, position_converter,
-                       team_converter)
+from fpl.utils import (chip_converter, get_current_gameweek, get_headers,
+                       logged_in, position_converter, team_converter)
 
 
 class TestUtils(object):
+    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_get_current_gameweek(self, loop, fpl):
         with pytest.raises(TypeError):
             current_gameweek = await get_current_gameweek(fpl.session)
@@ -36,14 +36,7 @@ class TestUtils(object):
         await fpl.login()
         assert logged_in(fpl.session)
 
-    async def test_get_csrf_token(self, loop, fpl):
-        with pytest.raises(KeyError):
-            await get_csrf_token(fpl.session)
-        await fpl.login()
-        csrf_token = await get_csrf_token(fpl.session)
-        assert isinstance(csrf_token, str)
-
     @staticmethod
     def test_get_headers():
-        headers = get_headers("123", "456")
+        headers = get_headers("123")
         assert isinstance(headers, dict)

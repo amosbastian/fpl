@@ -70,7 +70,7 @@ class FPL():
         the optional ``team_ids`` list.
 
         Information is taken from:
-            https://fantasy.premierleague.com/drf/teams/
+            https://fantasy.premierleague.com/api/bootstrap-static
 
         :param list team_ids: (optional) List containing the IDs of teams.
             If not set a list of *all* teams will be returned.
@@ -80,8 +80,9 @@ class FPL():
         :type return_json: bool
         :rtype: list
         """
-        url = API_URLS["teams"]
+        url = API_URLS["static"]
         teams = await fetch(self.session, url)
+        teams = teams["teams"]
 
         if team_ids:
             team_ids = set(team_ids)
@@ -97,7 +98,7 @@ class FPL():
         """Returns the team with the given ``team_id``.
 
         Information is taken from:
-            https://fantasy.premierleague.com/drf/teams/
+            https://fantasy.premierleague.com/api/bootstrap-static
 
         :param team_id: A team's ID.
         :type team_id: string or int
@@ -133,9 +134,10 @@ class FPL():
         """
         assert 0 < int(
             team_id) < 21, "Team ID must be a number between 1 and 20."
-        url = API_URLS["teams"]
+        url = API_URLS["static"]
         teams = await fetch(self.session, url)
-        team = next(team for team in teams if team["id"] == int(team_id))
+        team = next(team for team in teams["teams"]
+                    if team["id"] == int(team_id))
 
         if return_json:
             return team
@@ -213,7 +215,8 @@ class FPL():
         :raises ValueError: Player with ``player_id`` not found
         """
         if not players:
-            players = await fetch(self.session, API_URLS["players"])
+            players = await fetch(self.session, API_URLS["static"])
+            players = players["elements"]
 
         try:
             player = next(player for player in players
@@ -249,7 +252,9 @@ class FPL():
         :type return_json: bool
         :rtype: list
         """
-        players = await fetch(self.session, API_URLS["players"])
+        players = await fetch(self.session, API_URLS["static"])
+        players = players["elements"]
+
         if not player_ids:
             player_ids = [player["id"] for player in players]
 
@@ -406,21 +411,25 @@ class FPL():
         :rtype: :class:`Gameweek` or ``dict``
         """
 
-        static_gameweeks = await fetch(self.session, API_URLS["gameweeks"])
+        static_gameweeks = await fetch(self.session, API_URLS["static"])
+        static_gameweeks = static_gameweeks["events"]
+
         try:
             static_gameweek = next(gameweek for gameweek in static_gameweeks if
                                    gameweek["id"] == gameweek_id)
         except StopIteration:
             raise ValueError(f"Gameweek with ID {gameweek_id} not found")
-        live_gameweek = await fetch(
-            self.session, API_URLS["gameweek_live"].format(gameweek_id))
 
-        live_gameweek.update(static_gameweek)
+        # Currently not available
+        # live_gameweek = await fetch(
+        #     self.session, API_URLS["gameweek_live"].format(gameweek_id))
+
+        # live_gameweek.update(static_gameweek)
 
         if return_json:
-            return live_gameweek
+            return static_gameweek
 
-        return Gameweek(live_gameweek)
+        return Gameweek(static_gameweek)
 
     async def get_gameweeks(self, gameweek_ids=None, include_live=False,
                             return_json=False):
@@ -448,17 +457,6 @@ class FPL():
 
         gameweeks = await asyncio.gather(*tasks)
         return gameweeks
-
-    async def game_settings(self):
-        """Returns the Fantasy Premier League's rules / settings.
-
-        Information is taken from here:
-            https://fantasy.premierleague.com/drf/game-settings/
-
-        :rtype: dict
-        """
-        settings = await fetch(self.session, API_URLS["settings"])
-        return settings
 
     async def get_classic_league(self, league_id, return_json=False):
         """Returns the classic league with the given ``league_id``.
@@ -518,14 +516,7 @@ class FPL():
         if not email or not password:
             raise ValueError("Email and password must be set")
 
-        url = "https://fantasy.premierleague.com/"
-        await self.session.get(url)
-        filtered = self.session.cookie_jar.filter_cookies(url)
-        assert filtered["csrftoken"]
-        csrf_token = filtered["csrftoken"].value
-
         payload = {
-            "csrfmiddlewaretoken": csrf_token,
             "login": email,
             "password": password,
             "app": "plfpl-web",
@@ -588,6 +579,10 @@ class FPL():
                 points = fixture["total_points"]
                 opponent = team_converter(fixture["opponent_team"])
                 location = "H" if fixture["was_home"] else "A"
+                if opponent == "Watford" and location == "A":
+                    if player["element_type"] == 4:
+                        print(
+                            f"{player['web_name']} scored {points} on {fixture['kickoff_time_formatted']}")
 
                 points_against.setdefault(
                     opponent,

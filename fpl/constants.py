@@ -1,4 +1,4 @@
-API_BASE_URL = "https://fantasy.premierleague.com/drf/"
+API_BASE_URL = "https://fantasy.premierleague.com/api/"
 
 API_URLS = {
     "dynamic": "{}bootstrap-dynamic".format(API_BASE_URL),
@@ -8,8 +8,8 @@ API_URLS = {
     "gameweek_live": "{}event/{{}}/live".format(API_BASE_URL),
     "h2h": "{}leagues-entries-and-h2h-matches/league/{{}}?page={{}}".format(
         API_BASE_URL),
-    "league_classic": "{}leagues-classic-standings/{{}}".format(API_BASE_URL),
-    "league_h2h": "{}leagues-h2h-standings/{{}}".format(API_BASE_URL),
+    "league_classic": "{}leagues-classic/{{}}/standings/".format(API_BASE_URL),
+    "league_h2h": "{}leagues-h2h/{{}}/standings/".format(API_BASE_URL),
     "players": "{}elements".format(API_BASE_URL),
     "player": "{}element-summary/{{}}".format(API_BASE_URL),
     "settings": "{}game-settings".format(API_BASE_URL),
