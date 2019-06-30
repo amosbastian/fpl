@@ -114,20 +114,10 @@ def coroutine(func):
     return update_wrapper(wrapper, func)
 
 
-async def get_csrf_token(session):
-    """Returns the Cross-Site Request Forgery token from the current session.
-    """
-    url = "https://fantasy.premierleague.com/"
-    filtered = session.cookie_jar.filter_cookies(url)
-    csrf_token = filtered["csrftoken"].value
-    return csrf_token
-
-
-def get_headers(csrf_token, referer):
+def get_headers(referer):
     """Returns the headers needed for the transfer request."""
     return {
         "Content-Type": "application/json; charset=UTF-8",
-        "X-CSRFToken": csrf_token,
         "X-Requested-With": "XMLHttpRequest",
         "Referer": referer
     }
