@@ -28,11 +28,11 @@ class TestFPL(object):
             await fpl.get_user("-10")
 
         # test valid id
-        user = await fpl.get_user("3523615")
+        user = await fpl.get_user(91928)
         assert isinstance(user, User)
 
         # test valid id, require json response
-        user = await fpl.get_user("3523615", True)
+        user = await fpl.get_user(91928, True)
         assert isinstance(user, dict)
 
     async def test_team(self, loop, fpl):
@@ -187,26 +187,24 @@ class TestFPL(object):
         gameweek = await fpl.get_gameweek(20, return_json=True)
         assert isinstance(gameweek, dict)
 
-    async def test_game_settings(self, loop, fpl):
-        game_settings = await fpl.game_settings()
-        assert isinstance(game_settings, dict)
-
     async def test_classic_league(self, loop, fpl):
-        classic_league = await fpl.get_classic_league(890172)
+        classic_league = await fpl.get_classic_league(34438)
         assert isinstance(classic_league, ClassicLeague)
 
-        classic_league = await fpl.get_classic_league(890172, return_json=True)
+        classic_league = await fpl.get_classic_league(34438, return_json=True)
         assert isinstance(classic_league, dict)
 
+    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_h2h_league(self, loop, fpl):
-        h2h_league = await fpl.get_h2h_league(760869)
+        h2h_league = await fpl.get_h2h_league(63368)
         assert isinstance(h2h_league, H2HLeague)
 
-        h2h_league = await fpl.get_h2h_league(760869, True)
+        h2h_league = await fpl.get_h2h_league(63368, True)
         assert isinstance(h2h_league, dict)
 
     async def test_login_with_no_email_password(self, loop, mocker, monkeypatch, fpl):
-        mocked_text = mocker.patch('aiohttp.ClientResponse.text', new_callable=AsyncMock)
+        mocked_text = mocker.patch(
+            'aiohttp.ClientResponse.text', new_callable=AsyncMock)
         monkeypatch.setenv("FPL_EMAIL", "")
         monkeypatch.setenv("FPL_PASSWORD", "")
         with pytest.raises(ValueError):
@@ -214,7 +212,8 @@ class TestFPL(object):
         mocked_text.assert_not_called()
 
     async def test_login_with_invalid_email_password(self, loop, mocker, monkeypatch, fpl):
-        mocked_text = mocker.patch('aiohttp.ClientResponse.text', new_callable=AsyncMock)
+        mocked_text = mocker.patch(
+            'aiohttp.ClientResponse.text', new_callable=AsyncMock)
         mocked_text.return_value = "Incorrect email or password"
 
         with pytest.raises(ValueError):
@@ -228,7 +227,8 @@ class TestFPL(object):
         assert mocked_text.call_count == 2
 
     async def test_login_with_valid_email_password(self, loop, mocker, fpl):
-        mocked_text = mocker.patch('aiohttp.ClientResponse.text', new_callable=AsyncMock)
+        mocked_text = mocker.patch(
+            'aiohttp.ClientResponse.text', new_callable=AsyncMock)
         mocked_text.return_value = "Successful login"
         await fpl.login("email", "password")
         mocked_text.assert_called_once()
@@ -237,6 +237,7 @@ class TestFPL(object):
         points_against = await fpl.get_points_against()
         assert isinstance(points_against, dict)
 
+    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_FDR(self, loop, fpl):
         def test_main(fdr):
             assert isinstance(fdr, dict)
