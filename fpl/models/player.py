@@ -30,7 +30,8 @@ class Player():
 
         :rtype: int
         """
-        return sum([1 for fixture in getattr(self, "fixtures", []) if fixture["minutes"] > 0])
+        return sum([1 for fixture in getattr(self, "fixtures", [])
+                    if fixture["minutes"] > 0])
 
     @property
     def pp90(self):
