@@ -1,11 +1,13 @@
 import asyncio
 from functools import update_wrapper
 
+headers = {"User-Agent": "https://github.com/amosbastian/fpl"}
+
 
 async def fetch(session, url):
     while True:
         try:
-            async with session.get(url) as response:
+            async with session.get(url, headers=headers) as response:
                 assert response.status == 200
                 return await response.json()
         except Exception:
