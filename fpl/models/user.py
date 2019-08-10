@@ -164,7 +164,7 @@ class User():
                 self._session, API_URLS["user_history"].format(self.id))
 
         self._history = history
-        return history["season"]
+        return history["past"]
 
     async def get_chips_history(self, gameweek=None):
         """Returns a list containing the chip history of the user.
