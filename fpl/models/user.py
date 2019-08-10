@@ -144,10 +144,10 @@ class User():
 
         if gameweek:
             valid_gameweek(gameweek)
-            return next(gw for gw in history["history"]
+            return next(gw for gw in history["current"]
                         if gw["event"] == gameweek)
 
-        return history["history"]
+        return history["current"]
 
     async def get_season_history(self):
         """Returns a list containing the seasonal history of the user.
