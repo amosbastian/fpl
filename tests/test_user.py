@@ -323,12 +323,12 @@ class TestUser(object):
     async def test_get_watchlist_authenticated(self, loop, mocker, user):
         mocked_logged_in = mocker.patch("fpl.models.user.logged_in",
                                         return_value=True)
-        data = [{"element": 1}, {"element": 2}]
+        data = {"watched": []}
         mocked_fetch = mocker.patch("fpl.models.user.fetch",
                                     return_value=data,
                                     new_callable=AsyncMock)
         watchlist = await user.get_watchlist()
-        assert watchlist == data
+        assert watchlist == data["watched"]
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
 
