@@ -312,46 +312,46 @@ class User():
 
         return response["picks"]
 
-    async def get_transfers(self, gameweek=None):
-        """Returns either a list of all the user's transfers, or a list of
-        transfers made in the given gameweek.
+    # async def get_transfers(self, gameweek=None):
+    #     """Returns either a list of all the user's transfers, or a list of
+    #     transfers made in the given gameweek.
 
-        Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/transfers
+    #     Information is taken from e.g.:
+    #         https://fantasy.premierleague.com/drf/entry/3808385/transfers
 
-        :param gameweek: (optional): The gameweek. Defaults to ``None``.
-        :rtype: list
-        """
-        transfers = getattr(self, "_transfers", None)
-        if not transfers:
-            transfers = await fetch(
-                self._session, API_URLS["user_transfers"].format(self.id))
-            self._transfers = transfers
+    #     :param gameweek: (optional): The gameweek. Defaults to ``None``.
+    #     :rtype: list
+    #     """
+    #     transfers = getattr(self, "_transfers", None)
+    #     if not transfers:
+    #         transfers = await fetch(
+    #             self._session, API_URLS["user_transfers"].format(self.id))
+    #         self._transfers = transfers
 
-        if gameweek:
-            valid_gameweek(gameweek)
-            return [transfer for transfer in transfers["history"]
-                    if transfer["event"] == gameweek]
+    #     if gameweek:
+    #         valid_gameweek(gameweek)
+    #         return [transfer for transfer in transfers["history"]
+    #                 if transfer["event"] == gameweek]
 
-        return transfers["history"]
+    #     return transfers["history"]
 
-    async def get_wildcards(self):
-        """Returns a list containing information about when (and if) the user
-        has played their wildcard(s).
+    # async def get_wildcards(self):
+    #     """Returns a list containing information about when (and if) the user
+    #     has played their wildcard(s).
 
-        Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/transfers
+    #     Information is taken from e.g.:
+    #         https://fantasy.premierleague.com/drf/entry/3808385/transfers
 
-        :rtype: list
-        """
-        if hasattr(self, "_transfers"):
-            return self._transfers["wildcards"]
+    #     :rtype: list
+    #     """
+    #     if hasattr(self, "_transfers"):
+    #         return self._transfers["wildcards"]
 
-        transfers = await fetch(
-            self._session, API_URLS["user_transfers"].format(self.id))
+    #     transfers = await fetch(
+    #         self._session, API_URLS["user_transfers"].format(self.id))
 
-        self._transfers = transfers
-        return transfers["wildcards"]
+    #     self._transfers = transfers
+    #     return transfers["wildcards"]
 
     async def get_watchlist(self):
         """Returns the user's watchlist. Requires the user to have logged in

@@ -303,10 +303,12 @@ class TestUser(object):
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
 
+    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_get_transfers(self, loop, user):
         transfers = await user.get_transfers()
         assert isinstance(transfers, list)
 
+    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_get_wildcards_cached(self, loop, user):
         transfers = await user.get_wildcards()
         assert isinstance(transfers, list)
