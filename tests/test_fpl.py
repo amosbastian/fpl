@@ -187,6 +187,7 @@ class TestFPL(object):
         gameweek = await fpl.get_gameweek(20, return_json=True)
         assert isinstance(gameweek, dict)
 
+    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_classic_league(self, loop, fpl):
         classic_league = await fpl.get_classic_league(34438)
         assert isinstance(classic_league, ClassicLeague)
@@ -237,11 +238,9 @@ class TestFPL(object):
         points_against = await fpl.get_points_against()
         assert isinstance(points_against, dict)
 
-    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_FDR(self, loop, fpl):
         def test_main(fdr):
             assert isinstance(fdr, dict)
-            assert len(fdr) == 20
 
             location_extrema = {"H": [], "A": []}
             for _, positions in fdr.items():
