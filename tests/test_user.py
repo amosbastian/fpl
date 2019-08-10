@@ -184,45 +184,26 @@ class TestUser(object):
         await session.close()
 
     async def test_get_gameweek_history_unknown_gameweek_cached(
-            self, loop, mocker, user):
-        user._history = {"history": [{"event": 1}, {"event": 2}, {"event": 3}]}
-        mocked_fetch = mocker.patch(
-            "fpl.models.user.fetch", return_value={}, new_callable=AsyncMock)
+            self, loop, user):
         history = await user.get_gameweek_history()
-        assert history is user._history["history"]
-        mocked_fetch.assert_not_called()
+        assert history is user._history["current"]
+        assert isinstance(history, list)
 
     async def test_get_gameweek_history_unknown_gameweek_non_cached(
-            self, loop, mocker, user):
-        mocked_fetch = mocker.patch("fpl.models.user.fetch",
-                                    return_value={"history": [
-                                        {"event": 1}, {"event": 2}, {"event": 3}]},
-                                    new_callable=AsyncMock)
+            self, loop, user):
         history = await user.get_gameweek_history()
-        mocked_fetch.assert_called_once()
         assert isinstance(history, list)
-        assert len(history) == 3
 
     async def test_get_gameweek_history_known_gameweek_cached(
-            self, loop, mocker, user):
-        mocked_fetch = mocker.patch("fpl.models.user.fetch",
-                                    return_value={"history": []},
-                                    new_callable=AsyncMock)
-        events = [{"event": 1}, {"event": 2}, {"event": 3}]
-        user._history = {"history": events}
-        history = await user.get_gameweek_history(1)
-        assert history is events[0]
-        mocked_fetch.assert_not_called()
+            self, loop, user):
+        history = await user.get_gameweek_history(gameweek=1)
+        assert history is user._history["current"][0]
+        assert isinstance(history, dict)
 
     async def test_get_gameweek_history_known_gameweek_non_cached(
             self, loop, mocker, user):
-        events = [{"event": 1}, {"event": 2}, {"event": 3}]
-        mocked_fetch = mocker.patch("fpl.models.user.fetch",
-                                    return_value={"history": events},
-                                    new_callable=AsyncMock)
-        history = await user.get_gameweek_history(1)
-        assert history is events[0]
-        mocked_fetch.assert_called_once()
+        history = await user.get_gameweek_history(gameweek=1)
+        assert isinstance(history, dict)
 
     async def test_get_season_history_cached(self, loop, mocker, user):
         mocked_fetch = mocker.patch("fpl.models.user.fetch",
