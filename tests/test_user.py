@@ -205,23 +205,10 @@ class TestUser(object):
         history = await user.get_gameweek_history(gameweek=1)
         assert isinstance(history, dict)
 
-    async def test_get_season_history_cached(self, loop, mocker, user):
-        mocked_fetch = mocker.patch("fpl.models.user.fetch",
-                                    return_value={"season": [{"season": 5}]},
-                                    new_callable=AsyncMock)
-        seasons = [{"season": 6}]
-        user._history = {"season": seasons}
+    async def test_get_season_history(self, loop, user):
         season_history = await user.get_season_history()
-        mocked_fetch.assert_not_called()
-        assert season_history is seasons
-
-    async def test_get_season_history_non_cached(self, loop, mocker, user):
-        mocked_fetch = mocker.patch("fpl.models.user.fetch",
-                                    return_value={"season": [{"season": 5}]},
-                                    new_callable=AsyncMock)
-        season_history = await user.get_season_history()
-        mocked_fetch.assert_called_once()
-        assert season_history is mocked_fetch.return_value["season"]
+        assert season_history is user._history["past"]
+        assert isinstance(season_history, list)
 
     async def test_get_chips_history_cached_with_unknown_gameweek(
             self, loop, mocker, user):
