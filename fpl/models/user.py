@@ -185,8 +185,11 @@ class User():
 
         if gameweek:
             valid_gameweek(gameweek)
-            return next(chip for chip in history["chips"]
-                        if chip["event"] == gameweek)
+            try:
+                return next(chip for chip in history["chips"]
+                            if chip["event"] == gameweek)
+            except StopIteration:
+                return None
 
         return history["chips"]
 
@@ -230,7 +233,8 @@ class User():
         return picks_out
 
     async def get_active_chips(self, gameweek=None):
-        """Returns a list containing the user's active chips each gameweek.
+        """Returns a list containing the user's active chip for each gameweek,
+        or the active chip of the given gameweek.
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
@@ -250,8 +254,11 @@ class User():
 
         if gameweek:
             valid_gameweek(gameweek)
-            return [next(pick["active_chip"] for pick in picks
-                         if pick["event"]["id"] == gameweek)]
+            try:
+                return [next(pick["active_chip"] for pick in picks
+                             if pick["entry_history"]["event"] == gameweek)][0]
+            except StopIteration:
+                return None
 
         return [pick["active_chip"] for pick in picks]
 
@@ -277,8 +284,11 @@ class User():
 
         if gameweek:
             valid_gameweek(gameweek)
-            return next(pick["automatic_subs"] for pick in picks
-                        if pick["event"]["id"] == gameweek)
+            try:
+                return next(pick["automatic_subs"] for pick in picks
+                            if pick["entry_history"]["event"] == gameweek)
+            except StopIteration:
+                return None
 
         return [p for pick in picks for p in pick["automatic_subs"]]
 
