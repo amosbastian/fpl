@@ -95,7 +95,10 @@ def scale(value, upper, lower, min_, max_):
 
 def average(iterable):
     """Returns the average value of the iterable."""
-    return sum(iterable) / float(len(iterable))
+    try:
+        return sum(iterable) / float(len(iterable))
+    except ZeroDivisionError:
+        return 0.0
 
 
 def logged_in(session):
