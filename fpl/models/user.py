@@ -215,16 +215,16 @@ class User():
             valid_gameweek(gameweek)
             try:
                 pick = next(pick for pick in picks
-                            if pick["event"]["id"] == gameweek)
+                            if pick["entry_history"]["event"] == gameweek)
             except StopIteration:
                 return {}
             else:
-                return {pick["event"]["id"]: pick}
+                return {pick["entry_history"]["event"]: pick["picks"]}
 
         picks_out = {}
         for pick in picks:
             try:
-                picks_out[pick["event"]["id"]] = pick
+                picks_out[pick["entry_history"]["event"]] = pick["picks"]
             except KeyError:
                 pass
         return picks_out
