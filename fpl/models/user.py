@@ -358,14 +358,15 @@ class User():
         using ``fpl.login()``.
 
         Information is taken from here:
-            https://fantasy.premierleague.com/drf/watchlist/
+            https://fantasy.premierleague.com/api/me/
 
         :rtype: list
         """
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        return await fetch(self._session, API_URLS["watchlist"])
+        me = await fetch(self._session, API_URLS["me"])
+        return me["watched"]
 
     def _get_transfer_payload(
             self, players_out, players_in, user_team, players, wildcard,
