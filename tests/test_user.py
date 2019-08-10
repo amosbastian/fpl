@@ -303,67 +303,13 @@ class TestUser(object):
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
 
-    async def test_get_transfers_cached_with_unknown_gameweek(
-            self, loop, mocker, user):
-        transfers_data = [{"id": 6812275, "event": 2},
-                          {"id": 6800000, "event": 3}]
-        user._transfers = {"event": {"id": 1}, "history": transfers_data}
-        mocked_fetch = mocker.patch(
-            "fpl.models.user.fetch", return_value={}, new_callable=AsyncMock)
+    async def test_get_transfers(self, loop, user):
         transfers = await user.get_transfers()
-        assert transfers == transfers_data
-        mocked_fetch.assert_not_called()
+        assert isinstance(transfers, list)
 
-    async def test_get_transfers_non_cached_with_unknown_gameweek(
-            self, loop, mocker, user):
-        transfers_data = [{"id": 6812275, "event": 2},
-                          {"id": 6800000, "event": 3}]
-        data = {"event": {"id": 1}, "history": transfers_data}
-        mocked_fetch = mocker.patch(
-            "fpl.models.user.fetch", return_value=data, new_callable=AsyncMock)
-        transfers = await user.get_transfers()
-        assert transfers == transfers_data
-        mocked_fetch.assert_called_once()
-
-    async def test_get_transfers_cached_with_known_gameweek(
-            self, loop, mocker, user):
-        transfers_data = [{"id": 6812275, "event": 2},
-                          {"id": 6800000, "event": 3}]
-        user._transfers = {"event": {"id": 1}, "history": transfers_data}
-        mocked_fetch = mocker.patch(
-            "fpl.models.user.fetch", return_value={}, new_callable=AsyncMock)
-        transfers = await user.get_transfers(2)
-        assert transfers == [transfers_data[0]]
-        mocked_fetch.assert_not_called()
-
-    async def test_get_transfers_non_cached_with_known_gameweek(
-            self, loop, mocker, user):
-        transfers_data = [{"id": 6812275, "event": 2},
-                          {"id": 6800000, "event": 3}]
-        data = {"event": {"id": 1}, "history": transfers_data}
-        mocked_fetch = mocker.patch(
-            "fpl.models.user.fetch", return_value=data, new_callable=AsyncMock)
-        transfers = await user.get_transfers(2)
-        assert transfers == [transfers_data[0]]
-        mocked_fetch.assert_called_once()
-
-    async def test_get_wildcards_cached(self, loop, mocker, user):
-        transfers_data = [{"event": 2}, {"event": 3}]
-        user._transfers = {"event": {"id": 1}, "wildcards": transfers_data}
-        mocked_fetch = mocker.patch(
-            "fpl.models.user.fetch", return_value={}, new_callable=AsyncMock)
+    async def test_get_wildcards_cached(self, loop, user):
         transfers = await user.get_wildcards()
-        assert transfers == transfers_data
-        mocked_fetch.assert_not_called()
-
-    async def test_get_wildcards_non_cached(self, loop, mocker, user):
-        transfers_data = [{"event": 2}, {"event": 3}]
-        data = {"event": {"id": 1}, "wildcards": transfers_data}
-        mocked_fetch = mocker.patch(
-            "fpl.models.user.fetch", return_value=data, new_callable=AsyncMock)
-        transfers = await user.get_wildcards()
-        assert transfers == transfers_data
-        mocked_fetch.assert_called_once()
+        assert isinstance(transfers, list)
 
     async def test_get_watchlist_not_authenticated(self, loop, mocker, user):
         mocked_logged_in = mocker.patch("fpl.models.user.logged_in",
