@@ -39,7 +39,8 @@ class Team():
         team_players = getattr(self, "players", [])
 
         if not team_players:
-            players = await fetch(self.session, API_URLS["players"])
+            players = await fetch(self.session, API_URLS["static"])
+            players = players["elements"]
             team_players = [player for player in players
                             if player["team"] == self.id]
             self.players = team_players

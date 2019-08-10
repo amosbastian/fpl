@@ -144,10 +144,10 @@ class User():
 
         if gameweek:
             valid_gameweek(gameweek)
-            return next(gw for gw in history["history"]
+            return next(gw for gw in history["current"]
                         if gw["event"] == gameweek)
 
-        return history["history"]
+        return history["current"]
 
     async def get_season_history(self):
         """Returns a list containing the seasonal history of the user.
@@ -164,7 +164,7 @@ class User():
                 self._session, API_URLS["user_history"].format(self.id))
 
         self._history = history
-        return history["season"]
+        return history["past"]
 
     async def get_chips_history(self, gameweek=None):
         """Returns a list containing the chip history of the user.
@@ -185,8 +185,11 @@ class User():
 
         if gameweek:
             valid_gameweek(gameweek)
-            return next(chip for chip in history["chips"]
-                        if chip["event"] == gameweek)
+            try:
+                return next(chip for chip in history["chips"]
+                            if chip["event"] == gameweek)
+            except StopIteration:
+                return None
 
         return history["chips"]
 
@@ -215,22 +218,23 @@ class User():
             valid_gameweek(gameweek)
             try:
                 pick = next(pick for pick in picks
-                            if pick["event"]["id"] == gameweek)
+                            if pick["entry_history"]["event"] == gameweek)
             except StopIteration:
                 return {}
             else:
-                return {pick["event"]["id"]: pick}
+                return {pick["entry_history"]["event"]: pick["picks"]}
 
         picks_out = {}
         for pick in picks:
             try:
-                picks_out[pick["event"]["id"]] = pick
+                picks_out[pick["entry_history"]["event"]] = pick["picks"]
             except KeyError:
                 pass
         return picks_out
 
     async def get_active_chips(self, gameweek=None):
-        """Returns a list containing the user's active chips each gameweek.
+        """Returns a list containing the user's active chip for each gameweek,
+        or the active chip of the given gameweek.
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
@@ -250,8 +254,11 @@ class User():
 
         if gameweek:
             valid_gameweek(gameweek)
-            return [next(pick["active_chip"] for pick in picks
-                         if pick["event"]["id"] == gameweek)]
+            try:
+                return [next(pick["active_chip"] for pick in picks
+                             if pick["entry_history"]["event"] == gameweek)][0]
+            except StopIteration:
+                return None
 
         return [pick["active_chip"] for pick in picks]
 
@@ -277,8 +284,11 @@ class User():
 
         if gameweek:
             valid_gameweek(gameweek)
-            return next(pick["automatic_subs"] for pick in picks
-                        if pick["event"]["id"] == gameweek)
+            try:
+                return next(pick["automatic_subs"] for pick in picks
+                            if pick["entry_history"]["event"] == gameweek)
+            except StopIteration:
+                return None
 
         return [p for pick in picks for p in pick["automatic_subs"]]
 
@@ -302,60 +312,61 @@ class User():
 
         return response["picks"]
 
-    async def get_transfers(self, gameweek=None):
-        """Returns either a list of all the user's transfers, or a list of
-        transfers made in the given gameweek.
+    # async def get_transfers(self, gameweek=None):
+    #     """Returns either a list of all the user's transfers, or a list of
+    #     transfers made in the given gameweek.
 
-        Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/transfers
+    #     Information is taken from e.g.:
+    #         https://fantasy.premierleague.com/drf/entry/3808385/transfers
 
-        :param gameweek: (optional): The gameweek. Defaults to ``None``.
-        :rtype: list
-        """
-        transfers = getattr(self, "_transfers", None)
-        if not transfers:
-            transfers = await fetch(
-                self._session, API_URLS["user_transfers"].format(self.id))
-            self._transfers = transfers
+    #     :param gameweek: (optional): The gameweek. Defaults to ``None``.
+    #     :rtype: list
+    #     """
+    #     transfers = getattr(self, "_transfers", None)
+    #     if not transfers:
+    #         transfers = await fetch(
+    #             self._session, API_URLS["user_transfers"].format(self.id))
+    #         self._transfers = transfers
 
-        if gameweek:
-            valid_gameweek(gameweek)
-            return [transfer for transfer in transfers["history"]
-                    if transfer["event"] == gameweek]
+    #     if gameweek:
+    #         valid_gameweek(gameweek)
+    #         return [transfer for transfer in transfers["history"]
+    #                 if transfer["event"] == gameweek]
 
-        return transfers["history"]
+    #     return transfers["history"]
 
-    async def get_wildcards(self):
-        """Returns a list containing information about when (and if) the user
-        has played their wildcard(s).
+    # async def get_wildcards(self):
+    #     """Returns a list containing information about when (and if) the user
+    #     has played their wildcard(s).
 
-        Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/transfers
+    #     Information is taken from e.g.:
+    #         https://fantasy.premierleague.com/drf/entry/3808385/transfers
 
-        :rtype: list
-        """
-        if hasattr(self, "_transfers"):
-            return self._transfers["wildcards"]
+    #     :rtype: list
+    #     """
+    #     if hasattr(self, "_transfers"):
+    #         return self._transfers["wildcards"]
 
-        transfers = await fetch(
-            self._session, API_URLS["user_transfers"].format(self.id))
+    #     transfers = await fetch(
+    #         self._session, API_URLS["user_transfers"].format(self.id))
 
-        self._transfers = transfers
-        return transfers["wildcards"]
+    #     self._transfers = transfers
+    #     return transfers["wildcards"]
 
     async def get_watchlist(self):
         """Returns the user's watchlist. Requires the user to have logged in
         using ``fpl.login()``.
 
         Information is taken from here:
-            https://fantasy.premierleague.com/drf/watchlist/
+            https://fantasy.premierleague.com/api/me/
 
         :rtype: list
         """
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        return await fetch(self._session, API_URLS["watchlist"])
+        me = await fetch(self._session, API_URLS["me"])
+        return me["watched"]
 
     def _get_transfer_payload(
             self, players_out, players_in, user_team, players, wildcard,

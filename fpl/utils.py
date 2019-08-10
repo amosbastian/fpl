@@ -25,10 +25,13 @@ async def get_current_gameweek(session):
     :param aiohttp.ClientSession session: A logged in user's session.
     :rtype: int
     """
-    dynamic = await fetch(
-        session, "https://fantasy.premierleague.com/drf/bootstrap-dynamic")
+    static = await fetch(
+        session, "https://fantasy.premierleague.com/api/bootstrap-static/")
 
-    return dynamic["entry"]["current_event"]
+    current_gameweek = next(event for event in static["events"]
+                            if event["is_current"])
+
+    return current_gameweek["id"]
 
 
 def team_converter(team_id):
@@ -92,7 +95,10 @@ def scale(value, upper, lower, min_, max_):
 
 def average(iterable):
     """Returns the average value of the iterable."""
-    return sum(iterable) / float(len(iterable))
+    try:
+        return sum(iterable) / float(len(iterable))
+    except ZeroDivisionError:
+        return 0.0
 
 
 def logged_in(session):

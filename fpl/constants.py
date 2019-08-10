@@ -22,7 +22,8 @@ API_URLS = {
     "user_picks": "{}entry/{{}}/event/{{}}/picks".format(API_BASE_URL),
     "user_team": "{}my-team/{{}}".format(API_BASE_URL),
     "user_transfers": "{}entry/{{}}/transfers".format(API_BASE_URL),
-    "watchlist": "{}watchlist/".format(API_BASE_URL)
+    "watchlist": "{}watchlist/".format(API_BASE_URL),
+    "me": "{}me/".format(API_BASE_URL)
 }
 
 PICKS_FORMAT = "{} {}{}"

@@ -5,11 +5,7 @@ from fpl.utils import (chip_converter, get_current_gameweek, get_headers,
 
 
 class TestUtils(object):
-    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_get_current_gameweek(self, loop, fpl):
-        with pytest.raises(TypeError):
-            current_gameweek = await get_current_gameweek(fpl.session)
-        await fpl.login()
         current_gameweek = await get_current_gameweek(fpl.session)
         assert isinstance(current_gameweek, int)
 

@@ -579,10 +579,6 @@ class FPL():
                 points = fixture["total_points"]
                 opponent = team_converter(fixture["opponent_team"])
                 location = "H" if fixture["was_home"] else "A"
-                if opponent == "Watford" and location == "A":
-                    if player["element_type"] == 4:
-                        print(
-                            f"{player['web_name']} scored {points} on {fixture['kickoff_time_formatted']}")
 
                 points_against.setdefault(
                     opponent,
