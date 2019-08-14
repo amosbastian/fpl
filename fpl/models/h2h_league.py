@@ -33,7 +33,7 @@ class H2HLeague():
         """Returns a list of fixtures / results of the H2H league.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/leagues-entries-and-h2h-matches/829116/?page=1
+            https://fantasy.premierleague.com/api/leagues-h2h-matches/league/946125/?page=1
 
         :param gameweek: (optional) The gameweek of the fixtures / results.
         :type gameweek: string or int

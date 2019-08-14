@@ -129,7 +129,7 @@ class User():
         """Returns a list containing the gameweek history of the user.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/history
+            https://fantasy.premierleague.com/api/entry/91928/history
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list if gameweek is ``None``, otherwise dict.
@@ -153,7 +153,7 @@ class User():
         """Returns a list containing the seasonal history of the user.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/history
+            https://fantasy.premierleague.com/api/entry/91928/history
 
         :rtype: list
         """
@@ -170,7 +170,7 @@ class User():
         """Returns a list containing the chip history of the user.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/history
+            https://fantasy.premierleague.com/api/entry/91928/history
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
@@ -199,7 +199,7 @@ class User():
         Key is the gameweek number, value contains picks of the gameweek.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
+            https://fantasy.premierleague.com/api/entry/91928/event/1/picks/
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: dict
@@ -237,7 +237,7 @@ class User():
         or the active chip of the given gameweek.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
+            https://fantasy.premierleague.com/api/entry/91928/event/1/picks/
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
@@ -267,7 +267,7 @@ class User():
         gameweek.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/entry/3808385/event/1/picks
+            https://fantasy.premierleague.com/api/entry/91928/event/1/picks/
 
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
@@ -297,7 +297,7 @@ class User():
         logged in using ``fpl.login()``.
 
         Information is taken from e.g.:
-            https://fantasy.premierleague.com/drf/my-team/3808385/
+            https://fantasy.premierleague.com/api/my-team/91928/
 
         :rtype: list
         """
