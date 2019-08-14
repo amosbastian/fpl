@@ -12,8 +12,6 @@
         <img src="https://travis-ci.org/amosbastian/fpl.svg?branch=master"/></a>
     <a href="https://fpl.readthedocs.io/en/latest/" alt="Documentation">
         <img src="https://readthedocs.org/projects/fpl/badge/?version=latest" /></a>
-    <a href="https://utopian.io/" alt="Utopian.io">
-        <img src="https://img.shields.io/badge/Supported%20by-Utopian.io-%23B10DC9.svg"/></a>
     <a href="https://pypi.org/project/fpl/" alt="Version">
         <img src="https://badge.fury.io/py/fpl.svg"/></a>
     <a href="https://pypi.org/project/fpl/" alt="Python version">
