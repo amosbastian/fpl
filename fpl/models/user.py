@@ -7,6 +7,9 @@ from urllib3.util import response
 from ..constants import API_URLS
 from ..utils import fetch, logged_in, post, get_headers
 
+is_c = "is_captain"
+is_vc = "is_vice_captain"
+
 
 def valid_gameweek(gameweek):
     """Returns True if the gameweek is valid.
@@ -87,16 +90,13 @@ def _set_captain(lineup, captain, captain_type, player_ids):
 
     # If the chosen captain is already a (vice) captain, then give his previous
     # role to the current (vice) captain.
-    if chosen_captain["is_captain"] or chosen_captain["is_vice_captain"]:
-        current_captain["is_captain"] = True
-        current_captain["is_vice_captain"] = True
-        chosen_captain["is_captain"] = False
-        chosen_captain["is_vice_captain"] = False
+    if chosen_captain[is_c] or chosen_captain[is_vc]:
+        current_captain[is_c], chosen_captain[is_c] = (
+            chosen_captain[is_c], current_captain[is_c])
+        current_captain[is_vc], chosen_captain[is_vc] = (
+            chosen_captain[is_vc], current_captain[is_vc])
 
     for player in lineup:
-        if not player["can_captain"]:
-            continue
-
         player[captain_type] = False
 
         if player["element"] == captain:
@@ -313,28 +313,45 @@ class User():
 
         return response["picks"]
 
-    # async def get_transfers(self, gameweek=None):
-    #     """Returns either a list of all the user's transfers, or a list of
-    #     transfers made in the given gameweek.
+    async def get_transfers(self, gameweek=None):
+        """Returns either a list of all the user's transfers, or a list of
+        transfers made in the given gameweek.
 
-    #     Information is taken from e.g.:
-    #         https://fantasy.premierleague.com/drf/entry/3808385/transfers
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/api/entry/91928/transfers/
 
-    #     :param gameweek: (optional): The gameweek. Defaults to ``None``.
-    #     :rtype: list
-    #     """
-    #     transfers = getattr(self, "_transfers", None)
-    #     if not transfers:
-    #         transfers = await fetch(
-    #             self._session, API_URLS["user_transfers"].format(self.id))
-    #         self._transfers = transfers
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: list
+        """
+        transfers = getattr(self, "_transfers", None)
+        if not transfers:
+            transfers = await fetch(
+                self._session, API_URLS["user_transfers"].format(self.id))
+            self._transfers = transfers
 
-    #     if gameweek:
-    #         valid_gameweek(gameweek)
-    #         return [transfer for transfer in transfers["history"]
-    #                 if transfer["event"] == gameweek]
+        if gameweek:
+            valid_gameweek(gameweek)
+            return [transfer for transfer in transfers
+                    if transfer["event"] == gameweek]
 
-    #     return transfers["history"]
+        return transfers
+
+    async def get_latest_transfers(self):
+        """Returns a list of transfers made by the user in the current
+        gameweek. Requires the user to have logged in using ``fpl.login()``.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/api/entry/91928/transfers-latest/
+
+        :rtype: list
+        """
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
+        transfers = await fetch(
+            self._session, API_URLS["user_latest_transfers"].format(self.id))
+
+        return transfers
 
     # async def get_wildcards(self):
     #     """Returns a list containing information about when (and if) the user
@@ -485,10 +502,19 @@ class User():
         :rtype: list
         """
 
-        players = await fetch(self._session, API_URLS["players"])
+        players = await fetch(self._session, API_URLS["static"])
+        players = players["elements"]
         _set_element_type(lineup, players)
+
+        # Check if all subs in are actually substitutes
         subs_in = _ids_to_lineup(players_in, lineup)
+        if not all([sub["position"] > 11 for sub in subs_in]):
+            raise Exception("Not all substitutes in are actually substitutes.")
+
+        # Check if all subs out are actually starters
         subs_out = _ids_to_lineup(players_out, lineup)
+        if not all([sub["position"] <= 11 for sub in subs_out]):
+            raise Exception("Not all substitutes out are actually starters.")
 
         for sub_out, sub_in in zip(subs_out, subs_in):
             # Get indices of sub out and sub in, then swap their position in
@@ -497,13 +523,19 @@ class User():
             lineup[out_i], lineup[in_i] = lineup[in_i], lineup[out_i]
 
             same_position = sub_out["element_type"] == sub_in["element_type"]
-            both_subs = sub_out["is_sub"] and sub_in["is_sub"]
+            both_subs = sub_out["position"] > 11 and sub_in["position"] > 11
 
             # If players don't play in the same position, and aren't both
             # substitutes, then sort them
             if not same_position and not both_subs:
-                lineup[out_i]["position"] = lineup[in_i]["position"]
-                lineup[in_i]["position"] = lineup[out_i]["position"]
+                # Swap position and (vice) captaincy
+                lineup[out_i]["position"], lineup[in_i]["position"] = (
+                    lineup[in_i]["position"], lineup[out_i]["position"])
+                lineup[out_i][is_c], lineup[in_i][is_c] = (
+                    lineup[in_i][is_c], lineup[out_i][is_c])
+                lineup[out_i][is_vc], lineup[in_i][is_vc] = (
+                    lineup[in_i][is_vc], lineup[out_i][is_vc])
+
                 starters, subs = lineup[:11], lineup[11:]
                 new_starters = sorted(starters, key=lambda x: (
                     x["element_type"] - 1) * 100 + x["position"])
@@ -515,8 +547,8 @@ class User():
         new_lineup = [{
             "element": player["element"],
             "position": player["position"],
-            "is_captain": player["is_captain"],
-            "is_vice_captain": player["is_vice_captain"]
+            "is_captain": player[is_c],
+            "is_vice_captain": player[is_vc]
         } for player in lineup]
 
         return new_lineup
@@ -553,7 +585,7 @@ class User():
         :param captain: ID of the captain.
         :type captain: int
         """
-        await self._captain_helper(captain, "is_captain")
+        await self._captain_helper(captain, is_c)
 
     async def vice_captain(self, vice_captain):
         """Set the vice captain of the user's team.
@@ -561,12 +593,13 @@ class User():
         :param vice_captain: ID of the vice captain.
         :type vice_captain: int
         """
-        await self._captain_helper(vice_captain, "is_vice_captain")
+        await self._captain_helper(vice_captain, is_vc)
 
     async def substitute(self, players_in, players_out, captain=None,
                          vice_captain=None):
         """Substitute players on the bench for players in the starting eleven.
         Also allows the user to simultaneously set the new (vice) captain(s).
+        A maximum of 4 substitutes is set to force proper usage.
 
         :param players_in: List of IDs of players who will be substituted in.
         :type players_in: list
@@ -579,6 +612,9 @@ class User():
         """
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
+
+        if len(players_out) > 4 or len(players_in) > 4:
+            raise Exception("Can only substitute a maximum of 4 players.")
 
         if len(players_out) != len(players_in):
             raise Exception("Number of players substituted in must be same as "
@@ -597,10 +633,10 @@ class User():
 
         # Set new captain or vice captain if applicable
         if captain:
-            _set_captain(user_team, captain, "is_captain", team_ids)
+            _set_captain(user_team, captain, is_c, team_ids)
 
         if vice_captain:
-            _set_captain(user_team, vice_captain, "is_vice_captain", team_ids)
+            _set_captain(user_team, vice_captain, is_vc, team_ids)
 
         lineup = await self._create_new_lineup(
             players_in, players_out, user_team)

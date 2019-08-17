@@ -303,10 +303,20 @@ class TestUser(object):
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
 
-    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_get_transfers(self, loop, user):
         transfers = await user.get_transfers()
         assert isinstance(transfers, list)
+
+        transfers = await user.get_transfers(gameweek=1)
+        assert isinstance(transfers, list)
+
+    async def test_get_latest_transfers_not_authenticated(
+            self, loop, mocker, user):
+        mocked_logged_in = mocker.patch("fpl.models.user.logged_in",
+                                        return_value=False)
+        with pytest.raises(Exception):
+            await user.get_team()
+        mocked_logged_in.assert_called_once()
 
     @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_get_wildcards_cached(self, loop, user):
