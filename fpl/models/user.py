@@ -94,9 +94,6 @@ def _set_captain(lineup, captain, captain_type, player_ids):
         chosen_captain["is_vice_captain"] = False
 
     for player in lineup:
-        if not player["can_captain"]:
-            continue
-
         player[captain_type] = False
 
         if player["element"] == captain:
@@ -502,7 +499,8 @@ class User():
         :rtype: list
         """
 
-        players = await fetch(self._session, API_URLS["players"])
+        players = await fetch(self._session, API_URLS["static"])
+        players = players["elements"]
         _set_element_type(lineup, players)
         subs_in = _ids_to_lineup(players_in, lineup)
         subs_out = _ids_to_lineup(players_out, lineup)
