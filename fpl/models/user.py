@@ -313,28 +313,45 @@ class User():
 
         return response["picks"]
 
-    # async def get_transfers(self, gameweek=None):
-    #     """Returns either a list of all the user's transfers, or a list of
-    #     transfers made in the given gameweek.
+    async def get_transfers(self, gameweek=None):
+        """Returns either a list of all the user's transfers, or a list of
+        transfers made in the given gameweek.
 
-    #     Information is taken from e.g.:
-    #         https://fantasy.premierleague.com/drf/entry/3808385/transfers
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/api/entry/91928/transfers/
 
-    #     :param gameweek: (optional): The gameweek. Defaults to ``None``.
-    #     :rtype: list
-    #     """
-    #     transfers = getattr(self, "_transfers", None)
-    #     if not transfers:
-    #         transfers = await fetch(
-    #             self._session, API_URLS["user_transfers"].format(self.id))
-    #         self._transfers = transfers
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: list
+        """
+        transfers = getattr(self, "_transfers", None)
+        if not transfers:
+            transfers = await fetch(
+                self._session, API_URLS["user_transfers"].format(self.id))
+            self._transfers = transfers
 
-    #     if gameweek:
-    #         valid_gameweek(gameweek)
-    #         return [transfer for transfer in transfers["history"]
-    #                 if transfer["event"] == gameweek]
+        if gameweek:
+            valid_gameweek(gameweek)
+            return [transfer for transfer in transfers
+                    if transfer["event"] == gameweek]
 
-    #     return transfers["history"]
+        return transfers
+
+    async def get_latest_transfers(self):
+        """Returns a list of transfers made by the user in the current
+        gameweek. Requires the user to have logged in using ``fpl.login()``.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/api/entry/91928/transfers-latest/
+
+        :rtype: list
+        """
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
+        transfers = await fetch(
+            self._session, API_URLS["user_latest_transfers"].format(self.id))
+
+        return transfers
 
     # async def get_wildcards(self):
     #     """Returns a list containing information about when (and if) the user
