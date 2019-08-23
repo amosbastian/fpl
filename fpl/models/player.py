@@ -39,10 +39,10 @@ class Player():
 
         :rtype: float
         """
-        minutes = getattr(self, "minutes", 0)
+        minutes = float(getattr(self, "minutes", 0))
         if minutes == 0:
             return 0.0
-        return getattr(self, "total_points", 0.0) / 90.0
+        return getattr(self, "total_points", 0.0) / minutes * 90.0
 
     def __str__(self):
         return (f"{self.web_name} - "
