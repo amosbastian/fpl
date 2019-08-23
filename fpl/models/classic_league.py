@@ -14,6 +14,7 @@ class ClassicLeague():
       >>> async def main():
       ...     async with aiohttp.ClientSession() as session:
       ...         fpl = FPL(session)
+      ...         await fpl.login()
       ...         classic_league = await fpl.get_classic_league(1137)
       ...     print(classic_league)
       ...

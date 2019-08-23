@@ -17,6 +17,7 @@ class H2HLeague():
       >>> async def main():
       ...     async with aiohttp.ClientSession() as session:
       ...         fpl = FPL(session)
+      ...         await fpl.login()
       ...         h2h_league = await fpl.get_h2h_league(760869)
       ...     print(h2h_league)
       ...

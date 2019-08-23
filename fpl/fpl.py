@@ -458,7 +458,8 @@ class FPL():
         return gameweeks
 
     async def get_classic_league(self, league_id, return_json=False):
-        """Returns the classic league with the given ``league_id``.
+        """Returns the classic league with the given ``league_id``. Requires
+        the user to have logged in using ``fpl.login()``.
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/api/leagues-classic/967/standings/
@@ -480,7 +481,8 @@ class FPL():
         return ClassicLeague(league, session=self.session)
 
     async def get_h2h_league(self, league_id, return_json=False):
-        """Returns a `H2HLeague` object with the given `league_id`.
+        """Returns a `H2HLeague` object with the given `league_id`. Requires
+        the user to have logged in using ``fpl.login()``.
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/api/leagues-h2h-matches/league/946125/
