@@ -35,7 +35,8 @@ from .models.h2h_league import H2HLeague
 from .models.player import Player, PlayerSummary
 from .models.team import Team
 from .models.user import User
-from .utils import average, fetch, position_converter, scale, team_converter
+from .utils import (average, fetch, logged_in, position_converter, scale,
+                    team_converter)
 
 
 class FPL():
@@ -472,6 +473,9 @@ class FPL():
         :type return_json: bool
         :rtype: :class:`ClassicLeague` or ``dict``
         """
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
         url = API_URLS["league_classic"].format(league_id)
         league = await fetch(self.session, url)
 
@@ -495,6 +499,9 @@ class FPL():
         :type return_json: bool
         :rtype: :class:`H2HLeague` or ``dict``
         """
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
         url = API_URLS["league_h2h"].format(league_id)
         league = await fetch(self.session, url)
 
