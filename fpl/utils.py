@@ -62,6 +62,34 @@ def team_converter(team_id):
     return team_map[team_id]
 
 
+def short_name_converter(team_id):
+    """Converts a team's ID to their short name."""
+    short_name_map = {
+        1: "ARS",
+        2: "AVL",
+        3: "BOU",
+        4: "BHA",
+        5: "BUR",
+        6: "CHE",
+        7: "CRY",
+        8: "EVE",
+        9: "LEI",
+        10: "LIV",
+        11: "MCI",
+        12: "MUN",
+        13: "NEW",
+        14: "NOR",
+        15: "SHU",
+        16: "SOU",
+        17: "TOT",
+        18: "WAT",
+        19: "WHU",
+        20: "WOL",
+        None: None
+    }
+    return short_name_map[team_id]
+
+
 def position_converter(position):
     """Converts a player's `element_type` to their actual position."""
     position_map = {
