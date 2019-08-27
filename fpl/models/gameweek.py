@@ -21,4 +21,4 @@ class Gameweek():
             setattr(self, k, v)
 
     def __str__(self):
-        return f"{self.name} - {self.deadline_time_formatted}"
+        return f"{self.name}"
