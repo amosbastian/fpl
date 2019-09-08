@@ -37,13 +37,13 @@ To install it directly from GitHub you can do the following:
 You can also install a [.tar file](https://github.com/requests/requests/tarball/master)
 or [.zip file](https://github.com/requests/requests/tarball/master)
 
-    $ curl -OL https://github.com/amosbastian/fpl/tarball/master
-    $ curl -OL https://github.com/amosbastian/fpl/zipball/master # Windows
+    curl -OL https://github.com/amosbastian/fpl/tarball/master
+    curl -OL https://github.com/amosbastian/fpl/zipball/master # Windows
 
-Once it has been downloaded you can easily install it using `pip`::
+Once it has been downloaded you can easily install it using `pip`:
 
-    $ cd fpl
-    $ pip install .
+    cd fpl
+    pip install .
 
 ## Contributing
 
