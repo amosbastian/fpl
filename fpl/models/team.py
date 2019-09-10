@@ -22,7 +22,7 @@ class Team():
       Man Utd
     """
     def __init__(self, team_information, session):
-        self.session = session
+        self._session = session
         for k, v in team_information.items():
             setattr(self, k, v)
 
@@ -39,7 +39,7 @@ class Team():
         team_players = getattr(self, "players", [])
 
         if not team_players:
-            players = await fetch(self.session, API_URLS["static"])
+            players = await fetch(self._session, API_URLS["static"])
             players = players["elements"]
             team_players = [player for player in players
                             if player["team"] == self.id]
@@ -48,7 +48,7 @@ class Team():
         if return_json:
             return team_players
 
-        return [Player(player) for player in team_players]
+        return [Player(player, self._session) for player in team_players]
 
     async def get_fixtures(self, return_json=False):
         """Returns a list containing the team's fixtures.
@@ -69,7 +69,7 @@ class Team():
 
         player = self.players[0]
         url = API_URLS["player"].format(player["id"])
-        player_summary = await fetch(self.session, url)
+        player_summary = await fetch(self._session, url)
 
         self.fixtures = player_summary["fixtures"]
 
