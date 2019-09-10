@@ -27,7 +27,7 @@ class ClassicLeague():
         for k, v in league_information.items():
             setattr(self, k, v)
 
-    async def get_standings(self, page):
+    async def get_standings(self, page=1, page_new_entries=1, phase=1):
         """Returns the league's standings of the given page.
 
         Information is taken from e.g.:
@@ -38,9 +38,15 @@ class ClassicLeague():
         :type page: string or int
         :rtype: dict
         """
-        url = "{}?ls-page={}".format(
-                API_URLS["league_classic"].format(self.league["id"]), page)
+        if hasattr(self, "standings"):
+            if hasattr(self.standings, "page") and self.standings["page"] == page:
+                return self.standings
+
+        url = "{}?page_new_entries={}&page_standings={}&phase={}".format(
+                API_URLS["league_classic"].format(self.league["id"]),
+                page_new_entries, page, phase)
         standings = await fetch(self._session, url)
+
         return standings["standings"]
 
     def __str__(self):
