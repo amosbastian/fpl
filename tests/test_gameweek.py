@@ -29,7 +29,7 @@ class TestGameweek(object):
 
     @staticmethod
     def test_str(loop, gameweek):
-        assert str(gameweek) == "Gameweek 1 - 10 Aug 19:00"
+        assert str(gameweek) == "Gameweek 1"
 
     @staticmethod
     def test_fixtures(loop, gameweek):
