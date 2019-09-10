@@ -38,14 +38,14 @@ class ClassicLeague():
         :type page: string or int
         :rtype: dict
         """
-        if hasattr(self, "standings"):
-            if hasattr(self.standings, "page") and self.standings["page"] == page:
-                return self.standings
+        if hasattr(self, "standings") and self.standings["page"] == page:
+            return self.standings
 
         url = "{}?page_new_entries={}&page_standings={}&phase={}".format(
                 API_URLS["league_classic"].format(self.league["id"]),
                 page_new_entries, page, phase)
         standings = await fetch(self._session, url)
+        self.standings = standings["standings"]
 
         return standings["standings"]
 
