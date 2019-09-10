@@ -57,7 +57,8 @@ class Player():
     @property
     async def vapm(self):
         """Value added per million
-        An explanation of VAPM can be found here: https://www.reddit.com/r/FantasyPL/comments/6r60fu/exploring_a_key_metric_value_added_per_1m/
+        An explanation of VAPM can be found here:
+            https://www.reddit.com/r/FantasyPL/comments/6r60fu/exploring_a_key_metric_value_added_per_1m/
 
         :rtype: float
         """
@@ -65,7 +66,7 @@ class Player():
         cost = getattr(self, "now_cost", 0)
 
         if games_played == 0 or cost == 0:
-          return 0.0
+            return 0.0
 
         return (getattr(self, "total_points", 0.0) / games_played - 2) / (cost / 10)
 
