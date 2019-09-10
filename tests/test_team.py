@@ -43,7 +43,7 @@ class TestTeam(object):
     def test_init(self):
         session = None
         team = Team(team_data, session)
-        assert team.session is session
+        assert team._session is session
         for k, v in team_data.items():
             assert getattr(team, k) == v
 

@@ -1,4 +1,5 @@
-from ..utils import team_converter, position_converter
+from ..constants import API_URLS
+from ..utils import fetch, position_converter, team_converter
 
 
 class Player():
@@ -20,18 +21,25 @@ class Player():
       Pogba - Midfielder - Man Utd
     """
 
-    def __init__(self, player_information):
+    def __init__(self, player_information, session):
+        self._session = session
         for k, v in player_information.items():
             setattr(self, k, v)
 
     @property
-    def games_played(self):
+    async def games_played(self):
         """The number of games where the player has played at least 1 minute.
 
         :rtype: int
         """
-        return sum([1 for fixture in getattr(self, "fixtures", [])
-                    if fixture["minutes"] > 0])
+        if hasattr(self, "history"):
+            fixtures = self.history
+        else:
+            player_summary = await fetch(
+                self._session, API_URLS["player"].format(self.id))
+            fixtures = player_summary["history"]
+
+        return sum([1 for fixture in fixtures if fixture["minutes"] > 0])
 
     @property
     def pp90(self):
@@ -40,8 +48,10 @@ class Player():
         :rtype: float
         """
         minutes = float(getattr(self, "minutes", 0))
+
         if minutes == 0:
             return 0.0
+
         return getattr(self, "total_points", 0.0) / minutes * 90.0
 
     def __str__(self):

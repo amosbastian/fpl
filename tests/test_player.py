@@ -1,8 +1,11 @@
 class TestPlayer(object):
     @staticmethod
-    def test_games_played(loop, player):
-        games_played = player.games_played
+    async def test_games_played(loop, player):
+        games_played = await player.games_played
         assert isinstance(games_played, int)
+
+        if player.minutes > 0:
+            assert games_played > 0
 
     @staticmethod
     def test_pp90(loop, player):

@@ -233,7 +233,7 @@ class FPL():
         if return_json:
             return player
 
-        return Player(player)
+        return Player(player, self.session)
 
     async def get_players(self, player_ids=None, include_summary=False,
                           return_json=False):
