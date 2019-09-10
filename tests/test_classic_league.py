@@ -89,4 +89,3 @@ class TestClassicLeague(object):
         assert isinstance(standings, dict)
         assert standings["page"] == 1
         assert standings["results"][0]["rank"] == 1
-        mocked_fetch.assert_called_once()
