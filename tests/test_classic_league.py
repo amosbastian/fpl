@@ -28,7 +28,7 @@ classic_league_data = {
     },
     "standings": {
         "has_next": True,
-        "number": 1,
+        "page": 1,
         "results": [
             {
                 "id": 31124573,
