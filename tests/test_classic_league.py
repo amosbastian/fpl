@@ -28,7 +28,7 @@ classic_league_data = {
     },
     "standings": {
         "has_next": True,
-        "number": 1,
+        "page": 1,
         "results": [
             {
                 "id": 31124573,
@@ -87,6 +87,5 @@ class TestClassicLeague(object):
                                     new_callable=AsyncMock)
         standings = await classic_league.get_standings(1)
         assert isinstance(standings, dict)
-        assert standings["number"] == 1
+        assert standings["page"] == 1
         assert standings["results"][0]["rank"] == 1
-        mocked_fetch.assert_called_once()
