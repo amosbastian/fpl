@@ -19,6 +19,18 @@ async def post(session, url, payload, headers):
         return await response.json()
 
 
+async def get_total_players(session):
+    """Returns the total number of registered players.
+
+    :param aiohttp.ClientSession session: A logged in user's session.
+    :rtype: int
+    """
+    static = await fetch(
+        session, "https://fantasy.premierleague.com/api/bootstrap-static/")
+
+    return static["total_players"]
+
+
 async def get_current_gameweek(session):
     """Returns the current gameweek.
 
