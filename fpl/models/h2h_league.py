@@ -63,7 +63,7 @@ class H2HLeague():
 
         fixtures = await asyncio.gather(*tasks)
 
-        return fixtures
+        return fixtures[0]
 
     def __str__(self):
         return f"{self.league['name']} - {self.league['id']}"
