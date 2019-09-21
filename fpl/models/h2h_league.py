@@ -30,7 +30,7 @@ class H2HLeague():
         for k, v in league_information.items():
             setattr(self, k, v)
 
-    async def get_fixtures(self, gameweek=None):
+    async def get_fixtures(self, gameweek=None, page=None):
         """Returns a list of fixtures / results of the H2H league.
 
         Information is taken from e.g.:
@@ -38,6 +38,7 @@ class H2HLeague():
 
         :param gameweek: (optional) The gameweek of the fixtures / results.
         :type gameweek: string or int
+        :param page: (optional) page of results to return (for large leagues)
         :rtype: list
         """
         if not self._session:
@@ -52,10 +53,13 @@ class H2HLeague():
             current_gameweek = await get_current_gameweek(self._session)
             gameweeks = range(1, current_gameweek + 1)
 
+        if not page:
+            page = 1
+
         tasks = [asyncio.ensure_future(
-                 fetch(self._session,
-                       API_URLS["h2h"].format(self.league["id"], page)))
-                 for page in gameweeks]
+            fetch(self._session,
+                  API_URLS["league_h2h_fixtures"].format(self.league["id"], gameweek, page)))
+            for gameweek in gameweeks]
 
         fixtures = await asyncio.gather(*tasks)
 
