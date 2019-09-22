@@ -30,7 +30,7 @@ class H2HLeague():
         for k, v in league_information.items():
             setattr(self, k, v)
 
-    async def get_fixtures(self, gameweek=None):
+    async def get_fixtures(self, gameweek=None, page=1):
         """Returns a list of fixtures / results of the H2H league.
 
         Information is taken from e.g.:
@@ -38,28 +38,31 @@ class H2HLeague():
 
         :param gameweek: (optional) The gameweek of the fixtures / results.
         :type gameweek: string or int
+        :param page: (optional) The fixtures / results page.
+        :type page: string or int
         :rtype: list
         """
         if not self._session:
-            return
+            return []
 
         if not logged_in(self._session):
-            raise Exception("Not authorized to get h2h fixtures. Log in.")
+            raise Exception(
+                "Not authorised to get H2H fixtures. Log in first.")
 
-        if gameweek:
-            gameweeks = range(gameweek, gameweek + 1)
-        else:
-            current_gameweek = await get_current_gameweek(self._session)
-            gameweeks = range(1, current_gameweek + 1)
+        url_query = f"event={gameweek}&" if gameweek else ""
+        has_next = True
+        results = []
 
-        tasks = [asyncio.ensure_future(
-                 fetch(self._session,
-                       API_URLS["h2h"].format(self.league["id"], page)))
-                 for page in gameweeks]
+        while has_next:
+            fixtures = await fetch(
+                self._session, API_URLS["league_h2h_fixtures"].format(
+                    self.league["id"], url_query, page))
+            results.extend(fixtures["results"])
 
-        fixtures = await asyncio.gather(*tasks)
+            has_next = fixtures["has_next"]
+            page += 1
 
-        return fixtures
+        return results
 
     def __str__(self):
         return f"{self.league['name']} - {self.league['id']}"
