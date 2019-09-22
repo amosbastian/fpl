@@ -183,9 +183,12 @@ class TestFPL(object):
         gameweek = await fpl.get_gameweek(20)
         assert isinstance(gameweek, Gameweek)
         assert gameweek.id == 20
+        assert not hasattr(gameweek, "elements")
 
         gameweek = await fpl.get_gameweek(20, return_json=True)
         assert isinstance(gameweek, dict)
+        assert gameweek["id"] == 20
+        assert "elements" not in gameweek.keys()
 
         gameweek = await fpl.get_gameweek(1, include_live=True)
         assert isinstance(gameweek, Gameweek)
