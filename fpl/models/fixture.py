@@ -37,8 +37,9 @@ class Fixture():
         """
         stats = getattr(self, "stats", [])
         for statistic in stats:
-            if metric in statistic.keys():
-                return statistic[metric]
+            if metric == statistic['identifier']:
+                # merge home and away player lists and sort in descending order
+                return sorted(statistic['a'] + statistic['h'], key=lambda x: x['value'], reverse=True)
 
         return {}
 
