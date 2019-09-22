@@ -422,9 +422,12 @@ class FPL():
             raise ValueError(f"Gameweek with ID {gameweek_id} not found")
 
         if include_live:
-            live_gameweek = await fetch(
+            live_gameweek_elements = await fetch(
                 self.session, API_URLS["gameweek_live"].format(gameweek_id))
-            static_gameweek.update(live_gameweek)
+            live_gameweek_fixtures = {"fixtures": await fetch(
+                self.session, API_URLS["gameweek_fixtures"].format(gameweek_id))}
+            static_gameweek.update(live_gameweek_elements)
+            static_gameweek.update(live_gameweek_fixtures)
 
         if return_json:
             return static_gameweek

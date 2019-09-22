@@ -184,21 +184,27 @@ class TestFPL(object):
         assert isinstance(gameweek, Gameweek)
         assert gameweek.id == 20
         assert not hasattr(gameweek, "elements")
+        assert not hasattr(gameweek, "fixtures")
 
         gameweek = await fpl.get_gameweek(20, return_json=True)
         assert isinstance(gameweek, dict)
         assert gameweek["id"] == 20
-        assert "elements" not in gameweek.keys()
+        assert ("elements") not in gameweek.keys()
+        assert ("fixtures") not in gameweek.keys()
 
         gameweek = await fpl.get_gameweek(1, include_live=True)
         assert isinstance(gameweek, Gameweek)
         assert hasattr(gameweek, "elements")
+        assert hasattr(gameweek, "fixtures")
         assert isinstance(gameweek.elements, list)
+        assert isinstance(gameweek.fixtures, list)
 
         gameweek = await fpl.get_gameweek(1, include_live=True, return_json=True)
         assert isinstance(gameweek, dict)
-        assert "elements" in gameweek.keys()
+        assert ("elements") in gameweek.keys()
+        assert ("fixtures") in gameweek.keys()
         assert isinstance(gameweek["elements"], list)
+        assert isinstance(gameweek["fixtures"], list)
 
 
     @pytest.mark.skip(reason="Cannot currently test it.")
