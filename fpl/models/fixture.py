@@ -123,12 +123,41 @@ class Fixture():
 
         return self._get_players("saves")
 
-    def get_bonus(self):
+    def get_bonus(self, provisional=False):
         """Returns all players who received bonus points in the fixture.
 
         :rtype: dict
         """
         if not getattr(self, "finished", False):
+            if provisional:
+                bps = self.get_bps()
+                bps = {b["element"]: b["value"] for b in bps}  # map to dict
+                bps_values = set(bps.values())
+
+                bps1 = max(bps_values)  # highest bps
+                bps_values.remove(bps1)
+                bps2 = max(bps_values)  # 2nd highest bps
+                bps_values.remove(bps2)
+                bps3 = max(bps_values)  # 3rd highest bps
+
+                bonus3 = list(filter(lambda x: bps[x] == bps1, bps.keys()))
+                bonus2 = bonus1 = []
+
+                if len(bonus3) == 1:
+                    bonus2 = list(filter(lambda x: bps[x] == bps2, bps.keys()))
+
+                if len(bonus3) + len(bonus2) == 2:
+                    if len(bonus3) == 2:  # 2 way tie for 3 bonus
+                        bonus1 = list(filter(lambda x: bps[x] == bps2, bps.keys()))
+                    else:
+                        bonus1 = list(filter(lambda x: bps[x] == bps3, bps.keys()))
+
+                bonus3 = [{"value": 3, "element": b} for b in bonus3]
+                bonus2 = [{"value": 2, "element": b} for b in bonus2]
+                bonus1 = [{"value": 1, "element": b} for b in bonus1]
+
+                return bonus3 + bonus2 + bonus1
+
             return {}
 
         return self._get_players("bonus")
