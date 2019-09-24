@@ -1,6 +1,6 @@
 from ..utils import team_converter
 from .player import Player
-
+from datetime import datetime
 
 def add_player(location, information):
     """Appends player to the location list."""
@@ -175,4 +175,4 @@ class Fixture():
     def __str__(self):
         return (f"{team_converter(self.team_h)} vs. "
                 f"{team_converter(self.team_a)} - "
-                f"{self.deadline_time_formatted}")
+                f"{self.kickoff_time}")
