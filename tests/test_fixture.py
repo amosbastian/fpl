@@ -535,23 +535,32 @@ class TestFixture(object):
         for k, v in fixture_data.items():
             if k != 'stats':
                 assert getattr(fixture, k) == v
-            else:
-                assert isinstance(getattr(fixture, k), dict)
+            # else:
+            #     print(dir(getattr(fixture, k)))
+            #     # assert isinstance(getattr(fixture, k), dict)
 
     @staticmethod
     def _do_test_not_finished(fixture, method):
         fixture.finished = False
-        fixture.stats[8]['a'] = []
-        fixture.stats[8]['h'] = []
+        fixture.stats['bonus']['a'] = []
+        fixture.stats['bonus']['h'] = []
         data_dict = getattr(fixture, method)()
         assert isinstance(data_dict, dict)
         assert len(data_dict) == 0
 
     @staticmethod
     def _do_test_finished(fixture, method):
-        data_list = getattr(fixture, method)()
-        assert isinstance(data_list, list)
-        assert len(data_list) == 0 or all([isinstance(d, dict) for d in data_list])
+        data_dict = getattr(fixture, method)()
+        assert isinstance(data_dict, dict)
+        assert tuple(data_dict.keys()) == ('a', 'h')
+        assert isinstance(data_dict['a'], list)
+        assert isinstance(data_dict['h'], list)
+        assert all([isinstance(d, dict) for d in data_dict['a']])
+        assert all([isinstance(d, dict) for d in data_dict['h']])
+        assert all([tuple(d.keys()) == ('value', 'element') for d in data_dict['a']])
+        assert all([tuple(d.keys()) == ('value', 'element') for d in data_dict['h']])
+        assert all([all([isinstance(v, int) for v in d.values()]) for d in data_dict['a']])
+        assert all([all([isinstance(v, int) for v in d.values()]) for d in data_dict['h']])
 
     def test_get_goalscorers_not_finished(self, fixture):
         self._do_test_not_finished(fixture, "get_goalscorers")
@@ -615,5 +624,4 @@ class TestFixture(object):
 
     @staticmethod
     def test_str(fixture):
-        print(str(fixture))
         assert str(fixture) == "Southampton vs. Bournemouth - 2019-09-20T19:00:00Z"
