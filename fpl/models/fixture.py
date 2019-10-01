@@ -29,6 +29,8 @@ class Fixture():
     """
     def __init__(self, fixture_information):
         for k, v in fixture_information.items():
+            if k == 'stats':
+                v = {w['identifier']: {'a': w['a'], 'h': w['h']} for w in v}
             setattr(self, k, v)
 
     def _get_players(self, metric):

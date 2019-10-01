@@ -533,7 +533,10 @@ class TestFixture(object):
     def test_init():
         fixture = Fixture(fixture_data)
         for k, v in fixture_data.items():
-            assert getattr(fixture, k) == v
+            if k != 'stats':
+                assert getattr(fixture, k) == v
+            else:
+                assert isinstance(getattr(fixture, k), dict)
 
     @staticmethod
     def _do_test_not_finished(fixture, method):
