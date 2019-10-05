@@ -153,8 +153,8 @@ class TestFPL(object):
     async def test_fixtures_by_gameweek(self, loop, fpl):
         for gameweek in range(1, 39):
             fixtures = await fpl.get_fixtures_by_gameweek(gameweek)
-            assert isinstance(fixtures, list)
-            assert isinstance(fixtures[0], Fixture)
+            assert isinstance(fixtures, dict)
+            assert all([isinstance(fixtures[fixture_id], Fixture) for fixture_id in fixtures.keys()])
 
             fixtures = await fpl.get_fixtures_by_gameweek(
                 gameweek, return_json=True)
@@ -193,12 +193,12 @@ class TestFPL(object):
         gameweek = await fpl.get_gameweek(1, include_live=True)
         assert isinstance(gameweek, Gameweek)
         assert hasattr(gameweek, "elements")
-        assert isinstance(gameweek.elements, list)
+        assert isinstance(gameweek.elements, dict)
 
         gameweek = await fpl.get_gameweek(1, include_live=True, return_json=True)
         assert isinstance(gameweek, dict)
         assert "elements" in gameweek.keys()
-        assert isinstance(gameweek["elements"], list)
+        assert isinstance(gameweek["elements"], dict)
 
 
     @pytest.mark.skip(reason="Cannot currently test it.")

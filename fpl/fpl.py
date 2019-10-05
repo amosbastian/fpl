@@ -39,7 +39,7 @@ from .utils import (average, fetch, logged_in, position_converter, scale,
                     team_converter)
 
 
-class FPL():
+class FPL:
     """The FPL class."""
 
     def __init__(self, session):
@@ -365,8 +365,7 @@ class FPL():
         if return_json:
             return fixtures
 
-        return [Fixture(fixture) for fixture in fixtures]
-
+        return {fixture["id"]: Fixture(fixture) for fixture in fixtures}
 
     async def get_fixtures(self, return_json=False):
         """Returns a list of *all* fixtures.
