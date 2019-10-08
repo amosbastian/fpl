@@ -153,6 +153,7 @@ class TestFPL(object):
     async def test_fixtures_by_gameweek(self, loop, fpl):
         for gameweek in range(1, 39):
             fixtures = await fpl.get_fixtures_by_gameweek(gameweek)
+            print(type(fixtures))
             assert isinstance(fixtures, dict)
             assert all([isinstance(fixtures[fixture_id], Fixture) for fixture_id in fixtures.keys()])
 

@@ -45,6 +45,20 @@ class FPL:
     def __init__(self, session):
         self.session = session
 
+    async def _get_static(self, metric):
+        """
+        Helper function to return information is taken from:
+            https://fantasy.premierleague.com/api/bootstrap-static/
+        with only one API call
+        """
+        try:
+            return self.static[metric]
+        except AttributeError:
+            url = API_URLS["static"]
+            static = await fetch(self.session, url)
+            self.static = static
+        return self.static[metric]
+
     async def get_user(self, user_id, return_json=False):
         """Returns the user with the given ``user_id``.
 
@@ -81,9 +95,7 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        url = API_URLS["static"]
-        teams = await fetch(self.session, url)
-        teams = teams["teams"]
+        teams = await self._get_static("teams")
 
         if team_ids:
             team_ids = set(team_ids)
@@ -136,8 +148,8 @@ class FPL:
         assert 0 < int(
             team_id) < 21, "Team ID must be a number between 1 and 20."
         url = API_URLS["static"]
-        teams = await fetch(self.session, url)
-        team = next(team for team in teams["teams"]
+        teams = await self._get_static("teams")
+        team = next(team for team in teams
                     if team["id"] == int(team_id))
 
         if return_json:
@@ -216,8 +228,7 @@ class FPL:
         :raises ValueError: Player with ``player_id`` not found
         """
         if not players:
-            players = await fetch(self.session, API_URLS["static"])
-            players = players["elements"]
+            players = await self._get_static("elements")
 
         try:
             player = next(player for player in players
@@ -253,8 +264,7 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        players = await fetch(self.session, API_URLS["static"])
-        players = players["elements"]
+        players = await self._get_static("elements")
 
         if not player_ids:
             player_ids = [player["id"] for player in players]
@@ -412,8 +422,7 @@ class FPL:
         :rtype: :class:`Gameweek` or ``dict``
         """
 
-        static_gameweeks = await fetch(self.session, API_URLS["static"])
-        static_gameweeks = static_gameweeks["events"]
+        static_gameweeks = await self._get_static("events")
 
         try:
             static_gameweek = next(gameweek for gameweek in static_gameweeks if
