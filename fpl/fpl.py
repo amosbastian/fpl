@@ -44,8 +44,6 @@ class FPL:
 
     def __init__(self, session):
         self.session = session
-        url = API_URLS["static"]
-        self.static = await fetch(self.session, url)
 
     async def get_user(self, user_id, return_json=False):
         """Returns the user with the given ``user_id``.
@@ -83,7 +81,9 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        teams = self.static["teams"]
+        url = API_URLS["static"]
+        teams = await fetch(self.session, url)
+        teams = teams["teams"]
 
         if team_ids:
             team_ids = set(team_ids)
@@ -135,7 +135,8 @@ class FPL:
         """
         assert 0 < int(
             team_id) < 21, "Team ID must be a number between 1 and 20."
-        teams = self.static["teams"]
+        url = API_URLS["static"]
+        teams = await fetch(self.session, url)
         team = next(team for team in teams["teams"]
                     if team["id"] == int(team_id))
 
@@ -215,7 +216,8 @@ class FPL:
         :raises ValueError: Player with ``player_id`` not found
         """
         if not players:
-            players = self.static["elements"]
+            players = await fetch(self.session, API_URLS["static"])
+            players = players["elements"]
 
         try:
             player = next(player for player in players
@@ -251,7 +253,8 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        players = self.static["elements"]
+        players = await fetch(self.session, API_URLS["static"])
+        players = players["elements"]
 
         if not player_ids:
             player_ids = [player["id"] for player in players]
@@ -409,7 +412,8 @@ class FPL:
         :rtype: :class:`Gameweek` or ``dict``
         """
 
-        static_gameweeks = self.static["events"]
+        static_gameweeks = await fetch(self.session, API_URLS["static"])
+        static_gameweeks = static_gameweeks["events"]
 
         try:
             static_gameweek = next(gameweek for gameweek in static_gameweeks if
