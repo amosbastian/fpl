@@ -142,7 +142,7 @@ class User():
 
         self._history = history
 
-        if gameweek:
+        if gameweek is not None:
             valid_gameweek(gameweek)
             return next(gw for gw in history["current"]
                         if gw["event"] == gameweek)
@@ -183,7 +183,7 @@ class User():
 
         self._history = history
 
-        if gameweek:
+        if gameweek is not None:
             valid_gameweek(gameweek)
             try:
                 return next(chip for chip in history["chips"]
@@ -253,7 +253,7 @@ class User():
             picks = await asyncio.gather(*tasks)
             self._picks = picks
 
-        if gameweek:
+        if gameweek is not None:
             valid_gameweek(gameweek)
             try:
                 return [next(pick["active_chip"] for pick in picks
@@ -283,7 +283,7 @@ class User():
             picks = await asyncio.gather(*tasks)
             self._picks = picks
 
-        if gameweek:
+        if gameweek is not None:
             valid_gameweek(gameweek)
             try:
                 return next(pick["automatic_subs"] for pick in picks
@@ -329,7 +329,7 @@ class User():
                 self._session, API_URLS["user_transfers"].format(self.id))
             self._transfers = transfers
 
-        if gameweek:
+        if gameweek is not None:
             valid_gameweek(gameweek)
             return [transfer for transfer in transfers
                     if transfer["event"] == gameweek]
