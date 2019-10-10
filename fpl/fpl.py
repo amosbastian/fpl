@@ -56,8 +56,16 @@ class FPL:
         except AttributeError:
             url = API_URLS["static"]
             static = await fetch(self.session, url)
+            static["current_gameweek"] = next(event for event in static["events"]if event["is_current"])
             self.static = static
         return self.static[metric]
+
+    async def get_current_gameweek(self):
+        """Returns the current gameweek.
+        :rtype: int
+        """
+        current_gameweek = await self._get_static("current_gameweek")
+        return current_gameweek["id"]
 
     async def get_user(self, user_id, return_json=False):
         """Returns the user with the given ``user_id``.
@@ -209,7 +217,7 @@ class FPL:
                 for player_summary in player_summaries]
 
     async def get_player(self, player_id, players=None, include_summary=False,
-                         return_json=False):
+                         include_live=False, return_json=False):
         """Returns the player with the given ``player_id``.
 
         Information is taken from e.g.:
@@ -241,13 +249,21 @@ class FPL:
                 player["id"], return_json=True)
             player.update(player_summary)
 
+        player["image_url"] = f'https://platform-static-files.s3.amazonaws.com' \
+                              f'/premierleague/photos/players/110x140/p{player["code"]}.png'
+
+        if include_live:
+            current_gameweek = await self.get_current_gameweek()
+            live = await self.get_gameweek(current_gameweek)
+            player.update(live.elements[player["id"]])
+
         if return_json:
             return player
 
         return Player(player, self.session)
 
     async def get_players(self, player_ids=None, include_summary=False,
-                          return_json=False):
+                          include_live=False, return_json=False):
         """Returns either a list of *all* players, or a list of players whose
         IDs are in the given ``player_ids`` list.
 
@@ -271,10 +287,9 @@ class FPL:
 
         tasks = [asyncio.ensure_future(
                  self.get_player(
-                     player_id, players, include_summary, return_json))
+                     player_id, players, include_summary, include_live, return_json))
                  for player_id in player_ids]
         players = await asyncio.gather(*tasks)
-
         return players
 
     async def get_fixture(self, fixture_id, return_json=False):
@@ -437,6 +452,10 @@ class FPL:
             # convert element list to dict
             live_gameweek["elements"] = {element['id']: element for element in live_gameweek['elements']}
 
+            # mark players that did not play
+            for element in live_gameweek['elements'].values():
+                element['sub_out'] = element['stats']['minutes'] == 0
+
             # include live bonus points
             if not static_gameweek['finished']:
                 fixtures = await self.get_fixtures_by_gameweek(gameweek_id)
@@ -447,9 +466,9 @@ class FPL:
                     bonus_for_gameweek.extend(bonus['a'] + bonus['h'])
                 bonus_for_gameweek = {b['element']: b['value'] for b in bonus_for_gameweek}
                 for player_id, bonus_points in bonus_for_gameweek:
-                    if live_gameweek["elements"][player_id]["bonus"] == 0:
-                        live_gameweek["elements"][player_id]["bonus"] += bonus_points
-                        live_gameweek["elements"][player_id]["total_points"] += bonus_points
+                    if live_gameweek["elements"][player_id]["stats"]["bonus"] == 0:
+                        live_gameweek["elements"][player_id]["stats"]["bonus"] += bonus_points
+                        live_gameweek["elements"][player_id]["stats"]["total_points"] += bonus_points
 
             static_gameweek.update(live_gameweek)
 
@@ -529,7 +548,7 @@ class FPL:
         if not logged_in(self.session):
             raise Exception("User must be logged in.")
 
-        url = API_URLS["league_h2h"].format(league_id)
+        url = API_URLS["league_h2h"].format(league_id, 1)  # return first page of standings only
         league = await fetch(self.session, url)
 
         if return_json:
