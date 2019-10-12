@@ -47,6 +47,10 @@ class FPL:
         self.session = session
         static = requests.get(API_URLS["static"]).json()  # use synchronous request
         for k, v in static.items():
+            try:
+                v = {w["id"]: w for w in v}
+            except (KeyError, TypeError):
+                pass
             setattr(self, k, v)
         setattr(self, "current_gameweek", next(event for event in static["events"] if event["is_current"])['id'])
 
