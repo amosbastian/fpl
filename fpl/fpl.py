@@ -26,6 +26,7 @@ Fantasy Premier League API:
 import asyncio
 import itertools
 import os
+import requests
 
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
@@ -44,28 +45,10 @@ class FPL:
 
     def __init__(self, session):
         self.session = session
-
-    async def _get_static(self, metric):
-        """
-        Helper function to return information is taken from:
-            https://fantasy.premierleague.com/api/bootstrap-static/
-        with only one API call
-        """
-        try:
-            return self.static[metric]
-        except AttributeError:
-            url = API_URLS["static"]
-            static = await fetch(self.session, url)
-            static["current_gameweek"] = next(event for event in static["events"]if event["is_current"])
-            self.static = static
-        return self.static[metric]
-
-    async def get_current_gameweek(self):
-        """Returns the current gameweek.
-        :rtype: int
-        """
-        current_gameweek = await self._get_static("current_gameweek")
-        return current_gameweek["id"]
+        static = requests.get(API_URLS["static"]).json()  # use synchronous request
+        for k, v in static.items():
+            setattr(self, k, v)
+        setattr(self, "current_gameweek", next(event for event in static["events"] if event["is_current"])['id'])
 
     async def get_user(self, user_id, return_json=False):
         """Returns the user with the given ``user_id``.
@@ -103,7 +86,7 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        teams = await self._get_static("teams")
+        teams = getattr(self, "teams")
 
         if team_ids:
             team_ids = set(team_ids)
@@ -156,7 +139,7 @@ class FPL:
         assert 0 < int(
             team_id) < 21, "Team ID must be a number between 1 and 20."
         url = API_URLS["static"]
-        teams = await self._get_static("teams")
+        teams = getattr(self, "teams")
         team = next(team for team in teams
                     if team["id"] == int(team_id))
 
@@ -236,7 +219,7 @@ class FPL:
         :raises ValueError: Player with ``player_id`` not found
         """
         if not players:
-            players = await self._get_static("elements")
+            players = getattr(self, "elements")
 
         try:
             player = next(player for player in players
@@ -253,9 +236,9 @@ class FPL:
                               f'/premierleague/photos/players/110x140/p{player["code"]}.png'
 
         if include_live:
-            current_gameweek = await self.get_current_gameweek()
+            current_gameweek = getattr(self, "current_gameweek")
             live = await self.get_gameweek(current_gameweek)
-            player.update(live.elements[player["id"]])
+            player.update(getattr(live, "elements")[player["id"]])
 
         if return_json:
             return player
@@ -271,6 +254,7 @@ class FPL:
             https://fantasy.premierleague.com/api/bootstrap-static/
             https://fantasy.premierleague.com/api/element-summary/1/ (optional)
 
+        :param include_live:
         :param list player_ids: (optional) A list of player IDs
         :param boolean include_summary: (optional) Includes a player's summary
             if ``True``.
@@ -280,7 +264,7 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        players = await self._get_static("elements")
+        players = getattr(self, "elements")
 
         if not player_ids:
             player_ids = [player["id"] for player in players]
@@ -428,7 +412,7 @@ class FPL:
             https://fantasy.premierleague.com/api/event/1/live/
 
         :param int gameweek_id: A gameweek's ID.
-        :param bool include_summary: (optional) Includes a gameweek's live data
+        :param bool include_live: (optional) Includes a gameweek's live data
             if ``True``.
         :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
             if ``False`` returns a :class:`Gameweek` object. Defaults to
@@ -437,7 +421,7 @@ class FPL:
         :rtype: :class:`Gameweek` or ``dict``
         """
 
-        static_gameweeks = await self._get_static("events")
+        static_gameweeks = getattr(self, "events")
 
         try:
             static_gameweek = next(gameweek for gameweek in static_gameweeks if
@@ -756,7 +740,7 @@ class FPL:
             calculated by scaling the average points conceded per position
             between 1.0 and 5.0 using the given extrema.
 
-            :param dict points_against: A dict containing the points scored
+            :param dict average_points: A dict containing the points scored
                 against each team in the Premier League.
             :param dict extrema: A dict containing the extrema for each
                 position and location.
