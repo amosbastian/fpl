@@ -35,8 +35,8 @@ from .models.h2h_league import H2HLeague
 from .models.player import Player, PlayerSummary
 from .models.team import Team
 from .models.user import User
-from .utils import (average, fetch, logged_in, position_converter, scale,
-                    team_converter)
+from .utils import (average, fetch, get_current_user, logged_in,
+                    position_converter, scale, team_converter)
 
 
 class FPL():
@@ -45,7 +45,7 @@ class FPL():
     def __init__(self, session):
         self.session = session
 
-    async def get_user(self, user_id, return_json=False):
+    async def get_user(self, user_id=None, return_json=False):
         """Returns the user with the given ``user_id``.
 
         Information is taken from e.g.:
@@ -58,7 +58,17 @@ class FPL():
         :type return_json: bool
         :rtype: :class:`User` or `dict`
         """
-        assert int(user_id) > 0, "User ID must be a positive number."
+        if user_id:
+            assert int(user_id) > 0, "User ID must be a positive number."
+        else:
+            # If no user ID provided get it from current session
+            try:
+                user = await get_current_user(self.session)
+                user_id = user["player"]["entry"]
+            except TypeError:
+                raise Exception("You must log in before using `get_user` if "
+                                "you do not provide a user ID.")
+
         url = API_URLS["user"].format(user_id)
         user = await fetch(self.session, url)
 

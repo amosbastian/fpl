@@ -24,6 +24,7 @@ class H2HLeague():
       >>> asyncio.run(main())
       League 760869 - 760869
     """
+
     def __init__(self, league_information, session):
         self._session = session
 
