@@ -70,14 +70,14 @@ class TestFPL(object):
         assert isinstance(teams[0], Team)
 
         teams = await fpl.get_teams(return_json=True)
-        assert isinstance(teams, list)
+        assert isinstance(teams, dict)
         assert len(teams) == 20
-        assert isinstance(teams[0], dict)
+        assert isinstance(teams[1], dict)
 
         teams = await fpl.get_teams(team_ids=[1, 2, 3])
         assert isinstance(teams, list)
         assert len(teams) == 3
-        assert isinstance(teams[0], Team)
+        assert isinstance(teams[1], Team)
         assert [team.id for team in teams] == [1, 2, 3]
 
     async def test_player_summary(self, loop, fpl):
@@ -168,7 +168,6 @@ class TestFPL(object):
     async def test_fixtures_by_gameweek(self, loop, fpl):
         for gameweek in range(1, 39):
             fixtures = await fpl.get_fixtures_by_gameweek(gameweek)
-            print(type(fixtures))
             assert isinstance(fixtures, dict)
             assert all([isinstance(fixtures[fixture_id], Fixture) for fixture_id in fixtures.keys()])
 

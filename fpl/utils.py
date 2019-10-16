@@ -143,7 +143,6 @@ def average(iterable):
 
 def logged_in(session):
     """Checks that the user is logged in within the session.
-
     :param session: http session
     :type session: aiohttp.ClientSession
     :return: True if user is logged in else False

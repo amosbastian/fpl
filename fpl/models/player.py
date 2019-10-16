@@ -2,7 +2,7 @@ from ..constants import API_URLS
 from ..utils import fetch, position_converter, team_converter
 
 
-class Player():
+class Player:
     """A class representing a player in the Fantasy Premier League.
 
     Basic usage::
@@ -72,7 +72,6 @@ class Player():
 
     @property
     def attacking_form(self):
-        form = 0
         points_per_goal = 8 - getattr(self, "element_type")
         attack_ratings = []
         weights = []
@@ -85,14 +84,14 @@ class Player():
                 attack_ratings.append(attack_rating)
                 weights.append(weight)
                 form = sum(attack_ratings) / sum(weights)
-        except (AttributeError, ZeroDivisionError):
+                return round(form)
+        except AttributeError:
             pass
-        return round(form)
 
     def __str__(self):
-        return (f"{self.web_name} - "
-                f"{position_converter(self.element_type)} - "
-                f"{team_converter(self.team)}")
+        return (f"{getattr(self, 'web_name')} - "
+                f"{position_converter(getattr(self, 'element_type'))} - "
+                f"{team_converter(getattr(self, 'team'))}")
 
 
 class PlayerSummary:

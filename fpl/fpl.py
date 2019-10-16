@@ -94,13 +94,12 @@ class FPL:
 
         if team_ids:
             team_ids = set(team_ids)
-            teams = [team for team in teams if team["id"] in team_ids]
+            teams = {team["id"]: team for team in teams.values() if team["id"] in team_ids}
 
         if return_json:
             return teams
-
         return [Team(team_information, self.session)
-                for team_information in teams]
+                for team_information in teams.values()]
 
     async def get_team(self, team_id, return_json=False):
         """Returns the team with the given ``team_id``.
@@ -144,7 +143,7 @@ class FPL:
             team_id) < 21, "Team ID must be a number between 1 and 20."
         url = API_URLS["static"]
         teams = getattr(self, "teams")
-        team = next(team for team in teams
+        team = next(team for team in teams.values()
                     if team["id"] == int(team_id))
 
         if return_json:
@@ -226,7 +225,7 @@ class FPL:
             players = getattr(self, "elements")
 
         try:
-            player = next(player for player in players
+            player = next(player for player in players.values()
                           if player["id"] == player_id)
         except StopIteration:
             raise ValueError(f"Player with ID {player_id} not found")
@@ -271,7 +270,7 @@ class FPL:
         players = getattr(self, "elements")
 
         if not player_ids:
-            player_ids = [player["id"] for player in players]
+            player_ids = [player["id"] for player in players.values()]
 
         tasks = [asyncio.ensure_future(
                  self.get_player(
@@ -428,7 +427,7 @@ class FPL:
         static_gameweeks = getattr(self, "events")
 
         try:
-            static_gameweek = next(gameweek for gameweek in static_gameweeks if
+            static_gameweek = next(gameweek for gameweek in static_gameweeks.values() if
                                    gameweek["id"] == gameweek_id)
         except StopIteration:
             raise ValueError(f"Gameweek with ID {gameweek_id} not found")

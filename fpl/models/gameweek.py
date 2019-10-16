@@ -1,4 +1,4 @@
-class Gameweek():
+class Gameweek:
     """A class representing a gameweek of the Fantasy Premier League.
 
     Basic usage::
