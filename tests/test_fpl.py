@@ -215,21 +215,20 @@ class TestFPL(object):
         assert "elements" in gameweek.keys()
         assert isinstance(gameweek["elements"], dict)
 
-
-    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_classic_league(self, loop, fpl):
-        classic_league = await fpl.get_classic_league(34438)
+        await fpl.login()
+        classic_league = await fpl.get_classic_league(173226)
         assert isinstance(classic_league, ClassicLeague)
 
-        classic_league = await fpl.get_classic_league(34438, return_json=True)
+        classic_league = await fpl.get_classic_league(173226, return_json=True)
         assert isinstance(classic_league, dict)
 
-    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_h2h_league(self, loop, fpl):
-        h2h_league = await fpl.get_h2h_league(63368)
+        await fpl.login()
+        h2h_league = await fpl.get_h2h_league(902521)
         assert isinstance(h2h_league, H2HLeague)
 
-        h2h_league = await fpl.get_h2h_league(63368, True)
+        h2h_league = await fpl.get_h2h_league(902521, True)
         assert isinstance(h2h_league, dict)
 
     async def test_login_with_no_email_password(self, loop, mocker, monkeypatch, fpl):
@@ -249,7 +248,6 @@ class TestFPL(object):
         with pytest.raises(ValueError):
             await fpl.login(123, 123)
         assert mocked_text.call_count == 1
-
         monkeypatch.setenv("FPL_EMAIL", 123)
         monkeypatch.setenv("FPL_PASSWORD", 123)
         with pytest.raises(ValueError):

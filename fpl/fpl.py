@@ -303,7 +303,7 @@ class FPL:
 
         gameweek_fixtures = await fetch(
             self.session,
-            API_URLS["gameweek_fixtures"].format(fixture_gameweek))
+            API_URLS["fixtures"], params={"event": fixture_gameweek})
 
         try:
             fixture = next(fixture for fixture in gameweek_fixtures
@@ -340,7 +340,7 @@ class FPL:
                                 if fixture["id"] in fixture_ids)
         tasks = [asyncio.ensure_future(
                  fetch(self.session,
-                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                       API_URLS["fixtures"], params={"event": gameweek}))
                  for gameweek in fixture_gameweeks]
 
         gameweek_fixtures = await asyncio.gather(*tasks)
@@ -370,7 +370,7 @@ class FPL:
         :rtype: list
         """
         fixtures = await fetch(self.session,
-                               API_URLS["gameweek_fixtures"].format(gameweek))
+                               API_URLS["fixtures"], params={"event": gameweek})
 
         if return_json:
             return fixtures
@@ -393,7 +393,7 @@ class FPL:
         gameweeks = range(1, 39)
         tasks = [asyncio.ensure_future(
                  fetch(self.session,
-                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                       API_URLS["fixtures"], params={"event": gameweek}))
                  for gameweek in gameweeks]
 
         gameweek_fixtures = await asyncio.gather(*tasks)
@@ -486,7 +486,7 @@ class FPL:
         gameweeks = await asyncio.gather(*tasks)
         return gameweeks
 
-    async def get_classic_league(self, league_id, return_json=False):
+    async def get_classic_league(self, league_id, return_json=False, all_pages=False):
         """Returns the classic league with the given ``league_id``. Requires
         the user to have logged in using ``fpl.login()``.
 
@@ -505,14 +505,15 @@ class FPL:
             raise Exception("User must be logged in.")
 
         url = API_URLS["league_classic"].format(league_id)
-        league = await fetch(self.session, url)
+
+        league = await self.get_league(url, all_pages)
 
         if return_json:
             return league
 
         return ClassicLeague(league, session=self.session)
 
-    async def get_h2h_league(self, league_id, return_json=False):
+    async def get_h2h_league(self, league_id, return_json=False, all_pages=False):
         """Returns a `H2HLeague` object with the given `league_id`. Requires
         the user to have logged in using ``fpl.login()``.
 
@@ -531,12 +532,26 @@ class FPL:
             raise Exception("User must be logged in.")
 
         url = API_URLS["league_h2h"].format(league_id)
-        league = await fetch(self.session, url)
+        league = await self.get_league(url, all_pages)
 
         if return_json:
             return league
 
         return H2HLeague(league, session=self.session)
+
+    async def get_league(self, url, all_pages=False):
+        league = await fetch(self.session, url)
+        if all_pages:
+            for x in ("new_entries", "standings"):
+                has_next = league[x]["has_next"]
+                params = {f"page_{x}": 2}
+                while has_next:
+                    league[x]["results"] \
+                        .extend((await fetch(self._session, url, params=params))[x]["results"])
+                    has_next = league[x]["has_next"]
+                    params[f"page_{x}"] += 1
+
+        return league
 
     async def login(self, email=None, password=None):
         """Returns a requests session with FPL login authentication.
