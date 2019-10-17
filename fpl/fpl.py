@@ -561,9 +561,10 @@ class FPL:
 
         login_url = "https://users.premierleague.com/accounts/login/"
         async with self.session.post(login_url, data=payload) as response:
-            response_text = await response.text()
-            if "Incorrect email or password" in response_text:
-                raise ValueError("Incorrect email or password!")
+            state = response.url.query["state"]
+            if state == "fail":
+                reason = response.url.query["reason"]
+                raise ValueError(f"Login not successful, reason: {reason}")
 
     async def get_points_against(self):
         """Returns a dictionary containing the points scored against all teams
