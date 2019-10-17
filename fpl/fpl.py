@@ -27,6 +27,8 @@ import asyncio
 import itertools
 import os
 
+import requests
+
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
 from .models.fixture import Fixture
@@ -44,6 +46,14 @@ class FPL:
 
     def __init__(self, session):
         self.session = session
+        static = requests.get(API_URLS["static"]).json()  # use synchronous request
+        for k, v in static.items():
+            try:
+                v = {w["id"]: w for w in v}
+            except (KeyError, TypeError):
+                pass
+            setattr(self, k, v)
+        setattr(self, "current_gameweek", next(event for event in static["events"] if event["is_current"])['id'])
 
     async def get_user(self, user_id=None, return_json=False):
         """Returns the user with the given ``user_id``.
