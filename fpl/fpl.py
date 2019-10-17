@@ -551,7 +551,6 @@ class FPL:
             password = os.getenv("FPL_PASSWORD", None)
         if not email or not password:
             raise ValueError("Email and password must be set")
-
         payload = {
             "login": email,
             "password": password,
