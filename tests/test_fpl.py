@@ -17,6 +17,21 @@ class TestFPL(object):
         session = aiohttp.ClientSession()
         fpl = FPL(session)
         assert fpl.session is session
+        keys = [
+            "events",
+            "game_settings",
+            "phases",
+            "teams",
+            "elements",
+            "element_types",
+            "element_stats",
+            "total_players",
+            "current_gameweek",
+        ]
+        assert all([hasattr(fpl, key) for key in keys])
+        assert all([isinstance(getattr(fpl, key), dict) for key in keys[:-3]])
+        assert isinstance(getattr(fpl, keys[-3]), list)
+        assert all([isinstance(getattr(fpl, key), int) for key in keys[-2:]])
         await session.close()
 
     async def test_user(self, loop, fpl):
@@ -55,14 +70,14 @@ class TestFPL(object):
         assert isinstance(teams[0], Team)
 
         teams = await fpl.get_teams(return_json=True)
-        assert isinstance(teams, list)
+        assert isinstance(teams, dict)
         assert len(teams) == 20
-        assert isinstance(teams[0], dict)
+        assert isinstance(teams[1], dict)
 
         teams = await fpl.get_teams(team_ids=[1, 2, 3])
         assert isinstance(teams, list)
         assert len(teams) == 3
-        assert isinstance(teams[0], Team)
+        assert isinstance(teams[1], Team)
         assert [team.id for team in teams] == [1, 2, 3]
 
     async def test_player_summary(self, loop, fpl):
@@ -153,8 +168,8 @@ class TestFPL(object):
     async def test_fixtures_by_gameweek(self, loop, fpl):
         for gameweek in range(1, 39):
             fixtures = await fpl.get_fixtures_by_gameweek(gameweek)
-            assert isinstance(fixtures, list)
-            assert isinstance(fixtures[0], Fixture)
+            assert isinstance(fixtures, dict)
+            assert all([isinstance(fixtures[fixture_id], Fixture) for fixture_id in fixtures.keys()])
 
             fixtures = await fpl.get_fixtures_by_gameweek(
                 gameweek, return_json=True)
@@ -183,9 +198,23 @@ class TestFPL(object):
         gameweek = await fpl.get_gameweek(20)
         assert isinstance(gameweek, Gameweek)
         assert gameweek.id == 20
+        assert not hasattr(gameweek, "elements")
 
         gameweek = await fpl.get_gameweek(20, return_json=True)
         assert isinstance(gameweek, dict)
+        assert gameweek["id"] == 20
+        assert "elements" not in gameweek.keys()
+
+        gameweek = await fpl.get_gameweek(1, include_live=True)
+        assert isinstance(gameweek, Gameweek)
+        assert hasattr(gameweek, "elements")
+        assert isinstance(gameweek.elements, dict)
+
+        gameweek = await fpl.get_gameweek(1, include_live=True, return_json=True)
+        assert isinstance(gameweek, dict)
+        assert "elements" in gameweek.keys()
+        assert isinstance(gameweek["elements"], dict)
+
 
     @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_classic_league(self, loop, fpl):

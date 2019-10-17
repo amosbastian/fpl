@@ -35,17 +35,17 @@ from .models.h2h_league import H2HLeague
 from .models.player import Player, PlayerSummary
 from .models.team import Team
 from .models.user import User
-from .utils import (average, fetch, logged_in, position_converter, scale,
-                    team_converter)
+from .utils import (average, fetch, get_current_user, logged_in,
+                    position_converter, scale, team_converter)
 
 
-class FPL():
+class FPL:
     """The FPL class."""
 
     def __init__(self, session):
         self.session = session
 
-    async def get_user(self, user_id, return_json=False):
+    async def get_user(self, user_id=None, return_json=False):
         """Returns the user with the given ``user_id``.
 
         Information is taken from e.g.:
@@ -58,7 +58,17 @@ class FPL():
         :type return_json: bool
         :rtype: :class:`User` or `dict`
         """
-        assert int(user_id) > 0, "User ID must be a positive number."
+        if user_id:
+            assert int(user_id) > 0, "User ID must be a positive number."
+        else:
+            # If no user ID provided get it from current session
+            try:
+                user = await get_current_user(self.session)
+                user_id = user["player"]["entry"]
+            except TypeError:
+                raise Exception("You must log in before using `get_user` if "
+                                "you do not provide a user ID.")
+
         url = API_URLS["user"].format(user_id)
         user = await fetch(self.session, url)
 
@@ -365,7 +375,7 @@ class FPL():
         if return_json:
             return fixtures
 
-        return [Fixture(fixture) for fixture in fixtures]
+        return {fixture["id"]: Fixture(fixture) for fixture in fixtures}
 
     async def get_fixtures(self, return_json=False):
         """Returns a list of *all* fixtures.
@@ -421,10 +431,28 @@ class FPL():
         except StopIteration:
             raise ValueError(f"Gameweek with ID {gameweek_id} not found")
 
-        live_gameweek = await fetch(
-            self.session, API_URLS["gameweek_live"].format(gameweek_id))
+        if include_live:
+            live_gameweek = await fetch(
+                self.session, API_URLS["gameweek_live"].format(gameweek_id))
 
-        live_gameweek.update(static_gameweek)
+            # convert element list to dict
+            live_gameweek["elements"] = {element['id']: element for element in live_gameweek['elements']}
+
+            # include live bonus points
+            if not static_gameweek['finished']:
+                fixtures = await self.get_fixtures_by_gameweek(gameweek_id)
+                fixtures = filter(lambda f: not f.finished, fixtures)
+                bonus_for_gameweek = []
+                for fixture in fixtures:
+                    bonus = fixture.get_bonus(provisional=True)
+                    bonus_for_gameweek.extend(bonus['a'] + bonus['h'])
+                bonus_for_gameweek = {b['element']: b['value'] for b in bonus_for_gameweek}
+                for player_id, bonus_points in bonus_for_gameweek:
+                    if live_gameweek["elements"][player_id]["bonus"] == 0:
+                        live_gameweek["elements"][player_id]["bonus"] += bonus_points
+                        live_gameweek["elements"][player_id]["total_points"] += bonus_points
+
+            static_gameweek.update(live_gameweek)
 
         if return_json:
             return static_gameweek

@@ -1,6 +1,8 @@
 import asyncio
 from functools import update_wrapper
 
+from fpl.constants import API_URLS
+
 headers = {"User-Agent": "https://github.com/amosbastian/fpl"}
 
 
@@ -143,7 +145,6 @@ def average(iterable):
 
 def logged_in(session):
     """Checks that the user is logged in within the session.
-
     :param session: http session
     :type session: aiohttp.ClientSession
     :return: True if user is logged in else False
@@ -169,3 +170,8 @@ def get_headers(referer):
         "X-Requested-With": "XMLHttpRequest",
         "Referer": referer
     }
+
+
+async def get_current_user(session):
+    user = await fetch(session, API_URLS["me"])
+    return user

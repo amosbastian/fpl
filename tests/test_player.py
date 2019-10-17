@@ -16,3 +16,8 @@ class TestPlayer(object):
     async def test_vapm(loop, player):
         vapm = await player.vapm
         assert isinstance(vapm, float)
+
+    @staticmethod
+    async def test_attacking_form(loop, player):
+        attacking_form = player.attacking_form
+        assert isinstance(attacking_form, int)
