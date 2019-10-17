@@ -70,7 +70,7 @@ class TestFPL(object):
         assert isinstance(teams[0], Team)
 
         teams = await fpl.get_teams(return_json=True)
-        assert isinstance(teams, dict)
+        assert isinstance(teams, list)
         assert len(teams) == 20
         assert isinstance(teams[1], dict)
 
