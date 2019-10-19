@@ -39,7 +39,7 @@ from .utils import (average, fetch, get_current_user, logged_in,
                     position_converter, scale, team_converter)
 
 
-class FPL():
+class FPL:
     """The FPL class."""
 
     def __init__(self, session):
@@ -303,7 +303,7 @@ class FPL():
 
         gameweek_fixtures = await fetch(
             self.session,
-            API_URLS["gameweek_fixtures"].format(fixture_gameweek))
+            API_URLS["fixtures"], params={"event": fixture_gameweek})
 
         try:
             fixture = next(fixture for fixture in gameweek_fixtures
@@ -340,7 +340,7 @@ class FPL():
                                 if fixture["id"] in fixture_ids)
         tasks = [asyncio.ensure_future(
                  fetch(self.session,
-                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                       API_URLS["fixtures"], params={"event": gameweek}))
                  for gameweek in fixture_gameweeks]
 
         gameweek_fixtures = await asyncio.gather(*tasks)
@@ -370,7 +370,7 @@ class FPL():
         :rtype: list
         """
         fixtures = await fetch(self.session,
-                               API_URLS["gameweek_fixtures"].format(gameweek))
+                               API_URLS["fixtures"], params={"event": gameweek})
 
         if return_json:
             return fixtures
@@ -393,7 +393,7 @@ class FPL():
         gameweeks = range(1, 39)
         tasks = [asyncio.ensure_future(
                  fetch(self.session,
-                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                       API_URLS["fixtures"], params={"event": gameweek}))
                  for gameweek in gameweeks]
 
         gameweek_fixtures = await asyncio.gather(*tasks)
