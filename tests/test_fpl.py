@@ -17,6 +17,21 @@ class TestFPL(object):
         session = aiohttp.ClientSession()
         fpl = FPL(session)
         assert fpl.session is session
+        keys = [
+            "events",
+            "game_settings",
+            "phases",
+            "teams",
+            "elements",
+            "element_types",
+            "element_stats",
+            "total_players",
+            "current_gameweek",
+        ]
+        assert all([hasattr(fpl, key) for key in keys])
+        assert all([isinstance(getattr(fpl, key), dict) for key in keys[:-3]])
+        assert isinstance(getattr(fpl, keys[-3]), list)
+        assert all([isinstance(getattr(fpl, key), int) for key in keys[-2:]])
         await session.close()
 
     async def test_user(self, loop, fpl):
