@@ -137,6 +137,10 @@ class TestFPL(object):
         summary_keys = ("history_past", "history", "fixtures")
         assert all([isinstance(getattr(players[2], key), list) for key in summary_keys])
 
+        players = await fpl.get_players([1, 2, 3], include_live=True)
+        assert len(players.values()) == 3
+        assert isinstance(getattr(players[2], "live_score"), int)
+
         players = await fpl.get_players([1, 2, 3], include_summary=True, return_json=True)
         assert len(players) == 3
         assert all([isinstance(players[2][key], list) for key in summary_keys])
@@ -222,7 +226,6 @@ class TestFPL(object):
         assert "elements" in gameweek.keys()
         assert isinstance(gameweek["elements"], dict)
 
-    @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_classic_league(self, loop, fpl):
         await fpl.login()
         classic_league = await fpl.get_classic_league(173226)
@@ -276,11 +279,11 @@ class TestFPL(object):
 
     # noinspection PyPep8Naming
     async def test_FDR(self, loop, fpl):
-        def test_main(fdr):
-            assert isinstance(fdr, dict)
+        def test_main(fdr_):
+            assert isinstance(fdr_, dict)
 
             location_extrema = {"H": [], "A": []}
-            for _, positions in fdr.items():
+            for _, positions in fdr_.items():
                 for location in positions.values():
                     location_extrema["H"].append(location["H"])
                     location_extrema["A"].append(location["A"])

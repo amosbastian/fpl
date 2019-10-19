@@ -216,7 +216,7 @@ class FPL:
         return [PlayerSummary(player_summary)
                 for player_summary in player_summaries]
 
-    async def get_player(self, player_id, players=None, include_summary=False,
+    async def get_player(self, player_id, players=None, gameweek=None, include_summary=False,
                          return_json=False):
         """Returns the player with the given ``player_id``.
 
@@ -224,6 +224,7 @@ class FPL:
             https://fantasy.premierleague.com/api/bootstrap-static/
             https://fantasy.premierleague.com/api/element-summary/1/ (optional)
 
+        :param gameweek: the current gameweek data (for applying live scores)
         :param player_id: A player's ID.
         :type player_id: string or int
         :param list players: (optional) A list of players.
@@ -249,12 +250,15 @@ class FPL:
                 player["id"], return_json=True)
             player.update(player_summary)
 
+        if gameweek:
+            player["live_score"] = gameweek.elements[player_id]["stats"]["total_points"]
+
         if return_json:
             return player
 
         return Player(player, self.session)
 
-    async def get_players(self, player_ids=None, include_summary=False,
+    async def get_players(self, player_ids=None, include_summary=False, include_live=None,
                           return_json=False):
         """Returns either a list of *all* players, or a list of players whose
         IDs are in the given ``player_ids`` list.
@@ -263,6 +267,7 @@ class FPL:
             https://fantasy.premierleague.com/api/bootstrap-static/
             https://fantasy.premierleague.com/api/element-summary/1/ (optional)
 
+        :param include_live: (optional) include a player's live score
         :param list player_ids: (optional) A list of player IDs
         :param boolean include_summary: (optional) Includes a player's summary
             if ``True``.
@@ -273,13 +278,17 @@ class FPL:
         :rtype: list
         """
         players = getattr(self, "elements")
+        gameweek = None
 
         if not player_ids:
             player_ids = [player["id"] for player in players.values()]
 
+        if include_live:
+            gameweek = await self.get_gameweek(getattr(self, "current_gameweek"), include_live=True)
+
         tasks = [asyncio.ensure_future(
                  self.get_player(
-                     player_id, players, include_summary, return_json))
+                     player_id, players, gameweek, include_summary, return_json))
                  for player_id in player_ids]
         players = await asyncio.gather(*tasks)
 
@@ -415,7 +424,7 @@ class FPL:
 
         return {fixture["id"]: Fixture(fixture) for fixture in fixtures}
 
-    async def get_gameweek(self, gameweek_id, return_json=False):
+    async def get_gameweek(self, gameweek_id, include_live=False, return_json=False):
         """Returns the gameweek with the ID ``gameweek_id``.
 
         Information is taken from e.g.:
@@ -423,7 +432,7 @@ class FPL:
             https://fantasy.premierleague.com/api/event/1/live/
 
         :param int gameweek_id: A gameweek's ID.
-        :param bool include_summary: (optional) Includes a gameweek's live data
+        :param bool include_live: (optional) Includes a gameweek's live data
             if ``True``.
         :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
             if ``False`` returns a :class:`Gameweek` object. Defaults to
@@ -450,16 +459,16 @@ class FPL:
             # include live bonus points
             if not static_gameweek['finished']:
                 fixtures = await self.get_fixtures_by_gameweek(gameweek_id)
-                fixtures = filter(lambda f: not f.finished, fixtures)
+                fixtures = filter(lambda f: not f.finished, fixtures.values())
                 bonus_for_gameweek = []
                 for fixture in fixtures:
                     bonus = fixture.get_bonus(provisional=True)
                     bonus_for_gameweek.extend(bonus['a'] + bonus['h'])
                 bonus_for_gameweek = {b['element']: b['value'] for b in bonus_for_gameweek}
-                for player_id, bonus_points in bonus_for_gameweek:
-                    if live_gameweek["elements"][player_id]["bonus"] == 0:
-                        live_gameweek["elements"][player_id]["bonus"] += bonus_points
-                        live_gameweek["elements"][player_id]["total_points"] += bonus_points
+                for player_id, bonus_points in bonus_for_gameweek.items():
+                    if live_gameweek["elements"][player_id]["stats"]["bonus"] == 0:
+                        live_gameweek["elements"][player_id]["stats"]["bonus"] += bonus_points
+                        live_gameweek["elements"][player_id]["stats"]["total_points"] += bonus_points
 
             static_gameweek.update(live_gameweek)
 
@@ -488,7 +497,7 @@ class FPL:
             gameweek_ids = range(1, 39)
 
         tasks = [asyncio.ensure_future(
-                 self.get_gameweek(gameweek_id, return_json))
+                 self.get_gameweek(gameweek_id, False, return_json))
                  for gameweek_id in gameweek_ids]
 
         gameweeks = await asyncio.gather(*tasks)
