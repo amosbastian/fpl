@@ -39,7 +39,7 @@ from .utils import (average, fetch, get_current_user, logged_in,
                     position_converter, scale, team_converter)
 
 
-class FPL():
+class FPL:
     """The FPL class."""
 
     def __init__(self, session):
@@ -431,10 +431,28 @@ class FPL():
         except StopIteration:
             raise ValueError(f"Gameweek with ID {gameweek_id} not found")
 
-        live_gameweek = await fetch(
-            self.session, API_URLS["gameweek_live"].format(gameweek_id))
+        if include_live:
+            live_gameweek = await fetch(
+                self.session, API_URLS["gameweek_live"].format(gameweek_id))
 
-        live_gameweek.update(static_gameweek)
+            # convert element list to dict
+            live_gameweek["elements"] = {element['id']: element for element in live_gameweek['elements']}
+
+            # include live bonus points
+            if not static_gameweek['finished']:
+                fixtures = await self.get_fixtures_by_gameweek(gameweek_id)
+                fixtures = filter(lambda f: not f.finished, fixtures)
+                bonus_for_gameweek = []
+                for fixture in fixtures:
+                    bonus = fixture.get_bonus(provisional=True)
+                    bonus_for_gameweek.extend(bonus['a'] + bonus['h'])
+                bonus_for_gameweek = {b['element']: b['value'] for b in bonus_for_gameweek}
+                for player_id, bonus_points in bonus_for_gameweek:
+                    if live_gameweek["elements"][player_id]["bonus"] == 0:
+                        live_gameweek["elements"][player_id]["bonus"] += bonus_points
+                        live_gameweek["elements"][player_id]["total_points"] += bonus_points
+
+            static_gameweek.update(live_gameweek)
 
         if return_json:
             return static_gameweek
