@@ -9,6 +9,7 @@ def add_player(location, information):
     location.append({"player": player, "goals": goals})
 
 
+# noinspection PyUnresolvedReferences
 class Fixture:
     """A class representing fixtures in the Fantasy Premier League.
 
@@ -127,17 +128,54 @@ class Fixture:
         except KeyError:
             return {'a': [], 'h': []}
 
-        return self._get_players("saves")
-
-    def get_bonus(self):
+    def get_bonus(self, provisional=False):
         """Returns all players who received bonus points in the fixture.
 
         :rtype: dict
         """
-        if not getattr(self, "finished", False):
-            return {}
+        if self.finished:
+            return self.stats["bonus"]
+        elif self.started and provisional:
+            bps = self.get_bps()
+            home = [b["element"] for b in bps['h']]
+            away = [b["element"] for b in bps['a']]
+            bps = bps['a'] + bps['h']
+            bps = {b["element"]: b["value"] for b in bps}  # map to dict
+            bps_values = set(bps.values())
 
-        return self._get_players("bonus")
+            try:
+                bps1 = max(bps_values)  # highest bps
+                bps_values.remove(bps1)
+                bps2 = max(bps_values)  # 2nd highest bps
+                bps_values.remove(bps2)
+                bps3 = max(bps_values)  # 3rd highest bps
+            except ValueError:  # empty set
+                return {'a': [], 'h': []}
+
+            else:
+                bonus3 = list(filter(lambda x: bps[x] == bps1, bps.keys()))
+                bonus2 = bonus1 = []
+                if len(bonus3) == 1:
+                    bonus2 = list(filter(lambda x: bps[x] == bps2, bps.keys()))
+                if len(bonus3) + len(bonus2) == 2:
+                    if len(bonus3) == 2:  # 2 way tie for 3 bonus
+                        bonus1 = list(filter(lambda x: bps[x] == bps2, bps.keys()))
+                    else:
+                        bonus1 = list(filter(lambda x: bps[x] == bps3, bps.keys()))
+                bonus3 = [{"value": 3, "element": b} for b in bonus3]
+                bonus2 = [{"value": 2, "element": b} for b in bonus2]
+                bonus1 = [{"value": 1, "element": b} for b in bonus1]
+                bonus = bonus3 + bonus2 + bonus1
+                h = []
+                a = []
+                for b in bonus:
+                    if b["element"] in home:
+                        h.append(b)
+                    elif b["element"] in away:
+                        a.append(b)
+                return {'a': a, 'h': h}
+        else:
+            return {'a': [], 'h': []}
 
     def get_bps(self):
         """Returns the bonus points of each player.
