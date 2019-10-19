@@ -27,6 +27,8 @@ import asyncio
 import itertools
 import os
 
+import requests
+
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
 from .models.fixture import Fixture
@@ -44,6 +46,14 @@ class FPL:
 
     def __init__(self, session):
         self.session = session
+        static = requests.get(API_URLS["static"]).json()  # use synchronous request
+        for k, v in static.items():
+            try:
+                v = {w["id"]: w for w in v}
+            except (KeyError, TypeError):
+                pass
+            setattr(self, k, v)
+        setattr(self, "current_gameweek", next(event for event in static["events"] if event["is_current"])['id'])
 
     async def get_user(self, user_id=None, return_json=False):
         """Returns the user with the given ``user_id``.
@@ -91,13 +101,13 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        url = API_URLS["static"]
-        teams = await fetch(self.session, url)
-        teams = teams["teams"]
+        teams = getattr(self, "teams")
 
         if team_ids:
             team_ids = set(team_ids)
-            teams = [team for team in teams if team["id"] in team_ids]
+            teams = [team for team in teams.values() if team["id"] in team_ids]
+        else:
+            teams = [team for team in teams.values()]
 
         if return_json:
             return teams
@@ -145,9 +155,8 @@ class FPL:
         """
         assert 0 < int(
             team_id) < 21, "Team ID must be a number between 1 and 20."
-        url = API_URLS["static"]
-        teams = await fetch(self.session, url)
-        team = next(team for team in teams["teams"]
+        teams = getattr(self, "teams")
+        team = next(team for team in teams.values()
                     if team["id"] == int(team_id))
 
         if return_json:
@@ -226,11 +235,10 @@ class FPL:
         :raises ValueError: Player with ``player_id`` not found
         """
         if not players:
-            players = await fetch(self.session, API_URLS["static"])
-            players = players["elements"]
+            players = getattr(self, "elements")
 
         try:
-            player = next(player for player in players
+            player = next(player for player in players.values()
                           if player["id"] == player_id)
         except StopIteration:
             raise ValueError(f"Player with ID {player_id} not found")
@@ -263,11 +271,10 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        players = await fetch(self.session, API_URLS["static"])
-        players = players["elements"]
+        players = getattr(self, "elements")
 
         if not player_ids:
-            player_ids = [player["id"] for player in players]
+            player_ids = [player["id"] for player in players.values()]
 
         tasks = [asyncio.ensure_future(
                  self.get_player(
@@ -422,11 +429,10 @@ class FPL:
         :rtype: :class:`Gameweek` or ``dict``
         """
 
-        static_gameweeks = await fetch(self.session, API_URLS["static"])
-        static_gameweeks = static_gameweeks["events"]
+        static_gameweeks = getattr(self, "events")
 
         try:
-            static_gameweek = next(gameweek for gameweek in static_gameweeks if
+            static_gameweek = next(gameweek for gameweek in static_gameweeks.values() if
                                    gameweek["id"] == gameweek_id)
         except StopIteration:
             raise ValueError(f"Gameweek with ID {gameweek_id} not found")
