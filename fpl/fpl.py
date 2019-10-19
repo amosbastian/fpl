@@ -39,7 +39,7 @@ from .utils import (average, fetch, get_current_user, logged_in,
                     position_converter, scale, team_converter)
 
 
-class FPL():
+class FPL:
     """The FPL class."""
 
     def __init__(self, session):
@@ -102,8 +102,8 @@ class FPL():
         if return_json:
             return teams
 
-        return [Team(team_information, self.session)
-                for team_information in teams]
+        return {team_information["id"]: Team(team_information, self.session)
+                for team_information in teams}
 
     async def get_team(self, team_id, return_json=False):
         """Returns the team with the given ``team_id``.
@@ -177,6 +177,7 @@ class FPL():
 
         return PlayerSummary(player_summary)
 
+    # not used
     async def get_player_summaries(self, player_ids, return_json=False):
         """Returns a list of summaries of players whose ID are
         in the ``player_ids`` list.
@@ -275,7 +276,10 @@ class FPL():
                  for player_id in player_ids]
         players = await asyncio.gather(*tasks)
 
-        return players
+        if return_json:
+            return list(filter(lambda p: p["id"] in player_ids, players))
+
+        return {player.id: player for player in players}
 
     async def get_fixture(self, fixture_id, return_json=False):
         """Returns the fixture with the given ``fixture_id``.
@@ -352,7 +356,7 @@ class FPL():
         if return_json:
             return fixtures
 
-        return [Fixture(fixture) for fixture in fixtures]
+        return {fixture["id"]: Fixture(fixture) for fixture in fixtures}
 
     async def get_fixtures_by_gameweek(self, gameweek, return_json=False):
         """Returns a list of all fixtures of the given ``gameweek``.
@@ -375,7 +379,7 @@ class FPL():
         if return_json:
             return fixtures
 
-        return [Fixture(fixture) for fixture in fixtures]
+        return {fixture["id"]: Fixture(fixture) for fixture in fixtures}
 
     async def get_fixtures(self, return_json=False):
         """Returns a list of *all* fixtures.
@@ -402,10 +406,9 @@ class FPL():
         if return_json:
             return fixtures
 
-        return [Fixture(fixture) for fixture in fixtures]
+        return {fixture["id"]: Fixture(fixture) for fixture in fixtures}
 
-    async def get_gameweek(self, gameweek_id, include_live=False,
-                           return_json=False):
+    async def get_gameweek(self, gameweek_id, return_json=False):
         """Returns the gameweek with the ID ``gameweek_id``.
 
         Information is taken from e.g.:
@@ -441,8 +444,7 @@ class FPL():
 
         return Gameweek(static_gameweek)
 
-    async def get_gameweeks(self, gameweek_ids=None, include_live=False,
-                            return_json=False):
+    async def get_gameweeks(self, gameweek_ids=None, return_json=False):
         """Returns either a list of *all* gamweeks, or a list of gameweeks
         whose IDs are in the ``gameweek_ids`` list.
 
@@ -462,11 +464,15 @@ class FPL():
             gameweek_ids = range(1, 39)
 
         tasks = [asyncio.ensure_future(
-                 self.get_gameweek(gameweek_id, include_live, return_json))
+                 self.get_gameweek(gameweek_id, return_json))
                  for gameweek_id in gameweek_ids]
 
         gameweeks = await asyncio.gather(*tasks)
-        return gameweeks
+
+        if return_json:
+            return gameweeks
+
+        return {gameweek.id: gameweek for gameweek in gameweeks}
 
     async def get_classic_league(self, league_id, return_json=False):
         """Returns the classic league with the given ``league_id``. Requires
