@@ -182,6 +182,7 @@ class TestFPL(object):
     async def test_gameweek(self, loop, fpl):
         gameweek = await fpl.get_gameweek(20)
         assert isinstance(gameweek, Gameweek)
+        # noinspection PyUnresolvedReferences
         assert gameweek.id == 20
         assert not hasattr(gameweek, "elements")
 
@@ -193,13 +194,13 @@ class TestFPL(object):
         gameweek = await fpl.get_gameweek(1, include_live=True)
         assert isinstance(gameweek, Gameweek)
         assert hasattr(gameweek, "elements")
+        # noinspection PyUnresolvedReferences
         assert isinstance(gameweek.elements, dict)
 
         gameweek = await fpl.get_gameweek(1, include_live=True, return_json=True)
         assert isinstance(gameweek, dict)
         assert "elements" in gameweek.keys()
         assert isinstance(gameweek["elements"], dict)
-
 
     @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_classic_league(self, loop, fpl):
@@ -253,6 +254,7 @@ class TestFPL(object):
         points_against = await fpl.get_points_against()
         assert isinstance(points_against, dict)
 
+    # noinspection PyPep8Naming
     async def test_FDR(self, loop, fpl):
         def test_main(fdr):
             assert isinstance(fdr, dict)
