@@ -210,11 +210,11 @@ class TestFPL(object):
         assert hasattr(gameweek, "elements")
         assert isinstance(gameweek.elements, dict)
 
-        gameweek = await fpl.get_gameweek(1, include_live=True, return_json=True)
+        gameweek = await fpl.get_gameweek(1, include_live=True,
+                                          return_json=True)
         assert isinstance(gameweek, dict)
         assert "elements" in gameweek.keys()
         assert isinstance(gameweek["elements"], dict)
-
 
     @pytest.mark.skip(reason="Cannot currently test it.")
     async def test_classic_league(self, loop, fpl):
@@ -233,7 +233,8 @@ class TestFPL(object):
         h2h_league = await fpl.get_h2h_league(902521, True)
         assert isinstance(h2h_league, dict)
 
-    async def test_login_with_no_email_password(self, loop, mocker, monkeypatch, fpl):
+    async def test_login_with_no_email_password(
+            self, loop, mocker, monkeypatch, fpl):
         mocked_text = mocker.patch(
             'aiohttp.ClientResponse.text', new_callable=AsyncMock)
         monkeypatch.setenv("FPL_EMAIL", "")
@@ -242,27 +243,19 @@ class TestFPL(object):
             await fpl.login()
         mocked_text.assert_not_called()
 
-    async def test_login_with_invalid_email_password(self, loop, mocker, monkeypatch, fpl):
-        mocked_text = mocker.patch(
-            'aiohttp.ClientResponse.text', new_callable=AsyncMock)
-        mocked_text.return_value = "Incorrect email or password"
-
+    async def test_login_with_invalid_email_password(
+            self, loop, mocker, monkeypatch, fpl):
         with pytest.raises(ValueError):
             await fpl.login(123, 123)
-        assert mocked_text.call_count == 1
 
         monkeypatch.setenv("FPL_EMAIL", 123)
         monkeypatch.setenv("FPL_PASSWORD", 123)
+
         with pytest.raises(ValueError):
             await fpl.login()
-        assert mocked_text.call_count == 2
 
     async def test_login_with_valid_email_password(self, loop, mocker, fpl):
-        mocked_text = mocker.patch(
-            'aiohttp.ClientResponse.text', new_callable=AsyncMock)
-        mocked_text.return_value = "Successful login"
-        await fpl.login("email", "password")
-        mocked_text.assert_called_once()
+        await fpl.login()
 
     async def test_points_against(self, loop, fpl):
         points_against = await fpl.get_points_against()
