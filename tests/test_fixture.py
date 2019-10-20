@@ -1,97 +1,530 @@
 from fpl.models.fixture import Fixture
 
 fixture_data = {
-    "id": 6,
-    "kickoff_time_formatted": "10 Aug 20:00",
-    "started": True,
-    "event_day": 1,
-    "deadline_time": "2018-08-10T18:00:00Z",
-    "deadline_time_formatted": "10 Aug 19:00",
-    "stats": [
-        {
-            "goals_scored": {
-                "a": [{"value": 1, "element": 234}],
-                "h": [{"value": 1, "element": 286}, {"value": 1, "element": 302}],
-            }
-        },
-        {
-            "assists": {
-                "a": [{"value": 1, "element": 221}],
-                "h": [{"value": 1, "element": 295}, {"value": 1, "element": 297}],
-            }
-        },
-        {"own_goals": {"a": [], "h": []}},
-        {"penalties_saved": {"a": [], "h": []}},
-        {"penalties_missed": {"a": [], "h": []}},
-        {
-            "yellow_cards": {
-                "a": [{"value": 1, "element": 226}],
-                "h": [{"value": 1, "element": 304}, {"value": 1, "element": 481}],
-            }
-        },
-        {"red_cards": {"a": [], "h": []}},
-        {
-            "saves": {
-                "a": [{"value": 4, "element": 213}],
-                "h": [{"value": 3, "element": 282}],
-            }
-        },
-        {
-            "bonus": {
-                "a": [{"value": 1, "element": 234}],
-                "h": [{"value": 3, "element": 286}, {"value": 2, "element": 302}],
-            }
-        },
-        {
-            "bps": {
-                "a": [
-                    {"value": 25, "element": 234},
-                    {"value": 23, "element": 221},
-                    {"value": 16, "element": 213},
-                    {"value": 16, "element": 215},
-                    {"value": 15, "element": 225},
-                    {"value": 14, "element": 220},
-                    {"value": 13, "element": 227},
-                    {"value": 13, "element": 231},
-                    {"value": 12, "element": 219},
-                    {"value": 10, "element": 233},
-                    {"value": 6, "element": 226},
-                    {"value": 5, "element": 228},
-                    {"value": 3, "element": 492},
-                    {"value": 2, "element": 236},
-                ],
-                "h": [
-                    {"value": 30, "element": 286},
-                    {"value": 29, "element": 302},
-                    {"value": 24, "element": 297},
-                    {"value": 22, "element": 295},
-                    {"value": 16, "element": 289},
-                    {"value": 15, "element": 282},
-                    {"value": 15, "element": 292},
-                    {"value": 13, "element": 291},
-                    {"value": 13, "element": 305},
-                    {"value": 13, "element": 481},
-                    {"value": 8, "element": 304},
-                    {"value": 4, "element": 298},
-                    {"value": 3, "element": 303},
-                    {"value": -2, "element": 306},
-                ],
-            }
-        },
-    ],
-    "team_h_difficulty": 3,
-    "team_a_difficulty": 4,
-    "code": 987597,
-    "kickoff_time": "2018-08-10T19:00:00Z",
-    "team_h_score": 2,
-    "team_a_score": 1,
+    "code": 1059760,
+    "event": 6,
     "finished": True,
+    "finished_provisional": True,
+    "id": 59,
+    "kickoff_time": "2019-09-20T19:00:00Z",
     "minutes": 90,
     "provisional_start_time": False,
-    "finished_provisional": True,
-    "event": 1,
-    "team_a": 11,
-    "team_h": 14,
+    "started": True,
+    "team_a": 3,
+    "team_a_score": 3,
+    "team_h": 16,
+    "team_h_score": 1,
+    "stats": [
+        {
+            "identifier": "goals_scored",
+            "a": [
+                {
+                    "value": 1,
+                    "element": 59
+                },
+                {
+                    "value": 1,
+                    "element": 67
+                },
+                {
+                    "value": 1,
+                    "element": 505
+                }
+            ],
+            "h": [
+                {
+                    "value": 1,
+                    "element": 321
+                }
+            ]
+        },
+        {
+            "identifier": "assists",
+            "a": [
+                {
+                    "value": 1,
+                    "element": 65
+                },
+                {
+                    "value": 1,
+                    "element": 476
+                },
+                {
+                    "value": 1,
+                    "element": 494
+                }
+            ],
+            "h": [
+                {
+                    "value": 1,
+                    "element": 437
+                }
+            ]
+        },
+        {
+            "identifier": "own_goals",
+            "a": [
+
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "penalties_saved",
+            "a": [
+
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "penalties_missed",
+            "a": [
+
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "yellow_cards",
+            "a": [
+                {
+                    "value": 1,
+                    "element": 82
+                },
+                {
+                    "value": 1,
+                    "element": 446
+                },
+                {
+                    "value": 1,
+                    "element": 505
+                }
+            ],
+            "h": [
+                {
+                    "value": 1,
+                    "element": 328
+                }
+            ]
+        },
+        {
+            "identifier": "red_cards",
+            "a": [
+
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "saves",
+            "a": [
+                {
+                    "value": 6,
+                    "element": 494
+                }
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "bonus",
+            "a": [
+                {
+                    "value": 3,
+                    "element": 494
+                },
+                {
+                    "value": 1,
+                    "element": 67
+                }
+            ],
+            "h": [
+                {
+                    "value": 2,
+                    "element": 321
+                }
+            ]
+        },
+        {
+            "identifier": "bps",
+            "a": [
+                {
+                    "value": 34,
+                    "element": 494
+                },
+                {
+                    "value": 30,
+                    "element": 67
+                },
+                {
+                    "value": 26,
+                    "element": 59
+                },
+                {
+                    "value": 25,
+                    "element": 65
+                },
+                {
+                    "value": 23,
+                    "element": 476
+                },
+                {
+                    "value": 23,
+                    "element": 505
+                },
+                {
+                    "value": 14,
+                    "element": 58
+                },
+                {
+                    "value": 7,
+                    "element": 82
+                },
+                {
+                    "value": 6,
+                    "element": 446
+                },
+                {
+                    "value": 4,
+                    "element": 79
+                },
+                {
+                    "value": 3,
+                    "element": 75
+                },
+                {
+                    "value": 3,
+                    "element": 80
+                },
+                {
+                    "value": 2,
+                    "element": 68
+                }
+            ],
+            "h": [
+                {
+                    "value": 31,
+                    "element": 321
+                },
+                {
+                    "value": 23,
+                    "element": 328
+                },
+                {
+                    "value": 17,
+                    "element": 437
+                },
+                {
+                    "value": 16,
+                    "element": 486
+                },
+                {
+                    "value": 14,
+                    "element": 304
+                },
+                {
+                    "value": 14,
+                    "element": 508
+                },
+                {
+                    "value": 13,
+                    "element": 307
+                },
+                {
+                    "value": 9,
+                    "element": 320
+                },
+                {
+                    "value": 9,
+                    "element": 325
+                },
+                {
+                    "value": 7,
+                    "element": 319
+                },
+                {
+                    "value": 6,
+                    "element": 305
+                },
+                {
+                    "value": 4,
+                    "element": 313
+                },
+                {
+                    "value": 3,
+                    "element": 532
+                },
+                {
+                    "value": 2,
+                    "element": 323
+                }
+            ]
+        }
+    ],
+    "team_h_difficulty": 2,
+    "team_a_difficulty": 2
+}
+fixture_data_not_finished = {
+    "code": 1059760,
+    "event": 6,
+    "finished": False,
+    "finished_provisional": False,
+    "id": 59,
+    "kickoff_time": "2019-09-20T19:00:00Z",
+    "minutes": 90,
+    "provisional_start_time": False,
+    "started": True,
+    "team_a": 3,
+    "team_a_score": 3,
+    "team_h": 16,
+    "team_h_score": 1,
+    "stats": [
+        {
+            "identifier": "goals_scored",
+            "a": [
+                {
+                    "value": 1,
+                    "element": 59
+                },
+                {
+                    "value": 1,
+                    "element": 67
+                },
+                {
+                    "value": 1,
+                    "element": 505
+                }
+            ],
+            "h": [
+                {
+                    "value": 1,
+                    "element": 321
+                }
+            ]
+        },
+        {
+            "identifier": "assists",
+            "a": [
+                {
+                    "value": 1,
+                    "element": 65
+                },
+                {
+                    "value": 1,
+                    "element": 476
+                },
+                {
+                    "value": 1,
+                    "element": 494
+                }
+            ],
+            "h": [
+                {
+                    "value": 1,
+                    "element": 437
+                }
+            ]
+        },
+        {
+            "identifier": "own_goals",
+            "a": [
+
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "penalties_saved",
+            "a": [
+
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "penalties_missed",
+            "a": [
+
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "yellow_cards",
+            "a": [
+                {
+                    "value": 1,
+                    "element": 82
+                },
+                {
+                    "value": 1,
+                    "element": 446
+                },
+                {
+                    "value": 1,
+                    "element": 505
+                }
+            ],
+            "h": [
+                {
+                    "value": 1,
+                    "element": 328
+                }
+            ]
+        },
+        {
+            "identifier": "red_cards",
+            "a": [
+
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "saves",
+            "a": [
+                {
+                    "value": 6,
+                    "element": 494
+                }
+            ],
+            "h": [
+
+            ]
+        },
+        {
+            "identifier": "bonus",
+            "a": [],
+            "h": []
+        },
+        {
+            "identifier": "bps",
+            "a": [
+                {
+                    "value": 34,
+                    "element": 494
+                },
+                {
+                    "value": 30,
+                    "element": 67
+                },
+                {
+                    "value": 26,
+                    "element": 59
+                },
+                {
+                    "value": 25,
+                    "element": 65
+                },
+                {
+                    "value": 23,
+                    "element": 476
+                },
+                {
+                    "value": 23,
+                    "element": 505
+                },
+                {
+                    "value": 14,
+                    "element": 58
+                },
+                {
+                    "value": 7,
+                    "element": 82
+                },
+                {
+                    "value": 6,
+                    "element": 446
+                },
+                {
+                    "value": 4,
+                    "element": 79
+                },
+                {
+                    "value": 3,
+                    "element": 75
+                },
+                {
+                    "value": 3,
+                    "element": 80
+                },
+                {
+                    "value": 2,
+                    "element": 68
+                }
+            ],
+            "h": [
+                {
+                    "value": 31,
+                    "element": 321
+                },
+                {
+                    "value": 23,
+                    "element": 328
+                },
+                {
+                    "value": 17,
+                    "element": 437
+                },
+                {
+                    "value": 16,
+                    "element": 486
+                },
+                {
+                    "value": 14,
+                    "element": 304
+                },
+                {
+                    "value": 14,
+                    "element": 508
+                },
+                {
+                    "value": 13,
+                    "element": 307
+                },
+                {
+                    "value": 9,
+                    "element": 320
+                },
+                {
+                    "value": 9,
+                    "element": 325
+                },
+                {
+                    "value": 7,
+                    "element": 319
+                },
+                {
+                    "value": 6,
+                    "element": 305
+                },
+                {
+                    "value": 4,
+                    "element": 313
+                },
+                {
+                    "value": 3,
+                    "element": 532
+                },
+                {
+                    "value": 2,
+                    "element": 323
+                }
+            ]
+        }
+    ],
+    "team_h_difficulty": 2,
+    "team_a_difficulty": 2
 }
 
 
@@ -100,20 +533,31 @@ class TestFixture(object):
     def test_init():
         fixture = Fixture(fixture_data)
         for k, v in fixture_data.items():
-            assert getattr(fixture, k) == v
+            if k != 'stats':
+                assert getattr(fixture, k) == v
 
     @staticmethod
     def _do_test_not_finished(fixture, method):
-        delattr(fixture, "finished")
+        fixture.finished = False
+        fixture.stats['bonus']['a'] = []
+        fixture.stats['bonus']['h'] = []
         data_dict = getattr(fixture, method)()
         assert isinstance(data_dict, dict)
-        assert len(data_dict) == 0
+        assert len(data_dict) == 2
 
     @staticmethod
     def _do_test_finished(fixture, method):
         data_dict = getattr(fixture, method)()
         assert isinstance(data_dict, dict)
-        assert len(data_dict) == 2
+        assert tuple(data_dict.keys()) == ('a', 'h')
+        assert isinstance(data_dict['a'], list)
+        assert isinstance(data_dict['h'], list)
+        assert all([isinstance(d, dict) for d in data_dict['a']])
+        assert all([isinstance(d, dict) for d in data_dict['h']])
+        assert all([tuple(d.keys()) == ('value', 'element') for d in data_dict['a']])
+        assert all([tuple(d.keys()) == ('value', 'element') for d in data_dict['h']])
+        assert all([all([isinstance(v, int) for v in d.values()]) for d in data_dict['a']])
+        assert all([all([isinstance(v, int) for v in d.values()]) for d in data_dict['h']])
 
     def test_get_goalscorers_not_finished(self, fixture):
         self._do_test_not_finished(fixture, "get_goalscorers")
@@ -177,4 +621,4 @@ class TestFixture(object):
 
     @staticmethod
     def test_str(fixture):
-        assert str(fixture) == "Norwich vs. Man City - 10 Aug 19:00"
+        assert str(fixture) == "Southampton vs. Bournemouth - 2019-09-20T19:00:00Z"
