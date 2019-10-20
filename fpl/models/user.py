@@ -383,6 +383,22 @@ class User:
 
         return response["picks"]
 
+    @property
+    async def transfers(self):
+        return await fetch(self._session, API_URLS["user_transfers"].format(getattr(self, "id")))
+
+    @property
+    async def transfers_for_current_gameweek(self):
+        current_gameweek = getattr(self, "current_event")
+        picks = await self.picks_for_current_gameweek
+        transfers = await self.transfers
+        transfers = list(filter(lambda x: x["event"] == current_gameweek, transfers))
+        return {
+            "transfers_made": picks["entry_history"]["event_transfers"],
+            "transfers_cost": picks["entry_history"]["event_transfers_cost"],
+            "transfers": transfers
+        }
+
     async def get_transfers(self, gameweek=None):
         """Returns either a list of all the user's transfers, or a list of
         transfers made in the given gameweek.
@@ -423,23 +439,17 @@ class User:
 
         return transfers
 
-    # async def get_wildcards(self):
-    #     """Returns a list containing information about when (and if) the user
-    #     has played their wildcard(s).
+    async def get_wildcards(self):
+        """Returns a list containing information about when (and if) the user
+        has played their wildcard(s).
 
-    #     Information is taken from e.g.:
-    #         https://fantasy.premierleague.com/drf/entry/3808385/transfers
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/drf/entry/3808385/history
 
-    #     :rtype: list
-    #     """
-    #     if hasattr(self, "_transfers"):
-    #         return self._transfers["wildcards"]
-
-    #     transfers = await fetch(
-    #         self._session, API_URLS["user_transfers"].format(self.id))
-
-    #     self._transfers = transfers
-    #     return transfers["wildcards"]
+        :rtype: list
+        """
+        chips_played = await self.get_chips_history()
+        return list(filter(lambda x: x["name"] == "wildcard", chips_played))
 
     async def get_watchlist(self):
         """Returns the user's watchlist. Requires the user to have logged in
