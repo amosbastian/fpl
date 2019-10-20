@@ -258,6 +258,7 @@ class User:
         """
         picks = await self.picks_for_current_gameweek
         active_chip = picks["active_chip"]
+        points_hit = picks["entry_history"]["event_transfers_cost"]
         picks = picks["picks"]
 
         first_xi = filter(lambda x: x['position'] <= 11, picks)
@@ -301,7 +302,7 @@ class User:
         if active_chip == "3xc":
             captain_points *= 2
 
-        return sum(first_xi_live_scores) + captain_points
+        return sum(first_xi_live_scores) + captain_points - points_hit
 
     async def get_active_chips(self, gameweek=None):
         """Returns a list containing the user's active chip for each gameweek,
