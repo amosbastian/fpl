@@ -437,8 +437,9 @@ class FPL:
         static_gameweeks = getattr(self, "events")
 
         try:
-            static_gameweek = next(gameweek for gameweek in static_gameweeks.values() if
-                                   gameweek["id"] == gameweek_id)
+            static_gameweek = next(
+                gameweek for gameweek in static_gameweeks.values() if
+                gameweek["id"] == gameweek_id)
         except StopIteration:
             raise ValueError(f"Gameweek with ID {gameweek_id} not found")
 
@@ -446,18 +447,23 @@ class FPL:
             live_gameweek = await fetch(
                 self.session, API_URLS["gameweek_live"].format(gameweek_id))
 
-            # convert element list to dict
-            live_gameweek["elements"] = {element['id']: element for element in live_gameweek['elements']}
+            # Convert element list to dict
+            live_gameweek["elements"] = {
+                element["id"]: element for element in live_gameweek["elements"]}
 
-            # include live bonus points
-            if not static_gameweek['finished']:
+            # Include live bonus points
+            if not static_gameweek["finished"]:
                 fixtures = await self.get_fixtures_by_gameweek(gameweek_id)
                 fixtures = filter(lambda f: not f.finished, fixtures)
                 bonus_for_gameweek = []
+
                 for fixture in fixtures:
                     bonus = fixture.get_bonus(provisional=True)
-                    bonus_for_gameweek.extend(bonus['a'] + bonus['h'])
-                bonus_for_gameweek = {b['element']: b['value'] for b in bonus_for_gameweek}
+                    bonus_for_gameweek.extend(bonus["a"] + bonus["h"])
+
+                bonus_for_gameweek = {bonus["element"]: bonus["value"]
+                                      for bonus in bonus_for_gameweek}
+
                 for player_id, bonus_points in bonus_for_gameweek:
                     if live_gameweek["elements"][player_id]["bonus"] == 0:
                         live_gameweek["elements"][player_id]["bonus"] += bonus_points
@@ -552,8 +558,8 @@ class FPL:
     async def login(self, email=None, password=None):
         """Returns a requests session with FPL login authentication.
 
-        :param string email: Email address for the user's Fantasy Premier League
-            account.
+        :param string email: Email address for the user's Fantasy Premier
+            League account.
         :param string password: Password for the user's Fantasy Premier League
             account.
         """
