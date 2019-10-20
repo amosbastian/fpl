@@ -36,7 +36,8 @@ setup(
         "pytest-aiohttp",
         "pytest-cov",
         "pytest-mock",
-        "pytest", 'requests'
+        "pytest",
+        "requests"
     ],
     entry_points="""
         [console_scripts]
