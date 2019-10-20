@@ -250,8 +250,12 @@ class FPL:
                 player["id"], return_json=True)
             player.update(player_summary)
 
+        player["image_url"] = f'https://platform-static-files.s3.amazonaws.com' \
+                              f'/premierleague/photos/players/110x140/p{player["code"]}.png'
+
         if gameweek:
             player["live_score"] = gameweek.elements[player_id]["stats"]["total_points"]
+            player["did_not_play"] = gameweek.elements[player_id]["did_not_play"]
 
         if return_json:
             return player
@@ -459,9 +463,9 @@ class FPL:
             # include live bonus points
             if not static_gameweek['finished']:
                 fixtures = await self.get_fixtures_by_gameweek(gameweek_id)
-                fixtures = filter(lambda f: not f.finished, fixtures.values())
+                fixtures_not_finished = filter(lambda f: not f.finished, fixtures.values())
                 bonus_for_gameweek = []
-                for fixture in fixtures:
+                for fixture in fixtures_not_finished:
                     bonus = fixture.get_bonus(provisional=True)
                     bonus_for_gameweek.extend(bonus['a'] + bonus['h'])
                 bonus_for_gameweek = {b['element']: b['value'] for b in bonus_for_gameweek}
@@ -469,6 +473,15 @@ class FPL:
                     if live_gameweek["elements"][player_id]["stats"]["bonus"] == 0:
                         live_gameweek["elements"][player_id]["stats"]["bonus"] += bonus_points
                         live_gameweek["elements"][player_id]["stats"]["total_points"] += bonus_points
+
+                # mark players that did not play
+                fixtures_started = filter(lambda f: f.started, fixtures.values())
+                fixtures_started = list(map(lambda f: f.id, fixtures_started))
+                for element in live_gameweek["elements"].values():
+                    player_id = element["id"]
+                    no_minutes = element["stats"]["minutes"] == 0
+                    game_started = any([game["fixture"] in fixtures_started for game in element["explain"]])
+                    live_gameweek["elements"][player_id]["did_not_play"] = no_minutes and game_started
 
             static_gameweek.update(live_gameweek)
 

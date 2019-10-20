@@ -103,7 +103,22 @@ def _set_captain(lineup, captain, captain_type, player_ids):
             player[captain_type] = True
 
 
-class User():
+def _valid_formation(players):
+    positions = list(map(lambda x: x.element_type, players))
+    g = positions.count(1)
+    d = positions.count(2)
+    m = positions.count(3)
+    f = positions.count(4)
+    return all([
+        g == 1,
+        3 <= d <= 5,
+        2 <= m <= 5,
+        1 <= f <= 3,
+        sum([g, d, m, f]) == 11
+    ])
+
+
+class User:
     """A class representing a user of the Fantasy Premier League.
 
     >>> from fpl import FPL
@@ -125,6 +140,11 @@ class User():
         for k, v in user_information.items():
             setattr(self, k, v)
 
+    @property
+    async def history(self):
+        history = await fetch(self._session, API_URLS["user_history"].format(getattr(self, "id")))
+        return history
+
     async def get_gameweek_history(self, gameweek=None):
         """Returns a list containing the gameweek history of the user.
 
@@ -134,20 +154,14 @@ class User():
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list if gameweek is ``None``, otherwise dict.
         """
-        if hasattr(self, "_history"):
-            history = self._history
-        else:
-            history = await fetch(
-                self._session, API_URLS["user_history"].format(self.id))
 
-        self._history = history
+        current = (await self.history)["current"]
 
         if gameweek is not None:
             valid_gameweek(gameweek)
-            return next(gw for gw in history["current"]
-                        if gw["event"] == gameweek)
+            return next(gw for gw in current if gw["event"] == gameweek)
 
-        return history["current"]
+        return current
 
     async def get_season_history(self):
         """Returns a list containing the seasonal history of the user.
@@ -157,14 +171,8 @@ class User():
 
         :rtype: list
         """
-        if hasattr(self, "_history"):
-            history = self._history
-        else:
-            history = await fetch(
-                self._session, API_URLS["user_history"].format(self.id))
-
-        self._history = history
-        return history["past"]
+        past = (await self.history)["past"]
+        return past
 
     async def get_chips_history(self, gameweek=None):
         """Returns a list containing the chip history of the user.
@@ -175,25 +183,19 @@ class User():
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
         """
-        if hasattr(self, "_history"):
-            history = self._history
-        else:
-            history = await fetch(
-                self._session, API_URLS["user_history"].format(self.id))
-
-        self._history = history
+        chips = (await self.history)["chips"]
 
         if gameweek is not None:
             valid_gameweek(gameweek)
             try:
-                return next(chip for chip in history["chips"]
-                            if chip["event"] == gameweek)
+                return next(chip for chip in chips if chip["event"] == gameweek)
             except StopIteration:
                 return None
 
-        return history["chips"]
+        return chips
 
-    async def get_picks(self, gameweek=None):
+    @property
+    async def picks(self):
         """Returns a dict containing the user's picks each gameweek.
 
         Key is the gameweek number, value contains picks of the gameweek.
@@ -204,34 +206,102 @@ class User():
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: dict
         """
-        if hasattr(self, "_picks"):
-            picks = self._picks
+
+        tasks = [asyncio.ensure_future(
+            fetch(self._session, API_URLS["user_picks"].format(getattr(self, "id"), gameweek))
+        ) for gameweek in range(getattr(self, "started_event"), getattr(self, "current_event") + 1)]
+        picks = await asyncio.gather(*tasks)
+        picks = {p["entry_history"]["event"]: p for p in picks}
+        return picks
+
+    @property
+    async def picks_for_current_gameweek(self):
+        """Returns a dict containing the user's picks each gameweek.
+
+        Key is the gameweek number, value contains picks of the gameweek.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/api/entry/91928/event/1/picks/
+
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: dict
+        """
+
+        current_gameweek = getattr(self, "current_event")
+        picks = await self.picks
+        return picks[current_gameweek]
+
+    async def get_formation(self, players):
+        """
+        Get a user's formation for the current gameweek
+        :param players: (required) player dict from fpl.get_players()
+        :return: The user's formation
+        :rtype string
+        """
+        picks = await self.picks_for_current_gameweek
+        picks = picks["picks"]
+        first_xi = filter(lambda x: x['position'] <= 11, picks)  # get starting 11
+        first_xi_ids = map(lambda x: x['element'], first_xi)  # get ids of starting 11
+        # get positions of starting 11
+        first_xi_element_types = list(map(lambda x: getattr(players[x], "element_type"), first_xi_ids))
+        d = first_xi_element_types.count(2)
+        m = first_xi_element_types.count(3)
+        f = first_xi_element_types.count(4)
+        return f"{d}-{m}-{f}"
+
+    async def get_live_score(self, players):
+        """
+        Get a user's live score for the current gameweek
+        :param players: (required) player dict from fpl.get_players() with live scores
+        :return: The user's live score
+        :rtype int
+        """
+        picks = await self.picks_for_current_gameweek
+        active_chip = picks["active_chip"]
+        picks = picks["picks"]
+
+        first_xi = filter(lambda x: x['position'] <= 11, picks)
+        first_xi = map(lambda x: x['element'], first_xi)
+        first_xi = set(first_xi)
+        subs = filter(lambda x: x['position'] > 11, picks)
+        subs = map(lambda x: x['element'], subs)
+        subs = list(subs)
+        subs_out = filter(lambda x: players[x].did_not_play, first_xi)
+        subs_out = map(lambda x: players[x].id, subs_out)
+        subs_out = list(subs_out)
+
+        if active_chip == "bboost":
+            first_xi.update(subs)
         else:
-            tasks = [asyncio.ensure_future(
-                     fetch(self._session,
-                           API_URLS["user_picks"].format(self.id, gameweek)))
-                     for gameweek in range(self.started_event,
-                                           self.current_event + 1)]
-            picks = await asyncio.gather(*tasks)
-            self._picks = picks
+            for sub_out in subs_out:
+                i = 0
+                first_xi.remove(sub_out)
+                first_xi.add(subs[0])
+                valid_formation = _valid_formation(map(lambda x: players[x], first_xi))
+                while not valid_formation and i <= 3:
+                    i += 1
+                    first_xi.remove(subs[i - 1])
+                    first_xi.add(subs[i])
+                    valid_formation = _valid_formation(map(lambda x: players[x], first_xi))
+                subs.pop(i)
 
-        if gameweek is not None:
-            valid_gameweek(gameweek)
-            try:
-                pick = next(pick for pick in picks
-                            if pick["entry_history"]["event"] == gameweek)
-            except StopIteration:
-                return {}
-            else:
-                return {pick["entry_history"]["event"]: pick["picks"]}
+        first_xi_live_scores = map(lambda x: getattr(players[x], "live_score"), first_xi)
 
-        picks_out = {}
-        for pick in picks:
-            try:
-                picks_out[pick["entry_history"]["event"]] = pick["picks"]
-            except KeyError:
-                pass
-        return picks_out
+        captain = next(pick["element"] for pick in picks if pick["is_captain"])
+        try:
+            vice_captain = next(
+                pick["element"] for pick in picks if pick["is_vice_captain"] and pick["multiplier"] == 1)
+        except StopIteration:
+            vice_captain = None
+
+        captain_points = getattr(players[captain], "live_score")
+        if captain in subs_out and vice_captain:
+            captain_points = getattr(players[vice_captain], "live_score")
+
+        if active_chip == "3xc":
+            captain_points *= 2
+
+        return sum(first_xi_live_scores) + captain_points
 
     async def get_active_chips(self, gameweek=None):
         """Returns a list containing the user's active chip for each gameweek,
