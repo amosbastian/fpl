@@ -1,9 +1,6 @@
 import asyncio
 import json
 
-import aiohttp
-from urllib3.util import response
-
 from ..constants import API_URLS
 from ..utils import fetch, logged_in, post, get_headers
 
@@ -120,18 +117,17 @@ def _valid_formation(players):
 
 class User:
     """A class representing a user of the Fantasy Premier League.
-
-    >>> from fpl import FPL
-      >>> import aiohttp
-      >>> import asyncio
-      >>>
-      >>> async def main():
-      ...     async with aiohttp.ClientSession() as session:
-      ...         fpl = FPL(session)
-      ...         user = await fpl.get_user(3808385)
-      ...     print(user)
-      ...
-      >>> asyncio.run(main())
+      # >>> from fpl import FPL
+      # >>> import aiohttp
+      # >>> import asyncio
+      # >>>
+      # >>> async def main():
+      # ...     async with aiohttp.ClientSession() as session:
+      # ...         fpl = FPL(session)
+      # ...         user = await fpl.get_user(3808385)
+      # ...     print(user)
+      # ...
+      # >>> asyncio.run(main())
       Amos Bastian - Netherlands
     """
 
@@ -203,7 +199,6 @@ class User:
         Information is taken from e.g.:
             https://fantasy.premierleague.com/api/entry/91928/event/1/picks/
 
-        :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: dict
         """
 
@@ -223,7 +218,6 @@ class User:
         Information is taken from e.g.:
             https://fantasy.premierleague.com/api/entry/91928/event/1/picks/
 
-        :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: dict
         """
 
@@ -271,6 +265,7 @@ class User:
         subs_out = map(lambda x: players[x].id, subs_out)
         subs_out = list(subs_out)
 
+        # noinspection SpellCheckingInspection
         if active_chip == "bboost":
             first_xi.update(subs)
         else:
@@ -304,6 +299,21 @@ class User:
 
         return sum(first_xi_live_scores) + captain_points - points_hit
 
+    async def get_live_total_points(self, players):
+        """
+        Get a user's live total points
+        :param players: (required) player dict from fpl.get_players() with live scores
+        :return: The user's live overall points total
+        :rtype int
+        """
+        history = await self.get_gameweek_history()
+        history = filter(lambda x: x["event"] < getattr(self, "current_event"), history)
+        history = map(lambda x: x["total_points"] - x["event_transfers cost"], history)
+
+        live_score = + await self.get_live_score(players)
+
+        return sum(history) + live_score
+
     async def get_active_chips(self, gameweek=None):
         """Returns a list containing the user's active chip for each gameweek,
         or the active chip of the given gameweek.
@@ -314,15 +324,7 @@ class User:
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
         """
-        if hasattr(self, "_picks"):
-            picks = self._picks
-        else:
-            tasks = [asyncio.ensure_future(
-                     fetch(self._session,
-                           API_URLS["user_picks"].format(self.id, gameweek)))
-                     for gameweek in range(1, self.current_event + 1)]
-            picks = await asyncio.gather(*tasks)
-            self._picks = picks
+        picks = await self.picks
 
         if gameweek is not None:
             valid_gameweek(gameweek)
@@ -344,15 +346,8 @@ class User:
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
         """
-        if hasattr(self, "_picks"):
-            picks = self._picks
-        else:
-            tasks = [asyncio.ensure_future(
-                     fetch(self._session,
-                           API_URLS["user_picks"].format(self.id, gameweek)))
-                     for gameweek in range(1, self.current_event + 1)]
-            picks = await asyncio.gather(*tasks)
-            self._picks = picks
+
+        picks = await self.picks
 
         if gameweek is not None:
             valid_gameweek(gameweek)
@@ -377,7 +372,7 @@ class User:
             raise Exception("User must be logged in.")
 
         response = await fetch(
-            self._session, API_URLS["user_team"].format(self.id))
+            self._session, API_URLS["user_team"].format(getattr(self, "id")))
 
         if response == {"details": "You cannot view this entry"}:
             raise ValueError("User ID does not match provided email address!")
@@ -410,11 +405,8 @@ class User:
         :param gameweek: (optional): The gameweek. Defaults to ``None``.
         :rtype: list
         """
-        transfers = getattr(self, "_transfers", None)
-        if not transfers:
-            transfers = await fetch(
-                self._session, API_URLS["user_transfers"].format(self.id))
-            self._transfers = transfers
+
+        transfers = await self.transfers
 
         if gameweek is not None:
             valid_gameweek(gameweek)
@@ -436,7 +428,7 @@ class User:
             raise Exception("User must be logged in.")
 
         transfers = await fetch(
-            self._session, API_URLS["user_latest_transfers"].format(self.id))
+            self._session, API_URLS["user_latest_transfers"].format(getattr(self, "id")))
 
         return transfers
 
@@ -467,14 +459,12 @@ class User:
         me = await fetch(self._session, API_URLS["me"])
         return me["watched"]
 
-    def _get_transfer_payload(
-            self, players_out, players_in, user_team, players, wildcard,
-            free_hit):
+    def _get_transfer_payload(self, players_out, players_in, user_team, players, wildcard, free_hit):
         """Returns the payload needed to make the desired transfers."""
         payload = {
             "confirmed": False,
-            "entry": self.id,
-            "event": self.current_event + 1,
+            "entry": getattr(self, "id"),
+            "event": getattr(self, "current_event") + 1,
             "transfers": [],
             "wildcard": wildcard,
             "freehit": free_hit
@@ -509,7 +499,7 @@ class User:
         :param wildcard: bool, optional
         :param free_hit: Boolean for playing free hit, defaults to False
         :param free_hit: bool, optional
-        :return: Returns the response given by a succesful transfer.
+        :return: Returns the response given by a successful transfer.
         :rtype: dict
         """
         if wildcard and free_hit:
@@ -618,8 +608,7 @@ class User:
                     lineup[in_i][is_vc], lineup[out_i][is_vc])
 
                 starters, subs = lineup[:11], lineup[11:]
-                new_starters = sorted(starters, key=lambda x: (
-                    x["element_type"] - 1) * 100 + x["position"])
+                new_starters = sorted(starters, key=lambda x: (x["element_type"] - 1) * 100 + x["position"])
                 lineup = new_starters + subs
 
                 for position, player in enumerate(lineup):
@@ -645,7 +634,7 @@ class User:
         headers = get_headers("https://fantasy.premierleague.com/a/team/my")
 
         await post(
-            self._session, API_URLS["user_team"].format(self.id) + "/",
+            self._session, API_URLS["user_team"].format(getattr(self, "id")) + "/",
             payload=payload, headers=headers)
 
     async def _captain_helper(self, captain, captain_type):
@@ -725,5 +714,5 @@ class User:
         await self._post_substitutions(lineup)
 
     def __str__(self):
-        return (f"{self.player_first_name} {self.player_last_name} - "
-                f"{self.player_region_name}")
+        return (f"{getattr(self, 'player_first_name')} {getattr(self, 'player_last_name')} - "
+                f"{getattr(self, 'player_region_name')}")
