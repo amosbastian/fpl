@@ -297,9 +297,9 @@ class FPL:
         players = await asyncio.gather(*tasks)
 
         if return_json:
-            return list(filter(lambda p: p["id"] in player_ids, players))
+            return [player for player in players if player["id"] in player_ids]
 
-        return {player.id: player for player in players}
+        return {player.id: player for player in players if player.id in player_ids}
 
     async def get_fixture(self, fixture_id, return_json=False):
         """Returns the fixture with the given ``fixture_id``.
@@ -463,7 +463,7 @@ class FPL:
             # include live bonus points
             if not static_gameweek['finished']:
                 fixtures = await self.get_fixtures_by_gameweek(gameweek_id)
-                fixtures_not_finished = filter(lambda f: not f.finished, fixtures.values())
+                fixtures_not_finished = [fixture for fixture in fixtures.values() if not fixture.finished]
                 bonus_for_gameweek = []
                 for fixture in fixtures_not_finished:
                     bonus = fixture.get_bonus(provisional=True)
@@ -475,8 +475,7 @@ class FPL:
                         live_gameweek["elements"][player_id]["stats"]["total_points"] += bonus_points
 
                 # mark players that did not play
-                fixtures_started = filter(lambda f: f.started, fixtures.values())
-                fixtures_started = list(map(lambda f: f.id, fixtures_started))
+                fixtures_started = [fixture.id for fixture in fixtures.values() if fixture.started]
                 for element in live_gameweek["elements"].values():
                     player_id = element["id"]
                     no_minutes = element["stats"]["minutes"] == 0

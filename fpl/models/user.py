@@ -101,7 +101,7 @@ def _set_captain(lineup, captain, captain_type, player_ids):
 
 
 def _valid_formation(players):
-    positions = list(map(lambda x: x.element_type, players))
+    positions = [player.element_type for player in players]
     g = positions.count(1)
     d = positions.count(2)
     m = positions.count(3)
@@ -113,6 +113,14 @@ def _valid_formation(players):
         1 <= f <= 3,
         sum([g, d, m, f]) == 11
     ])
+
+
+def _get_first_xi(picks, players):
+    return [players[pick["element"]].id for pick in picks if pick["position"] <= 11]
+
+
+def _get_subs(picks, players):
+    return [players[pick["element"]].id for pick in picks if pick["position"] > 11]
 
 
 class User:
@@ -234,13 +242,10 @@ class User:
         """
         picks = await self.picks_for_current_gameweek
         picks = picks["picks"]
-        first_xi = filter(lambda x: x['position'] <= 11, picks)  # get starting 11
-        first_xi_ids = map(lambda x: x['element'], first_xi)  # get ids of starting 11
-        # get positions of starting 11
-        first_xi_element_types = list(map(lambda x: getattr(players[x], "element_type"), first_xi_ids))
-        d = first_xi_element_types.count(2)
-        m = first_xi_element_types.count(3)
-        f = first_xi_element_types.count(4)
+        first_xi = [players[player_id].element_type for player_id in _get_first_xi(picks, players)]
+        d = first_xi.count(2)
+        m = first_xi.count(3)
+        f = first_xi.count(4)
         return f"{d}-{m}-{f}"
 
     async def get_live_score(self, players):
@@ -255,46 +260,44 @@ class User:
         points_hit = picks["entry_history"]["event_transfers_cost"]
         picks = picks["picks"]
 
-        first_xi = filter(lambda x: x['position'] <= 11, picks)
-        first_xi = map(lambda x: x['element'], first_xi)
-        first_xi = set(first_xi)
-        subs = filter(lambda x: x['position'] > 11, picks)
-        subs = map(lambda x: x['element'], subs)
-        subs = list(subs)
-        subs_out = filter(lambda x: players[x].did_not_play, first_xi)
-        subs_out = map(lambda x: players[x].id, subs_out)
-        subs_out = list(subs_out)
+        first_xi = set(_get_first_xi(picks, players))
+        subs = _get_subs(picks, players)
+        subs_out = [player_id for player_id in first_xi if players[player_id].did_not_play]
 
-        # noinspection SpellCheckingInspection
-        if active_chip == "bboost":
+        if active_chip == "bboost":  # count scores for all 15 players if bench boost chip is active
             first_xi.update(subs)
         else:
+            # perform auto-subs if applicable
             for sub_out in subs_out:
                 i = 0
-                first_xi.remove(sub_out)
-                first_xi.add(subs[0])
-                valid_formation = _valid_formation(map(lambda x: players[x], first_xi))
+                first_xi.remove(sub_out)  # remove first sub out
+                first_xi.add(subs[0])  # add first sub in
+                valid_formation = _valid_formation([players[player_id] for player_id in first_xi])
+                # check formation is valid
+                # if formation not valid, move on to the next sub
                 while not valid_formation and i <= 3:
                     i += 1
-                    first_xi.remove(subs[i - 1])
-                    first_xi.add(subs[i])
-                    valid_formation = _valid_formation(map(lambda x: players[x], first_xi))
-                subs.pop(i)
+                    first_xi.remove(subs[i - 1])  # remove previous player subbed in
+                    first_xi.add(subs[i])  # add next sub in
+                    # check formation
+                    valid_formation = _valid_formation([players[player_id] for player_id in first_xi])
+                subs.pop(i)  # when complete, remove the subbed in player from the list of subs
 
-        first_xi_live_scores = map(lambda x: getattr(players[x], "live_score"), first_xi)
+        first_xi_live_scores = [players[player_id].live_score for player_id in first_xi]
 
         captain = next(pick["element"] for pick in picks if pick["is_captain"])
         try:
             vice_captain = next(
                 pick["element"] for pick in picks if pick["is_vice_captain"] and pick["multiplier"] == 1)
+            # only if multiplier == 1, i.e. vice-captain not already applied by FPL
         except StopIteration:
             vice_captain = None
 
-        captain_points = getattr(players[captain], "live_score")
+        captain_points = players[captain].live_score
         if captain in subs_out and vice_captain:
-            captain_points = getattr(players[vice_captain], "live_score")
+            captain_points = players[vice_captain].live_score
 
-        if active_chip == "3xc":
+        if active_chip == "3xc":  # for triple captain chip
             captain_points *= 2
 
         return sum(first_xi_live_scores) + captain_points - points_hit
@@ -307,8 +310,8 @@ class User:
         :rtype int
         """
         history = await self.get_gameweek_history()
-        history = filter(lambda x: x["event"] < getattr(self, "current_event"), history)
-        history = map(lambda x: x["total_points"] - x["event_transfers cost"], history)
+        history = [x["total_points"] - x["event_transfers cost"] for x in history
+                   if x["event"] < getattr(self, "current_event")]
 
         live_score = + await self.get_live_score(players)
 
@@ -388,7 +391,7 @@ class User:
         current_gameweek = getattr(self, "current_event")
         picks = await self.picks_for_current_gameweek
         transfers = await self.transfers
-        transfers = list(filter(lambda x: x["event"] == current_gameweek, transfers))
+        transfers = [transfer for transfer in transfers if transfer["event"] == current_gameweek]
         return {
             "transfers_made": picks["entry_history"]["event_transfers"],
             "transfers_cost": picks["entry_history"]["event_transfers_cost"],
@@ -442,7 +445,7 @@ class User:
         :rtype: list
         """
         chips_played = await self.get_chips_history()
-        return list(filter(lambda x: x["name"] == "wildcard", chips_played))
+        return [chip for chip in chips_played if chip["name"] == "wildcard"]
 
     async def get_watchlist(self):
         """Returns the user's watchlist. Requires the user to have logged in

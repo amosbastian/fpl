@@ -6,18 +6,21 @@ from fpl.constants import API_URLS
 headers = {"User-Agent": "https://github.com/amosbastian/fpl"}
 
 
-async def fetch(session, url):
+async def fetch(session, url, params=None):
+    if params is None:
+        params = {}
     while True:
+        # noinspection PyBroadException
         try:
-            async with session.get(url, headers=headers) as response:
+            async with session.get(url, headers=headers, params=params) as response:
                 assert response.status == 200
                 return await response.json()
         except Exception:
             pass
 
 
-async def post(session, url, payload, headers):
-    async with session.post(url, data=payload, headers=headers) as response:
+async def post(session, url, payload, headers_):
+    async with session.post(url, data=payload, headers=headers_) as response:
         return await response.json()
 
 
@@ -151,6 +154,7 @@ def logged_in(session):
     :return: True if user is logged in else False
     :rtype: bool
     """
+    # noinspection PyTypeChecker
     return "csrftoken" in session.cookie_jar.filter_cookies(
         "https://users.premierleague.com/")
 
