@@ -27,6 +27,7 @@ setup(
         "Source": "https://github.com/amosbastian/fpl"
     },
     install_requires=[
+        "async_property",
         "Click",
         "colorama",
         "codecov",
@@ -36,7 +37,8 @@ setup(
         "pytest-aiohttp",
         "pytest-cov",
         "pytest-mock",
-        "pytest", 'requests'
+        "pytest",
+        "requests"
     ],
     entry_points="""
         [console_scripts]

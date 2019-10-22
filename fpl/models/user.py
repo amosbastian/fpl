@@ -1,6 +1,8 @@
 import asyncio
 import json
 
+from async_property import async_cached_property
+
 from ..constants import API_URLS
 from ..utils import fetch, logged_in, post, get_headers
 
@@ -120,7 +122,11 @@ def _get_first_xi(picks, players):
 
 
 def _get_subs(picks, players):
-    return [players[pick["element"]].id for pick in picks if pick["position"] > 11]
+    return [players[pick["element"]].id
+            for pick in picks
+            if pick["position"] > 11
+            and
+            not players[pick["element"]].did_not_play]
 
 
 class User:
@@ -144,7 +150,7 @@ class User:
         for k, v in user_information.items():
             setattr(self, k, v)
 
-    @property
+    @async_cached_property
     async def history(self):
         history = await fetch(self._session, API_URLS["user_history"].format(getattr(self, "id")))
         return history
@@ -198,15 +204,12 @@ class User:
 
         return chips
 
-    @property
+    @async_cached_property
     async def picks(self):
         """Returns a dict containing the user's picks each gameweek.
-
         Key is the gameweek number, value contains picks of the gameweek.
-
         Information is taken from e.g.:
             https://fantasy.premierleague.com/api/entry/91928/event/1/picks/
-
         :rtype: dict
         """
 
@@ -382,8 +385,16 @@ class User:
 
         return response["picks"]
 
-    @property
+    @async_cached_property
     async def transfers(self):
+        """Returns either a list of all the user's transfers, or a list of
+            transfers made in the given gameweek.
+
+        Information is taken from e.g.:
+                    https://fantasy.premierleague.com/api/entry/91928/transfers/
+
+        :rtype: list
+        """
         return await fetch(self._session, API_URLS["user_transfers"].format(getattr(self, "id")))
 
     @property

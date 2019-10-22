@@ -250,8 +250,8 @@ class FPL:
                 player["id"], return_json=True)
             player.update(player_summary)
 
-        player["image_url"] = f'https://platform-static-files.s3.amazonaws.com' \
-                              f'/premierleague/photos/players/110x140/p{player["code"]}.png'
+        player["image_url"] = (f'https://platform-static-files.s3.amazonaws.com'
+                               f'/premierleague/photos/players/110x140/p{player["code"]}.png')
 
         if gameweek:
             player["live_score"] = gameweek.elements[player_id]["stats"]["total_points"]
