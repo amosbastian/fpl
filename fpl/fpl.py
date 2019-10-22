@@ -262,7 +262,7 @@ class FPL:
 
         return Player(player, self.session)
 
-    async def get_players(self, player_ids=None, include_summary=False, include_live=None,
+    async def get_players(self, player_ids=None, include_summary=False, include_live=False,
                           return_json=False):
         """Returns either a list of *all* players, or a list of players whose
         IDs are in the given ``player_ids`` list.
@@ -287,8 +287,14 @@ class FPL:
         if not player_ids:
             player_ids = [player["id"] for player in players.values()]
 
+        current_gameweek_id = getattr(self, "current_gameweek")
+        gameweeks = getattr(self, "events")
+        current_gameweek = gameweeks[current_gameweek_id]
+        current_gameweek_finished = current_gameweek["finished"]
+        include_live = include_live and not current_gameweek_finished
+
         if include_live:
-            gameweek = await self.get_gameweek(getattr(self, "current_gameweek"), include_live=True)
+            gameweek = await self.get_gameweek(current_gameweek_id, include_live=include_live)
 
         tasks = [asyncio.ensure_future(
                  self.get_player(

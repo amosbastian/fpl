@@ -25,6 +25,8 @@ class Player():
         self._session = session
         for k, v in player_information.items():
             setattr(self, k, v)
+        self.did_not_play = False
+        self.live_score = getattr(self, "event_points")
 
     @property
     async def games_played(self):

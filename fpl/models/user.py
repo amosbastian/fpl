@@ -290,18 +290,18 @@ class User:
 
         captain = next(pick["element"] for pick in picks if pick["is_captain"])
         try:
-            vice_captain = next(
-                pick["element"] for pick in picks if pick["is_vice_captain"] and pick["multiplier"] == 1)
-            # only if multiplier == 1, i.e. vice-captain not already applied by FPL
+            vice_captain = next(pick["element"] for pick in picks if pick["is_vice_captain"])
         except StopIteration:
             vice_captain = None
 
         captain_points = players[captain].live_score
-        if captain in subs_out and vice_captain:
+        if captain in subs_out + subs:
             captain_points = players[vice_captain].live_score
 
         if active_chip == "3xc":  # for triple captain chip
             captain_points *= 2
+
+        print(sum(first_xi_live_scores), captain_points, points_hit)
 
         return sum(first_xi_live_scores) + captain_points - points_hit
 
