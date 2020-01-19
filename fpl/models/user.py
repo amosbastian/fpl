@@ -293,6 +293,30 @@ class User():
 
         return [p for pick in picks for p in pick["automatic_subs"]]
 
+    async def get_user_history(self, gameweek=None):
+        """Returns a list containing the user's history for each gameweek,
+        or a dictionary of the user's history for the given gameweek.
+        """
+        if hasattr(self, "_picks"):
+            picks = self._picks
+        else:
+            tasks = [asyncio.ensure_future(
+                     fetch(self._session,
+                           API_URLS["user_picks"].format(self.id, gameweek)))
+                     for gameweek in range(1, self.current_event + 1)]
+            picks = await asyncio.gather(*tasks)
+            self._picks = picks
+
+        if gameweek is not None:
+            valid_gameweek(gameweek)
+            try:
+                return next(pick["entry_history"] for pick in picks
+                            if pick["entry_history"]["event"] == gameweek)
+            except StopIteration:
+                return None
+
+        return [history["entry_history"] for history in picks]
+
     async def get_team(self):
         """Returns a logged in user's current team. Requires the user to have
         logged in using ``fpl.login()``.
