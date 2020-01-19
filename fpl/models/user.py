@@ -359,6 +359,27 @@ class User():
 
         return response["chips"]
 
+    async def get_transfers_status(self):
+        """Returns a logged in user's transfer status, which is a dictionary
+        containing their bank value, how many free transfers they have left
+        and so on. Requires the user to have logged in using ``fpl.login()``.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/api/my-team/91928/
+
+        :rtype: dict
+        """
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
+        response = await fetch(
+            self._session, API_URLS["user_team"].format(self.id))
+
+        if response == {"details": "You cannot view this entry"}:
+            raise ValueError("User ID does not match provided email address!")
+
+        return response["transfers"]
+
     async def get_transfers(self, gameweek=None):
         """Returns either a list of all the user's transfers, or a list of
         transfers made in the given gameweek.
