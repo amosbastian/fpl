@@ -527,7 +527,7 @@ class User():
 
             # If players don't play in the same position, and aren't both
             # substitutes, then sort them
-            if not same_position and not both_subs:
+            if not both_subs:
                 # Swap position and (vice) captaincy
                 lineup[out_i]["position"], lineup[in_i]["position"] = (
                     lineup[in_i]["position"], lineup[out_i]["position"])
@@ -560,7 +560,7 @@ class User():
         :type lineup: list
         """
         # Get CSRF token and create payload + headers
-        payload = json.dumps({"picks": lineup})
+        payload = json.dumps({"chip": None, "picks": lineup})
         headers = get_headers("https://fantasy.premierleague.com/a/team/my")
 
         await post(
