@@ -296,6 +296,8 @@ class User():
     async def get_user_history(self, gameweek=None):
         """Returns a list containing the user's history for each gameweek,
         or a dictionary of the user's history for the given gameweek.
+
+        :rtype: list or dict
         """
         if hasattr(self, "_picks"):
             picks = self._picks
@@ -336,6 +338,26 @@ class User():
             raise ValueError("User ID does not match provided email address!")
 
         return response["picks"]
+
+    async def get_chips(self):
+        """Returns a logged in user's list of chips. Requires the user to have
+        logged in using ``fpl.login()``.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/api/my-team/91928/
+
+        :rtype: list
+        """
+        if not logged_in(self._session):
+            raise Exception("User must be logged in.")
+
+        response = await fetch(
+            self._session, API_URLS["user_team"].format(self.id))
+
+        if response == {"details": "You cannot view this entry"}:
+            raise ValueError("User ID does not match provided email address!")
+
+        return response["chips"]
 
     async def get_transfers(self, gameweek=None):
         """Returns either a list of all the user's transfers, or a list of
