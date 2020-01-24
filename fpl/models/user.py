@@ -233,6 +233,29 @@ class User():
                 pass
         return picks_out
 
+    async def get_cup_matches(self, gameweek=None):
+        """Returns either a list of all the user's cup matches, dictionary
+        of the cup match in the given gameweek (gameweek 17 and onwards).
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/api/entry/91928/cup/
+
+        :param gameweek: (optional): The gameweek. Defaults to ``None``.
+        :rtype: list or dict
+        """
+        cup_matches = getattr(self, "_cup_matches", None)
+        if not cup_matches:
+            cup_matches = await fetch(
+                self._session, API_URLS["user_cup"].format(self.id))
+            self._cup_matches = cup_matches
+
+        if gameweek is not None:
+            valid_gameweek(gameweek)
+            return [cup_match for cup_match in cup_matches
+                    if cup_match["event"] == gameweek]
+
+        return cup_matches
+
     async def get_active_chips(self, gameweek=None):
         """Returns a list containing the user's active chip for each gameweek,
         or the active chip of the given gameweek.
