@@ -596,15 +596,8 @@ class User():
         players = players["elements"]
         _set_element_type(lineup, players)
 
-        # Check if all subs in are actually substitutes
         subs_in = _ids_to_lineup(players_in, lineup)
-        if not all([sub["position"] > 11 for sub in subs_in]):
-            raise Exception("Not all substitutes in are actually substitutes.")
-
-        # Check if all subs out are actually starters
         subs_out = _ids_to_lineup(players_out, lineup)
-        if not all([sub["position"] <= 11 for sub in subs_out]):
-            raise Exception("Not all substitutes out are actually starters.")
 
         for sub_out, sub_in in zip(subs_out, subs_in):
             # Get indices of sub out and sub in, then swap their position in
@@ -612,27 +605,21 @@ class User():
             out_i, in_i = lineup.index(sub_out), lineup.index(sub_in)
             lineup[out_i], lineup[in_i] = lineup[in_i], lineup[out_i]
 
-            same_position = sub_out["element_type"] == sub_in["element_type"]
-            both_subs = sub_out["position"] > 11 and sub_in["position"] > 11
+            # Swap position and (vice) captaincy
+            lineup[out_i]["position"], lineup[in_i]["position"] = (
+                lineup[in_i]["position"], lineup[out_i]["position"])
+            lineup[out_i][is_c], lineup[in_i][is_c] = (
+                lineup[in_i][is_c], lineup[out_i][is_c])
+            lineup[out_i][is_vc], lineup[in_i][is_vc] = (
+                lineup[in_i][is_vc], lineup[out_i][is_vc])
 
-            # If players don't play in the same position, and aren't both
-            # substitutes, then sort them
-            if not both_subs:
-                # Swap position and (vice) captaincy
-                lineup[out_i]["position"], lineup[in_i]["position"] = (
-                    lineup[in_i]["position"], lineup[out_i]["position"])
-                lineup[out_i][is_c], lineup[in_i][is_c] = (
-                    lineup[in_i][is_c], lineup[out_i][is_c])
-                lineup[out_i][is_vc], lineup[in_i][is_vc] = (
-                    lineup[in_i][is_vc], lineup[out_i][is_vc])
+            starters, subs = lineup[:11], lineup[11:]
+            new_starters = sorted(starters, key=lambda x: (
+                x["element_type"] - 1) * 100 + x["position"])
+            lineup = new_starters + subs
 
-                starters, subs = lineup[:11], lineup[11:]
-                new_starters = sorted(starters, key=lambda x: (
-                    x["element_type"] - 1) * 100 + x["position"])
-                lineup = new_starters + subs
-
-                for position, player in enumerate(lineup):
-                    player["position"] = position + 1
+            for position, player in enumerate(lineup):
+                player["position"] = position + 1
 
         new_lineup = [{
             "element": player["element"],
