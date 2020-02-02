@@ -464,10 +464,10 @@ class FPL:
                 bonus_for_gameweek = {bonus["element"]: bonus["value"]
                                       for bonus in bonus_for_gameweek}
 
-                for player_id, bonus_points in bonus_for_gameweek:
-                    if live_gameweek["elements"][player_id]["bonus"] == 0:
-                        live_gameweek["elements"][player_id]["bonus"] += bonus_points
-                        live_gameweek["elements"][player_id]["total_points"] += bonus_points
+                for player_id, bonus_points in bonus_for_gameweek.items():
+                    if live_gameweek["elements"][player_id]["stats"]["bonus"] == 0:
+                        live_gameweek["elements"][player_id]["stats"]["bonus"] += bonus_points
+                        live_gameweek["elements"][player_id]["stats"]["total_points"] += bonus_points
 
             static_gameweek.update(live_gameweek)
 
