@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="fpl",
-    version="0.6.18",
+    version="0.6.19",
     packages=find_packages(),
     description="A Python wrapper for the Fantasy Premier League API",
     long_description=long_description,
