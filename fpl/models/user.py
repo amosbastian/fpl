@@ -344,7 +344,8 @@ class User():
             tasks = [asyncio.ensure_future(
                      fetch(self._session,
                            API_URLS["user_picks"].format(self.id, gameweek)))
-                     for gameweek in range(1, self.current_event + 1)]
+                     for gameweek in range(self.started_event, 
+                                           self.current_event + 1)]
             picks = await asyncio.gather(*tasks)
             self._picks = picks
 
