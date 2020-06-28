@@ -3,6 +3,7 @@ import pytest
 
 from fpl.models.user import (User, _id_to_element_type, _ids_to_lineup,
                              _set_captain, _set_element_type, valid_gameweek)
+from fpl.constants import MIN_GAMEWEEK, MAX_GAMEWEEK
 from tests.helper import AsyncMock
 
 user_data = {
@@ -71,9 +72,9 @@ class TestHelpers(object):
     @staticmethod
     def test_valid_gameweek_gameweek_out_of_range():
         with pytest.raises(ValueError):
-            valid_gameweek(0)
+            valid_gameweek(MIN_GAMEWEEK - 1)
         with pytest.raises(ValueError):
-            valid_gameweek(39)
+            valid_gameweek(MAX_GAMEWEEK + 1)
 
     @staticmethod
     def test_valid_gameweek_valid_gameweek():

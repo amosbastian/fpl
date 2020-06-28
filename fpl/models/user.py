@@ -4,7 +4,7 @@ import json
 import aiohttp
 from urllib3.util import response
 
-from ..constants import API_URLS
+from ..constants import API_URLS, MIN_GAMEWEEK, MAX_GAMEWEEK
 from ..utils import fetch, logged_in, post, get_headers
 
 is_c = "is_captain"
@@ -19,8 +19,8 @@ def valid_gameweek(gameweek):
     :raises ValueError: if gameweek is not a number between 1 and 38
     """
     gameweek = int(gameweek)
-    if (gameweek < 1) or (gameweek > 38):
-        raise ValueError("Gameweek must be a number between 1 and 38.")
+    if (gameweek < MIN_GAMEWEEK) or (gameweek > MAX_GAMEWEEK):
+        raise ValueError(f"Gameweek must be a number between {MIN_GAMEWEEK} and {MAX_GAMEWEEK}.")
     return True
 
 

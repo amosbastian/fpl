@@ -168,6 +168,9 @@ class TestFPL(object):
     async def test_fixtures_by_gameweek(self, loop, fpl):
         for gameweek in range(1, 39):
             fixtures = await fpl.get_fixtures_by_gameweek(gameweek)
+            if (len(fixtures) == 0):
+                continue
+
             assert isinstance(fixtures, list)
             assert isinstance(fixtures[0], Fixture)
 

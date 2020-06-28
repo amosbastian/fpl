@@ -29,3 +29,6 @@ API_URLS = {
 
 PICKS_FORMAT = "{} {}{}"
 MYTEAM_FORMAT = "{}{}"
+
+MIN_GAMEWEEK = 1
+MAX_GAMEWEEK = 47
