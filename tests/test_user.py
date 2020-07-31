@@ -186,6 +186,7 @@ class TestUser(object):
 
     async def test_get_gameweek_history_unknown_gameweek_cached(
             self, loop, user):
+        print(user)
         history = await user.get_gameweek_history()
         assert history is user._history["current"]
         assert isinstance(history, list)

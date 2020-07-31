@@ -28,6 +28,7 @@ import itertools
 import os
 
 import requests
+from unidecode import unidecode
 
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
@@ -38,7 +39,8 @@ from .models.player import Player, PlayerSummary
 from .models.team import Team
 from .models.user import User
 from .utils import (average, fetch, get_current_user, logged_in,
-                    position_converter, scale, team_converter)
+                    position_converter, scale, team_converter,
+                    levenshtein_distance)
 
 
 class FPL:
@@ -288,6 +290,61 @@ class FPL:
         players = await asyncio.gather(*tasks)
 
         return players
+
+    async def search_players(self, player_name, num_players=1, 
+                            include_summary=False, return_json=False):
+        """Returns the player(s) given input search term by using Levenshtein distance, 
+        or the mininum number of edits to turn one string into the other. Specifically, 
+        the distance is defined as the minimum of Levenshtein distances from search string
+        to player's full name (`first_name` and `last_name`) and player's `web_name`
+
+        :param str plauer_name: The player name to search  on
+        :param int num_players: (optional) The number of players to return in the search
+        :param boolean include_summary: (optional) Includes a player's summary
+            if ``True``.
+        :param return_json: (optional) Boolean. If ``True`` returns a list of
+            ``dict``s, if ``False`` returns a list of  :class:`Player`
+            objects. Defaults to ``False``. 
+        """
+        
+        players = getattr(self, "elements")
+        N = len(players)
+        search_term = player_name.lower()
+        min_id = 0
+        min_ed = float('inf')
+        eds = {}
+        player_ids = [0]*N
+        for i, player in enumerate(players.values()):
+            player_ids[i] = player['id']
+            full_name = unidecode(player['first_name'] + ' ' + player['second_name']).lower()
+            web_name = unidecode(player['web_name']).lower()
+            ed = min(levenshtein_distance(full_name, player_name), 
+                        levenshtein_distance(web_name, player_name))
+
+            if ed < min_ed:
+                min_ed = ed
+                min_id = player['id']
+            
+            eds[player['id']] = ed
+        
+        player_ids.sort(key=lambda player_id: eds[player_id])
+
+        players_list = []
+        for i in range(num_players):
+            player = players[player_ids[i]]
+
+            if include_summary:
+                player_summary = await self.get_player_summary(
+                    player["id"], return_json=True)
+                player.update(player_summary)
+            
+            players_list.append(player)
+
+        if return_json:
+            return players_list
+        else:
+            return [Player(p, self.session) for p in players_list]
+
 
     async def get_fixture(self, fixture_id, return_json=False):
         """Returns the fixture with the given ``fixture_id``.
