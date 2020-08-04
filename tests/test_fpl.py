@@ -123,7 +123,7 @@ class TestFPL(object):
         assert isinstance(players[0], dict)
 
         players_with_summary = await fpl.search_players('nicolas pepe', include_summary=True)
-        assert isinstance(players_with_summary[0].fixtures, list)        
+        assert isinstance(players_with_summary[0].fixtures, list)
 
     async def test_player(self, loop, fpl):
         # test invalid ID
