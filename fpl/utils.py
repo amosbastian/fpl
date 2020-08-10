@@ -3,7 +3,7 @@ from functools import update_wrapper
 
 from fpl.constants import API_URLS
 
-headers = {"User-Agent": "https://github.com/amosbastian/fpl"}
+headers = {"User-Agent": ""}
 
 
 async def fetch(session, url):
