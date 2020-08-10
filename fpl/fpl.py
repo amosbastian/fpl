@@ -311,25 +311,29 @@ class FPL:
         N = len(players)
         search_term = player_name.lower()
         min_id = 0
-        min_ed = float('inf')
+        min_ed = float("inf")
         eds = {}
-        player_ids = [0]*N
+        player_ids = [0] * N
+        
         for i, player in enumerate(players.values()):
-            player_ids[i] = player['id']
-            full_name = unidecode(player['first_name'] + ' ' + player['second_name']).lower()
-            web_name = unidecode(player['web_name']).lower()
-            ed = min(levenshtein_distance(full_name, player_name), 
-                        levenshtein_distance(web_name, player_name))
+            player_ids[i] = player["id"]
+            first_name = unidecode(player["first_name"])
+            second_name = unidecode(player["second_name"])
+            full_name = f"{first_name} {second_name}".lower()
+            web_name = unidecode(player["web_name"]).lower()
+        
+            ed = min(levenshtein_distance(full_name, search_term), 
+                     levenshtein_distance(web_name, search_term))
 
             if ed < min_ed:
                 min_ed = ed
-                min_id = player['id']
+                min_id = player["id"]
             
-            eds[player['id']] = ed
+            eds[player["id"]] = ed
         
         player_ids.sort(key=lambda player_id: eds[player_id])
-
         players_list = []
+
         for i in range(num_players):
             player = players[player_ids[i]]
 
@@ -343,7 +347,7 @@ class FPL:
         if return_json:
             return players_list
         else:
-            return [Player(p, self.session) for p in players_list]
+            return [Player(player, self.session) for player in players_list]
 
 
     async def get_fixture(self, fixture_id, return_json=False):
