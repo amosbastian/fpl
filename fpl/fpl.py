@@ -55,10 +55,13 @@ class FPL:
             except (KeyError, TypeError):
                 pass
             setattr(self, k, v)
-        setattr(self,
-                "current_gameweek",
-                next(event for event in static["events"]
-                     if event["is_current"])["id"])
+        try:
+            setattr(self,
+                    "current_gameweek",
+                    next(event for event in static["events"]
+                         if event["is_current"])["id"])
+        except StopIteration:
+            setattr(self, "current_gameweek", 0)
 
     async def get_user(self, user_id=None, return_json=False):
         """Returns the user with the given ``user_id``.
