@@ -497,10 +497,13 @@ class User():
             self, players_out, players_in, user_team, players, wildcard,
             free_hit):
         """Returns the payload needed to make the desired transfers."""
+        event = 0
+        if (self.current_event):
+            event = self.current_event
         payload = {
             "confirmed": False,
             "entry": self.id,
-            "event": self.current_event + 1,
+            "event": event + 1,
             "transfers": [],
             "wildcard": wildcard,
             "freehit": free_hit
@@ -566,7 +569,8 @@ class User():
             raise Exception(
                 "Cannot transfer a player out who is not in the user's team.")
 
-        players = await fetch(self._session, API_URLS["players"])
+        players = await fetch(self._session, API_URLS["static"])
+        players = players["elements"]
         player_ids = [player["id"] for player in players]
 
         if set(player_ids).isdisjoint(players_in):
