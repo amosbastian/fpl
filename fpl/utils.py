@@ -6,14 +6,19 @@ from fpl.constants import API_URLS
 headers = {"User-Agent": ""}
 
 
-async def fetch(session, url):
+async def fetch(session, url, retries=10, cooldown=1):
+    retries_count = 0
+
     while True:
-        try:
-            async with session.get(url, headers=headers) as response:
-                assert response.status == 200
-                return await response.json()
-        except Exception:
-            pass
+        async with session.get(url, headers=headers, raise_for_status=True) as response:
+            result = await response.json()
+            return result
+        retries_count += 1
+        if retries_count > retries:
+            raise Exception(f"Could not fetch {url} after {retries} retries")
+
+        if cooldown:
+            await asyncio.sleep(cooldown)
 
 
 async def post(session, url, payload, headers):
