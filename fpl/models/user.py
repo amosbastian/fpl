@@ -371,11 +371,11 @@ class User():
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        response = await fetch(
-            self._session, API_URLS["user_team"].format(self.id))
-
-        if response == {"details": "You cannot view this entry"}:
-            raise ValueError("User ID does not match provided email address!")
+        try:
+            response = await fetch(
+                self._session, API_URLS["user_team"].format(self.id))
+        except aiohttp.client_exceptions.ClientResponseError:
+            raise Exception("User ID does not match provided email address!")
 
         return response["picks"]
 
@@ -391,11 +391,11 @@ class User():
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        response = await fetch(
-            self._session, API_URLS["user_team"].format(self.id))
-
-        if response == {"details": "You cannot view this entry"}:
-            raise ValueError("User ID does not match provided email address!")
+        try:
+            response = await fetch(
+                self._session, API_URLS["user_team"].format(self.id))
+        except aiohttp.client_exceptions.ClientResponseError:
+            raise Exception("User ID does not match provided email address!")
 
         return response["chips"]
 
@@ -412,11 +412,11 @@ class User():
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        response = await fetch(
-            self._session, API_URLS["user_team"].format(self.id))
-
-        if response == {"details": "You cannot view this entry"}:
-            raise ValueError("User ID does not match provided email address!")
+        try:
+            response = await fetch(
+                self._session, API_URLS["user_team"].format(self.id))
+        except aiohttp.client_exceptions.ClientResponseError:
+            raise Exception("User ID does not match provided email address!")
 
         return response["transfers"]
 
@@ -455,8 +455,11 @@ class User():
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        transfers = await fetch(
-            self._session, API_URLS["user_latest_transfers"].format(self.id))
+        try:
+            transfers = await fetch(
+                self._session, API_URLS["user_latest_transfers"].format(self.id))
+        except aiohttp.client_exceptions.ClientResponseError:
+            raise Exception("User ID does not match provided email address!")
 
         return transfers
 
