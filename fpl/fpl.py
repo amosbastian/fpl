@@ -26,8 +26,8 @@ Fantasy Premier League API:
 import asyncio
 import itertools
 import os
-
-import requests
+import json
+from urllib.request import urlopen
 
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
@@ -47,8 +47,7 @@ class FPL:
     def __init__(self, session):
         self.session = session
 
-        # TODO: use aiohttp instead
-        static = requests.get(API_URLS["static"]).json()
+        static = json.loads(urlopen(API_URLS["static"]).read().decode("utf-8"))
         for k, v in static.items():
             try:
                 v = {w["id"]: w for w in v}
