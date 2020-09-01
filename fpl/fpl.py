@@ -140,23 +140,23 @@ class FPL:
         .. code-block:: none
 
              1 - Arsenal
-             2 - Bournemouth
+             2 - Aston Villa
              3 - Brighton
              4 - Burnley
-             5 - Cardiff
-             6 - Chelsea
-             7 - Crystal Palace
-             8 - Everton
-             9 - Fulham
-            10 - Huddersfield
-            11 - Leicester
-            12 - Liverpool
-            13 - Man City
-            14 - Man Utd
-            15 - Newcastle
+             5 - Chelsea
+             6 - Crystal Palace
+             7 - Everton
+             8 - Fulham
+             9 - Leicester
+            10 - Leeds
+            11 - Liverpool
+            12 - Man City
+            13 - Man Utd
+            14 - Newcastle
+            15 - Sheffield Utd
             16 - Southampton
             17 - Spurs
-            18 - Watford
+            18 - West Brom
             19 - West Ham
             20 - Wolves
         """
@@ -399,7 +399,7 @@ class FPL:
             https://fantasy.premierleague.com/api/fixtures/?event=1
 
         :param return_json: (optional) Boolean. If ``True`` returns a list of
-            ``dict``s, if ``False`` returns a list of  :class:`Fixture`
+            ``dicts``, if ``False`` returns a list of  :class:`Fixture`
             objects. Defaults to ``False``.
         :type return_json: bool
         :rtype: list
