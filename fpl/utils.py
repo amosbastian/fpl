@@ -1,5 +1,6 @@
 import asyncio
 from functools import update_wrapper
+from datetime import datetime
 
 from fpl.constants import API_URLS
 
@@ -129,6 +130,11 @@ def chip_converter(chip):
         "freehit": "FH"
     }
     return chip_map[chip]
+
+def date_formatter(date):
+    """"Converts a datetime string from iso format into a more readable format."""
+    date_obj = datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
+    return date_obj.strftime("%a %d %b %H:%M")
 
 
 def scale(value, upper, lower, min_, max_):
