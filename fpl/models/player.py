@@ -3,23 +3,7 @@ from ..utils import fetch, position_converter, team_converter
 
 
 class Player():
-    """A class representing a player in the Fantasy Premier League.
-
-    Basic usage::
-
-      >>> from fpl import FPL
-      >>> import aiohttp
-      >>> import asyncio
-      >>>
-      >>> async def main():
-      ...     async with aiohttp.ClientSession() as session:
-      ...         fpl = FPL(session)
-      ...         player = await fpl.get_player(302)
-      ...     print(player)
-      ...
-      >>> asyncio.run(main())
-      Pogba - Midfielder - Man Utd
-    """
+    """A class representing a player in Fantasy Premier League."""
 
     def __init__(self, player_information, session):
         self._session = session
@@ -56,9 +40,7 @@ class Player():
 
     @property
     async def vapm(self):
-        """Value added per million
-        An explanation of VAPM can be found here:
-            https://www.reddit.com/r/FantasyPL/comments/6r60fu/exploring_a_key_metric_value_added_per_1m/
+        """Value added per million.
 
         :rtype: float
         """

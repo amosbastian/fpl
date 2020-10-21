@@ -1,19 +1,25 @@
 import asyncio
 from functools import update_wrapper
+from datetime import datetime
 
 from fpl.constants import API_URLS
 
-headers = {"User-Agent": "https://github.com/amosbastian/fpl"}
+headers = {"User-Agent": ""}
 
 
-async def fetch(session, url):
+async def fetch(session, url, retries=10, cooldown=1):
+    retries_count = 0
+
     while True:
-        try:
-            async with session.get(url, headers=headers) as response:
-                assert response.status == 200
-                return await response.json()
-        except Exception:
-            pass
+        async with session.get(url, headers=headers, raise_for_status=True) as response:
+            result = await response.json()
+            return result
+        retries_count += 1
+        if retries_count > retries:
+            raise Exception(f"Could not fetch {url} after {retries} retries")
+
+        if cooldown:
+            await asyncio.sleep(cooldown)
 
 
 async def post(session, url, payload, headers):
@@ -53,22 +59,22 @@ def team_converter(team_id):
     team_map = {
         1: "Arsenal",
         2: "Aston Villa",
-        3: "Bournemouth",
-        4: "Brighton",
-        5: "Burnley",
-        6: "Chelsea",
-        7: "Crystal Palace",
-        8: "Everton",
+        3: "Brighton",
+        4: "Burnley",
+        5: "Chelsea",
+        6: "Crystal Palace",
+        7: "Everton",
+        8: "Fulham",
         9: "Leicester",
-        10: "Liverpool",
-        11: "Man City",
-        12: "Man Utd",
-        13: "Newcastle",
-        14: "Norwich",
+        10: "Leeds",
+        11: "Liverpool",
+        12: "Man City",
+        13: "Man Utd",
+        14: "Newcastle",
         15: "Sheffield Utd",
         16: "Southampton",
         17: "Spurs",
-        18: "Watford",
+        18: "West Brom",
         19: "West Ham",
         20: "Wolves",
         None: None
@@ -81,22 +87,22 @@ def short_name_converter(team_id):
     short_name_map = {
         1: "ARS",
         2: "AVL",
-        3: "BOU",
-        4: "BHA",
-        5: "BUR",
-        6: "CHE",
-        7: "CRY",
-        8: "EVE",
+        3: "BHA",
+        4: "BUR",
+        5: "CHE",
+        6: "CRY",
+        7: "EVE",
+        8: "FUL",
         9: "LEI",
-        10: "LIV",
-        11: "MCI",
-        12: "MUN",
-        13: "NEW",
-        14: "NOR",
+        10: "LEE",
+        11: "LIV",
+        12: "MCI",
+        13: "MUN",
+        14: "NEW",
         15: "SHU",
         16: "SOU",
         17: "TOT",
-        18: "WAT",
+        18: "WBA",
         19: "WHU",
         20: "WOL",
         None: None
@@ -124,6 +130,11 @@ def chip_converter(chip):
         "freehit": "FH"
     }
     return chip_map[chip]
+
+def date_formatter(date):
+    """"Converts a datetime string from iso format into a more readable format."""
+    date_obj = datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
+    return date_obj.strftime("%a %d %b %H:%M")
 
 
 def scale(value, upper, lower, min_, max_):

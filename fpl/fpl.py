@@ -29,6 +29,8 @@ import os
 
 import requests
 from unidecode import unidecode
+import json
+from urllib.request import urlopen
 
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
@@ -49,18 +51,20 @@ class FPL:
     def __init__(self, session):
         self.session = session
 
-        # TODO: use aiohttp instead
-        static = requests.get(API_URLS["static"]).json()
+        static = json.loads(urlopen(API_URLS["static"]).read().decode("utf-8"))
         for k, v in static.items():
             try:
                 v = {w["id"]: w for w in v}
             except (KeyError, TypeError):
                 pass
             setattr(self, k, v)
-        setattr(self,
-                "current_gameweek",
-                next(event for event in static["events"]
-                     if event["is_current"])["id"])
+        try:
+            setattr(self,
+                    "current_gameweek",
+                    next(event for event in static["events"]
+                         if event["is_current"])["id"])
+        except StopIteration:
+            setattr(self, "current_gameweek", 0)
 
     async def get_user(self, user_id=None, return_json=False):
         """Returns the user with the given ``user_id``.
@@ -140,23 +144,23 @@ class FPL:
         .. code-block:: none
 
              1 - Arsenal
-             2 - Bournemouth
+             2 - Aston Villa
              3 - Brighton
              4 - Burnley
-             5 - Cardiff
-             6 - Chelsea
-             7 - Crystal Palace
-             8 - Everton
-             9 - Fulham
-            10 - Huddersfield
-            11 - Leicester
-            12 - Liverpool
-            13 - Man City
-            14 - Man Utd
-            15 - Newcastle
+             5 - Chelsea
+             6 - Crystal Palace
+             7 - Everton
+             8 - Fulham
+             9 - Leicester
+            10 - Leeds
+            11 - Liverpool
+            12 - Man City
+            13 - Man Utd
+            14 - Newcastle
+            15 - Sheffield Utd
             16 - Southampton
             17 - Spurs
-            18 - Watford
+            18 - West Brom
             19 - West Ham
             20 - Wolves
         """
@@ -454,7 +458,7 @@ class FPL:
             https://fantasy.premierleague.com/api/fixtures/?event=1
 
         :param return_json: (optional) Boolean. If ``True`` returns a list of
-            ``dict``s, if ``False`` returns a list of  :class:`Fixture`
+            ``dicts``, if ``False`` returns a list of  :class:`Fixture`
             objects. Defaults to ``False``.
         :type return_json: bool
         :rtype: list

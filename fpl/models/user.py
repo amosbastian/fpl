@@ -371,11 +371,11 @@ class User():
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        response = await fetch(
-            self._session, API_URLS["user_team"].format(self.id))
-
-        if response == {"details": "You cannot view this entry"}:
-            raise ValueError("User ID does not match provided email address!")
+        try:
+            response = await fetch(
+                self._session, API_URLS["user_team"].format(self.id))
+        except aiohttp.client_exceptions.ClientResponseError:
+            raise Exception("User ID does not match provided email address!")
 
         return response["picks"]
 
@@ -391,11 +391,11 @@ class User():
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        response = await fetch(
-            self._session, API_URLS["user_team"].format(self.id))
-
-        if response == {"details": "You cannot view this entry"}:
-            raise ValueError("User ID does not match provided email address!")
+        try:
+            response = await fetch(
+                self._session, API_URLS["user_team"].format(self.id))
+        except aiohttp.client_exceptions.ClientResponseError:
+            raise Exception("User ID does not match provided email address!")
 
         return response["chips"]
 
@@ -412,11 +412,11 @@ class User():
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        response = await fetch(
-            self._session, API_URLS["user_team"].format(self.id))
-
-        if response == {"details": "You cannot view this entry"}:
-            raise ValueError("User ID does not match provided email address!")
+        try:
+            response = await fetch(
+                self._session, API_URLS["user_team"].format(self.id))
+        except aiohttp.client_exceptions.ClientResponseError:
+            raise Exception("User ID does not match provided email address!")
 
         return response["transfers"]
 
@@ -455,8 +455,11 @@ class User():
         if not logged_in(self._session):
             raise Exception("User must be logged in.")
 
-        transfers = await fetch(
-            self._session, API_URLS["user_latest_transfers"].format(self.id))
+        try:
+            transfers = await fetch(
+                self._session, API_URLS["user_latest_transfers"].format(self.id))
+        except aiohttp.client_exceptions.ClientResponseError:
+            raise Exception("User ID does not match provided email address!")
 
         return transfers
 
@@ -497,10 +500,13 @@ class User():
             self, players_out, players_in, user_team, players, wildcard,
             free_hit):
         """Returns the payload needed to make the desired transfers."""
+        event = 0
+        if (self.current_event):
+            event = self.current_event
         payload = {
             "confirmed": False,
             "entry": self.id,
-            "event": self.current_event + 1,
+            "event": event + 1,
             "transfers": [],
             "wildcard": wildcard,
             "freehit": free_hit
@@ -566,7 +572,8 @@ class User():
             raise Exception(
                 "Cannot transfer a player out who is not in the user's team.")
 
-        players = await fetch(self._session, API_URLS["players"])
+        players = await fetch(self._session, API_URLS["static"])
+        players = players["elements"]
         player_ids = [player["id"] for player in players]
 
         if set(player_ids).isdisjoint(players_in):

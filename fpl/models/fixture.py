@@ -1,4 +1,4 @@
-from ..utils import team_converter
+from ..utils import team_converter, date_formatter
 from .player import Player
 
 
@@ -9,25 +9,8 @@ def add_player(location, information):
     location.append({"player": player, "goals": goals})
 
 
-# noinspection PyUnresolvedReferences
 class Fixture:
-    """A class representing fixtures in the Fantasy Premier League.
-
-    Basic usage::
-
-      >>> from fpl import FPL
-      >>> import aiohttp
-      >>> import asyncio
-      >>>
-      >>> async def main():
-      ...     async with aiohttp.ClientSession() as session:
-      ...         fpl = FPL(session)
-      ...         fixture = await fpl.get_fixture(1)
-      ...     print(fixture)
-      ...
-      >>> asyncio.run(main())
-      Arsenal vs. Man City - 10 Aug 19:00
-    """
+    """A class representing a fixture in Fantasy Premier League."""
 
     def __init__(self, fixture_information):
         for k, v in fixture_information.items():
@@ -187,4 +170,4 @@ class Fixture:
     def __str__(self):
         return (f"{team_converter(self.team_h)} vs. "
                 f"{team_converter(self.team_a)} - "
-                f"{self.kickoff_time}")
+                f"{date_formatter(self.kickoff_time)}")
