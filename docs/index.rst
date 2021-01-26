@@ -43,6 +43,8 @@ join our `Discord server <https://discord.gg/cjY37fv>`_ or send an email to
 With **fpl** you can easily use the Fantasy Premier League API in all your
 Python scripts, exactly how you expect it to work.
 
+.. note:: If you are using **fpl** in an environment such as a Jupyter notebook, then you might need to use `nest_asyncio` instead of `asyncio`.
+
 The User Guide
 --------------
 
