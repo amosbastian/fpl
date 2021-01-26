@@ -10,18 +10,18 @@ class H2HLeague():
 
     Basic usage::
 
-      >>> from fpl import FPL
-      >>> import aiohttp
-      >>> import asyncio
+      from fpl import FPL
+      import aiohttp
+      import asyncio
       >>>
-      >>> async def main():
-      ...     async with aiohttp.ClientSession() as session:
-      ...         fpl = FPL(session)
-      ...         await fpl.login()
-      ...         h2h_league = await fpl.get_h2h_league(760869)
-      ...     print(h2h_league)
+      async def main():
+          async with aiohttp.ClientSession() as session:
+              fpl = FPL(session)
+              await fpl.login()
+              h2h_league = await fpl.get_h2h_league(760869)
+          print(h2h_league)
       ...
-      >>> asyncio.run(main())
+      asyncio.run(main())
       League 760869 - 760869
     """
 

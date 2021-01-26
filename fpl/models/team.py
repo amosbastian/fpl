@@ -8,17 +8,17 @@ class Team():
 
     Basic usage::
 
-      >>> from fpl import FPL
-      >>> import aiohttp
-      >>> import asyncio
+      from fpl import FPL
+      import aiohttp
+      import asyncio
       >>>
-      >>> async def main():
-      ...     async with aiohttp.ClientSession() as session:
-      ...         fpl = FPL(session)
-      ...         team = await fpl.get_team(14)
-      ...     print(team)
+      async def main():
+          async with aiohttp.ClientSession() as session:
+              fpl = FPL(session)
+              team = await fpl.get_team(14)
+          print(team)
       ...
-      >>> asyncio.run(main())
+      asyncio.run(main())
       Man Utd
     """
     def __init__(self, team_information, session):

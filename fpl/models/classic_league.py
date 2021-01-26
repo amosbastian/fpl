@@ -7,18 +7,18 @@ class ClassicLeague():
 
     Basic usage::
 
-      >>> from fpl import FPL
-      >>> import aiohttp
-      >>> import asyncio
+      from fpl import FPL
+      import aiohttp
+      import asyncio
       >>>
-      >>> async def main():
-      ...     async with aiohttp.ClientSession() as session:
-      ...         fpl = FPL(session)
-      ...         await fpl.login()
-      ...         classic_league = await fpl.get_classic_league(1137)
-      ...     print(classic_league)
+      async def main():
+          async with aiohttp.ClientSession() as session:
+              fpl = FPL(session)
+              await fpl.login()
+              classic_league = await fpl.get_classic_league(1137)
+          print(classic_league)
       ...
-      >>> asyncio.run(main())
+      asyncio.run(main())
       Official /r/FantasyPL Classic League - 1137
     """
     def __init__(self, league_information, session):

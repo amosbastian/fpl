@@ -28,16 +28,16 @@ join our `Discord server <https://discord.gg/cjY37fv>`_ or send an email to
 
 **A simple example**::
 
-    >>> import aiohttp
-    >>> import asyncio
-    >>> from fpl import FPL
-    >>> async def main():
-    ...     async with aiohttp.ClientSession() as session:
-    ...         fpl = FPL(session)
-    ...         player = await fpl.get_player(302)
-    ...     print(player)
+    import aiohttp
+    import asyncio
+    from fpl import FPL
+    async def main():
+        async with aiohttp.ClientSession() as session:
+            fpl = FPL(session)
+            player = await fpl.get_player(302)
+        print(player)
     ...
-    >>> asyncio.run(main())
+    asyncio.run(main())
     Pogba - Midfielder - Man Utd
 
 With **fpl** you can easily use the Fantasy Premier League API in all your

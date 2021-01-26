@@ -17,32 +17,32 @@ information from the Fantasy Premier League's API.
 
 Begin by importing the :class:`FPL <fpl.FPL>` class from **fpl**::
 
-    >>> from fpl import FPL
+    from fpl import FPL
 
 Because **fpl** uses `aiohttp <https://aiohttp.readthedocs.io/en/stable/>`_,
 we must also import this and pass a `Client Session <https://docs.aiohttp.org/en/stable/client_advanced.html>`_
 as an argument to the `FPL` class. You can either create a session and pass it like this::
 
-    >>> import aiohttp
+    import aiohttp
     >>>
-    >>> async def main():
-    ...     session = aiohttp.ClientSession()
-    ...     fpl = FPL(session)
+    async def main():
+        session = aiohttp.ClientSession()
+        fpl = FPL(session)
             # ...
-    ...     await session.close()
+        await session.close()
 
 or use a session context manager::
 
-    >>> async def main():
-    ...     async with aiohttp.ClientSession as session:
-    ...         fpl = FPL(session)
-    ...         # ...
+    async def main():
+        async with aiohttp.ClientSession as session:
+            fpl = FPL(session)
+            # ...
 
 Now, let's try to get a player. For this example, let's get Manchester United's
 star midfielder Paul Pogba (replace `# ...` with this code)::
 
-    >>> player = await fpl.get_player(302)
-    >>> print(player)
+    player = await fpl.get_player(302)
+    print(player)
     Pogba - Midfielder - Man Utd
 
 Now, we have a :class:`Player <fpl.models.player.Player>` object called
@@ -50,9 +50,9 @@ Now, we have a :class:`Player <fpl.models.player.Player>` object called
 example, if we want his points per game, or his total points, then we can
 simply do this::
 
-    >>> print(player.points_per_game)
+    print(player.points_per_game)
     5.7
-    >>> print(player.total_points)
+    print(player.total_points)
     113
 
 Nearly all of :class:`FPL <fpl.FPL>`'s functions include the argument
@@ -60,15 +60,15 @@ Nearly all of :class:`FPL <fpl.FPL>`'s functions include the argument
 :class:`Player <fpl.models.player.Player>` object, then you can simply do the
 following::
 
-    >>> player = await fpl.get_player(302, return_json=True)
-    >>> print(player["total_points"])
+    player = await fpl.get_player(302, return_json=True)
+    print(player["total_points"])
     113
 
 Nice, right? However, one important thing was left out. Because **fpl** is
 asynchronous, you must use ``asyncio`` to run the function::
 
-    >>> import asyncio
-    >>> asyncio.run(main())
+    import asyncio
+    asyncio.run(main())
 
 
 Authentication
@@ -85,17 +85,17 @@ access this, the ``login`` function was added to :class:`FPL <fpl.FPL>`. It
 must be called before using other functions where login authentication is
 required. Let's use my team as an example::
 
-    >>> import asyncio
-    >>> import aiohttp
-    >>> from fpl import FPL
+    import asyncio
+    import aiohttp
+    from fpl import FPL
     >>>
-    >>> async def my_team(user_id):
-    ...     async with aiohttp.ClientSession() as session:
-    ...         fpl = FPL(session)
-    ...         await fpl.login()
-    ...         user = await fpl.get_user(user_id)
-    ...         team = await user.get_team()
-    ...     print(team)
+    async def my_team(user_id):
+        async with aiohttp.ClientSession() as session:
+            fpl = FPL(session)
+            await fpl.login()
+            user = await fpl.get_user(user_id)
+            team = await user.get_team()
+        print(team)
     ...
-    >>> asyncio.run(my_team(3808385))
+    asyncio.run(my_team(3808385))
     [{'can_sub': True, 'has_played': False, 'is_sub': False, 'can_captain': True, 'selling_price': 46, 'multiplier': 1, 'is_captain': False, 'is_vice_captain': False, 'position': 1, 'element': 400}, ..., {'can_sub': True, 'has_played': False, 'is_sub': True, 'can_captain': True, 'selling_price': 44, 'multiplier': 1, 'is_captain': False, 'is_vice_captain': False, 'position': 15, 'element': 201}]

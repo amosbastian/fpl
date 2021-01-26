@@ -106,17 +106,17 @@ def _set_captain(lineup, captain, captain_type, player_ids):
 class User():
     """A class representing a user of the Fantasy Premier League.
 
-    >>> from fpl import FPL
-      >>> import aiohttp
-      >>> import asyncio
+    from fpl import FPL
+      import aiohttp
+      import asyncio
       >>>
-      >>> async def main():
-      ...     async with aiohttp.ClientSession() as session:
-      ...         fpl = FPL(session)
-      ...         user = await fpl.get_user(3808385)
-      ...     print(user)
+      async def main():
+          async with aiohttp.ClientSession() as session:
+              fpl = FPL(session)
+              user = await fpl.get_user(3808385)
+          print(user)
       ...
-      >>> asyncio.run(main())
+      asyncio.run(main())
       Amos Bastian - Netherlands
     """
 
