@@ -4,9 +4,6 @@ A Python wrapper for the Fantasy Premier League API
 .. image:: https://travis-ci.org/amosbastian/fpl.svg?branch=master
     :target: https://travis-ci.org/amosbastian/fpl
 
-.. image:: https://img.shields.io/badge/Supported%20by-Utopian.io-%23B10DC9.svg
-    :target: https://utopian.io/
-
 .. image:: https://badge.fury.io/py/fpl.svg
     :target: https://pypi.org/project/fpl/
 
