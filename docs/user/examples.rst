@@ -52,8 +52,15 @@ to implement using **fpl**!
 
        print(player_table)
 
-   if __name__ == "__main__":
-       asyncio.run(main())
+    if __name__ == "__main__":
+        if sys.version_info >= (3, 7):
+            # Python 3.7+
+            asyncio.run(main())
+        else:
+            # Python 3.6
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(main())
+        
 
 which outputs the following table::
 
@@ -122,8 +129,14 @@ highlighting is shown::
         fdr_table.align["Team"] = "l"
         print(fdr_table)
 
-    if __name__ == '__main__':
-        asyncio.run(main())
+    if __name__ == "__main__":
+        if sys.version_info >= (3, 7):
+            # Python 3.7+
+            asyncio.run(main())
+        else:
+            # Python 3.6
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(main())
 
 
 which outputs the following table::
@@ -242,7 +255,13 @@ top scorer of each gameweek, and their respective difference in points scored::
         print(f"Total point difference is {abs(total_difference)} points!")
 
     if __name__ == '__main__':
-        asyncio.run(main(3808385))
+        if sys.version_info >= (3, 7):
+            # Python 3.7+
+            asyncio.run(main(3808385))
+        else:
+            # Python 3.6
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(main(3808385))
 
 which outputs the following table::
 

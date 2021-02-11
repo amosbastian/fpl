@@ -53,7 +53,12 @@ Basic usage:
           gameweek = await fpl.get_gameweek(1)
       print(gameweek)
 
-  asyncio.get_event_loop().run_until_complete(main())
+  # Python 3.7+
+  asyncio.run(main())
+  ...
+  # Python 3.6
+  loop = asyncio.get_event_loop()
+  loop.run_until_complete(main())
   # Gameweek 1 - Deadline Sat 12 Sep 10:00
 
 .. autoclass:: fpl.models.gameweek.Gameweek
