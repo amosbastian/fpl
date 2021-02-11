@@ -18,7 +18,12 @@ class ClassicLeague():
               classic_league = await fpl.get_classic_league(1137)
           print(classic_league)
       ...
+      # Python 3.7+
       asyncio.run(main())
+      # Python 3.6
+      loop = asyncio.get_event_loop()
+      loop.run_until_complete(main())
+      ...
       Official /r/FantasyPL Classic League - 1137
     """
     def __init__(self, league_information, session):

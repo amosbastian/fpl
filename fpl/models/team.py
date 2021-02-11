@@ -18,7 +18,12 @@ class Team():
               team = await fpl.get_team(14)
           print(team)
       ...
+      # Python 3.7+
       asyncio.run(main())
+      ...
+      # Python 3.6
+      loop = asyncio.get_event_loop()
+      loop.run_until_complete(main())
       Man Utd
     """
     def __init__(self, team_information, session):

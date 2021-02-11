@@ -21,7 +21,12 @@ class H2HLeague():
               h2h_league = await fpl.get_h2h_league(760869)
           print(h2h_league)
       ...
+      # Python 3.7+
       asyncio.run(main())
+      ...
+      # Python 3.6
+      loop = asyncio.get_event_loop()
+      loop.run_until_complete(main())
       League 760869 - 760869
     """
 

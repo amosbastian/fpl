@@ -106,18 +106,25 @@ def _set_captain(lineup, captain, captain_type, player_ids):
 class User():
     """A class representing a user of the Fantasy Premier League.
 
-    from fpl import FPL
-      import aiohttp
-      import asyncio
-      >>>
-      async def main():
-          async with aiohttp.ClientSession() as session:
-              fpl = FPL(session)
-              user = await fpl.get_user(3808385)
-          print(user)
-      ...
-      asyncio.run(main())
-      Amos Bastian - Netherlands
+    Basic usage::
+
+      from fpl import FPL
+        import aiohttp
+        import asyncio
+      
+        async def main():
+            async with aiohttp.ClientSession() as session:
+                fpl = FPL(session)
+                user = await fpl.get_user(3808385)
+            print(user)
+        ...
+        # Python 3.7+
+        asyncio.run(main())
+        ...
+        # Python 3.6
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
+        Amos Bastian - Netherlands
     """
 
     def __init__(self, user_information, session):
