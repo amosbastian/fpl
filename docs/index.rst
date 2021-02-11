@@ -37,6 +37,7 @@ join our `Discord server <https://discord.gg/cjY37fv>`_ or send an email to
     # Python 3.7+
     asyncio.run(main())
     ...
+    # Python 3.6
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
     Fernandes - Midfielder - Man Utd
