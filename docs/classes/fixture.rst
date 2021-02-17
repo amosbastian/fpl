@@ -46,7 +46,13 @@ Basic usage:
           fixture = await fpl.get_fixture(3)
       print(fixture)
 
-  asyncio.get_event_loop().run_until_complete(main())
+  # Python 3.7+
+  asyncio.run(main())
+  ...
+  # Python 3.6
+  loop = asyncio.get_event_loop()
+  loop.run_until_complete(main())
+  
   # Liverpool vs. Leeds - Sat 12 Sep 16:30
 
 .. autoclass:: fpl.models.fixture.Fixture

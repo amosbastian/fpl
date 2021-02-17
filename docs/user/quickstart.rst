@@ -67,8 +67,16 @@ following::
 Nice, right? However, one important thing was left out. Because **fpl** is
 asynchronous, you must use ``asyncio`` to run the function::
 
+    import sys
     import asyncio
-    asyncio.run(main())
+    
+    if sys.version_info >= (3, 7):
+        # Python 3.7+
+        asyncio.run(main())
+    else:
+        # Python 3.6
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
 
 
 Authentication
@@ -96,6 +104,10 @@ required. Let's use my team as an example::
             user = await fpl.get_user(user_id)
             team = await user.get_team()
         print(team)
-    ...
+    # Python 3.7+
     asyncio.run(my_team(3808385))
+    ...
+    # Python 3.6
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(my_team(3808385))
     [{'can_sub': True, 'has_played': False, 'is_sub': False, 'can_captain': True, 'selling_price': 46, 'multiplier': 1, 'is_captain': False, 'is_vice_captain': False, 'position': 1, 'element': 400}, ..., {'can_sub': True, 'has_played': False, 'is_sub': True, 'can_captain': True, 'selling_price': 44, 'multiplier': 1, 'is_captain': False, 'is_vice_captain': False, 'position': 15, 'element': 201}]

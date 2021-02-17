@@ -34,8 +34,13 @@ join our `Discord server <https://discord.gg/cjY37fv>`_ or send an email to
             player = await fpl.get_player(302)
         print(player)
     ...
+    # Python 3.7+
     asyncio.run(main())
-    Pogba - Midfielder - Man Utd
+    ...
+    # Python 3.6
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    Fernandes - Midfielder - Man Utd
 
 With **fpl** you can easily use the Fantasy Premier League API in all your
 Python scripts, exactly how you expect it to work.

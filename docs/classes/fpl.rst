@@ -22,7 +22,12 @@ can look something like this:
 
       print(my_team)
 
-  asyncio.get_event_loop().run_until_complete(main())
+  # Python 3.7+
+  asyncio.run(main())
+  ...
+  # Python 3.6
+  loop = asyncio.get_event_loop()
+  loop.run_until_complete(main())
 
 Note that when calling the ``login`` function, you must either specify an ``email`` and ``password``,
 or set up system environment variables named ``FPL_EMAIL`` and ``FPL_PASSWORD``.
