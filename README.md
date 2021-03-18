@@ -26,7 +26,7 @@ Join the [Discord server](https://discord.gg/cjY37fv) or submit [an issue](https
 
 ## Installing fpl
 
-The recommended way to install fpl is via ``pip``.
+The recommended way to install fpl is via `pip`.
 
     pip install fpl
 
@@ -34,8 +34,8 @@ To install it directly from GitHub you can do the following:
 
     git clone git://github.com/amosbastian/fpl.git
 
-You can also install a [.tar file](https://github.com/requests/requests/tarball/master)
-or [.zip file](https://github.com/requests/requests/tarball/master)
+You can also install a [.tar file](https://github.com/amosbastian/fpl/tarball/master)
+or [.zip file](https://github.com/amosbastian/fpl/tarball/master)
 
     curl -OL https://github.com/amosbastian/fpl/tarball/master
     curl -OL https://github.com/amosbastian/fpl/zipball/master # Windows
@@ -56,7 +56,7 @@ Once it has been downloaded you can easily install it using `pip`:
    way around.
 4. Run all tests again with with `pytest tests/` to confirm that everything
    still passes, including your newly added test(s).
-5. Create a pull request for the main repository's ``master`` branch.
+5. Create a pull request for the main repository's `master` branch.
 
 For more information on how to contribute to **fpl** see [the contributing guide](https://fpl.readthedocs.io/en/latest/contributing/contributing.html).
 

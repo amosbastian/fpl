@@ -50,8 +50,8 @@ version of **fpl** from here you can use the following command::
 
     $ git clone git://github.com/amosbastian/fpl.git
 
-You can also install a `.tar file <https://github.com/requests/requests/tarball/master>`_
-or `.zip file <https://github.com/requests/requests/tarball/master>`_
+You can also install a `.tar file <https://github.com/amosbastian/fpl/tarball/master>`_
+or `.zip file <https://github.com/amosbastian/fpl/tarball/master>`_
 
     $ curl -OL https://github.com/amosbastian/fpl/tarball/master
     $ curl -OL https://github.com/amosbastian/fpl/zipball/master # Windows
