@@ -280,6 +280,15 @@ class FPL:
         """
         players = getattr(self, "elements")
 
+        if not include_summary:
+            if player_ids:
+                players = [player for player in players.values() if player["id"] in player_ids]
+
+            if not return_json:
+                players = [Player(player, self.session) for player in players]
+
+            return players
+
         if not player_ids:
             player_ids = [player["id"] for player in players.values()]
 
