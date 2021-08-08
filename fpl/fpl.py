@@ -141,22 +141,22 @@ class FPL:
 
              1 - Arsenal
              2 - Aston Villa
-             3 - Brighton
-             4 - Burnley
-             5 - Chelsea
-             6 - Crystal Palace
-             7 - Everton
-             8 - Fulham
+             3 - Brentford
+             4 - Brighton
+             5 - Burnley
+             6 - Chelsea
+             7 - Crystal Palace
+             8 - Everton
              9 - Leicester
             10 - Leeds
             11 - Liverpool
             12 - Man City
             13 - Man Utd
             14 - Newcastle
-            15 - Sheffield Utd
+            15 - Norwich
             16 - Southampton
             17 - Spurs
-            18 - West Brom
+            18 - Watford
             19 - West Ham
             20 - Wolves
         """
