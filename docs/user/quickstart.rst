@@ -34,7 +34,7 @@ as an argument to the `FPL` class. You can either create a session and pass it l
 or use a session context manager::
 
     async def main():
-        async with aiohttp.ClientSession as session:
+        async with aiohttp.ClientSession() as session:
             fpl = FPL(session)
             # ...
 
