@@ -27,6 +27,7 @@ import asyncio
 import itertools
 import os
 import json
+import ssl
 from urllib.request import urlopen
 
 from .constants import API_URLS
@@ -47,7 +48,12 @@ class FPL:
     def __init__(self, session):
         self.session = session
 
-        static = json.loads(urlopen(API_URLS["static"]).read().decode("utf-8"))
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        url = API_URLS["static"]
+        static = json.loads(urlopen(url, context=ctx).read().decode("utf-8"))
+        
         for k, v in static.items():
             try:
                 v = {w["id"]: w for w in v}
