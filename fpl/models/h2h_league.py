@@ -37,7 +37,7 @@ class H2HLeague():
             setattr(self, k, v)
 
     async def get_fixture(self, gameweek):
-        """Returns a list of fixtures / results of the H2H league.
+        """Returns an object blob containing fixture / result data of the H2H league.
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/api/leagues-h2h-matches/league/946125/?event=1
