@@ -36,6 +36,31 @@ class H2HLeague():
         for k, v in league_information.items():
             setattr(self, k, v)
 
+    async def get_fixture(self, gameweek):
+        """Returns an object blob containing fixture / result data of the H2H league.
+
+        Information is taken from e.g.:
+            https://fantasy.premierleague.com/api/leagues-h2h-matches/league/946125/?event=1
+
+        :param gameweek: (required) The gameweek of the fixture / result.
+        :type gameweek: string or int
+        :rtype: object blob containing fixture / result data.
+        """
+        if not self._session:
+            return []
+
+        if not logged_in(self._session):
+            raise Exception(
+                "Not authorised to get H2H fixtures. Log in first.")
+
+        url_query = "event={gameweek}".format(gameweek=gameweek)
+
+        fixtures = await fetch(
+            self._session, API_URLS["league_h2h_fixture"].format(
+                self.league["id"], url_query))
+
+        return fixtures["results"]
+
     async def get_fixtures(self, gameweek=None, page=1):
         """Returns a list of fixtures / results of the H2H league.
 
