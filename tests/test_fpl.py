@@ -105,6 +105,26 @@ class TestFPL(object):
         player_summaries = await fpl.get_player_summaries([1, 2, 3], True)
         assert isinstance(player_summaries[0], dict)
 
+    async def test_search_players(self, loop, fpl):
+        # test search_players
+        players = await fpl.search_players('lucas moura')
+        assert isinstance(players[0], Player)
+        assert players[0].id == 345
+
+        players = await fpl.search_players('nicolas pepe')
+        assert isinstance(players[0], Player)
+        assert players[0].id == 488
+
+        players = await fpl.search_players('lucas', num_players=5)
+        assert all([isinstance(p, Player) for p in players])
+        assert len(players) == 5
+
+        players = await fpl.search_players('nicolas pepe', return_json=True)
+        assert isinstance(players[0], dict)
+
+        players_with_summary = await fpl.search_players('nicolas pepe', include_summary=True)
+        assert isinstance(players_with_summary[0].fixtures, list)
+
     async def test_player(self, loop, fpl):
         # test invalid ID
         with pytest.raises(ValueError):
