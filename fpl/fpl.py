@@ -407,7 +407,6 @@ class FPL:
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/api/fixtures/
-            https://fantasy.premierleague.com/api/fixtures/?event=1
 
         :param return_json: (optional) Boolean. If ``True`` returns a list of
             ``dicts``, if ``False`` returns a list of  :class:`Fixture`
