@@ -416,9 +416,13 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        task = asyncio.ensure_future(fetch(self.session, API_URLS["fixtures"]))
+        gameweeks = range(1, 39)
+        tasks = [asyncio.ensure_future(
+                 fetch(self.session,
+                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                 for gameweek in gameweeks]
 
-        gameweek_fixtures = await asyncio.gather(task)
+        gameweek_fixtures = await asyncio.gather(*tasks)
         fixtures = list(itertools.chain(*gameweek_fixtures))
 
         if return_json:
