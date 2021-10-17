@@ -48,7 +48,8 @@ Once it has been downloaded you can easily install it using `pip`:
 ## Contributing
 
 1. Fork the repository on GitHub.
-2. Run the tests with `pytest tests/` to confirm they all pass on your system.
+2. Create a `credentials.cfg` file with your FPL login and password (see [example](example-credentials-file.cfg)).
+3. Run the tests with `pytest tests/` to confirm they all pass on your system.
    If the tests fail, then try and find out why this is happening. If you aren't
    able to do this yourself, then don't hesitate to either create an issue on
    GitHub, contact me on Discord or send an email to [amosbastian@gmail.com](mailto:amosbastian@gmail.com>).
