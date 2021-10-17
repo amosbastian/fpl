@@ -18,7 +18,7 @@ class H2HLeague():
           async with aiohttp.ClientSession() as session:
               fpl = FPL(session)
               await fpl.login()
-              h2h_league = await fpl.get_h2h_league(760869)
+              h2h_league = await fpl.get_h2h_league(829116)
           print(h2h_league)
       ...
       # Python 3.7+
@@ -27,7 +27,7 @@ class H2HLeague():
       # Python 3.6
       loop = asyncio.get_event_loop()
       loop.run_until_complete(main())
-      League 760869 - 760869
+      League 829116 - 829116
     """
 
     def __init__(self, league_information, session):
