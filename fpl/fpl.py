@@ -284,9 +284,9 @@ class FPL:
 
         if not include_summary:
             if player_ids:
-                players = [player for player in players.values() if player["id"] in player_ids]
+                players = [player for player in list(players.values()) if player["id"] in player_ids]
             else:
-                players = players.values()
+                players = list(players.values())
 
             if not return_json:
                 players = [Player(player, self.session) for player in players]
@@ -294,7 +294,7 @@ class FPL:
             return players
 
         if not player_ids:
-            player_ids = [player["id"] for player in players.values()]
+            player_ids = [player["id"] for player in list(players.values())]
 
         tasks = [asyncio.ensure_future(
                  self.get_player(
