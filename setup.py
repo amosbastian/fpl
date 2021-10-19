@@ -27,6 +27,7 @@ setup(
         "Source": "https://github.com/amosbastian/fpl"
     },
     install_requires=[
+        "certifi",
         "Click",
         "colorama",
         "codecov",

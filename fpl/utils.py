@@ -1,19 +1,20 @@
 import asyncio
+import aiohttp
+import certifi
+import ssl
+
 from datetime import datetime
+from fpl.constants import API_URLS
 from functools import update_wrapper
 
-import aiohttp
-
-from fpl.constants import API_URLS
-
 headers = {"User-Agent": ""}
-
+ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 async def fetch(session, url, retries=10, cooldown=1):
     retries_count = 0
     while True:
         try:
-            async with session.get(url, headers=headers) as response:
+            async with session.get(url, headers=headers, ssl=ssl_context) as response:
                 result = await response.json()
                 return result
         except aiohttp.client_exceptions.ContentTypeError:
