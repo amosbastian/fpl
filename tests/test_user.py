@@ -284,9 +284,9 @@ class TestUser(object):
                                         return_value=True)
         mocked_fetch = mocker.patch("fpl.models.user.fetch",
                                     return_value={
-                                        "details": "You cannot view this entry"},
+                                        "detail": "Not found."},
                                     new_callable=AsyncMock)
-        with pytest.raises(ValueError):
+        with pytest.raises(Exception):
             await user.get_team()
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
