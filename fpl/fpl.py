@@ -284,9 +284,9 @@ class FPL:
 
         if not include_summary:
             if player_ids:
-                players = [player for player in players.values() if player["id"] in player_ids]
+                players = [player for player in list(players.values()) if player["id"] in player_ids]
             else:
-                players = players.values()
+                players = list(players.values())
 
             if not return_json:
                 players = [Player(player, self.session) for player in players]
@@ -294,7 +294,7 @@ class FPL:
             return players
 
         if not player_ids:
-            player_ids = [player["id"] for player in players.values()]
+            player_ids = [player["id"] for player in list(players.values())]
 
         tasks = [asyncio.ensure_future(
                  self.get_player(
@@ -416,9 +416,13 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        task = asyncio.ensure_future(fetch(self.session, API_URLS["fixtures"]))
+        gameweeks = range(1, 39)
+        tasks = [asyncio.ensure_future(
+                 fetch(self.session,
+                       API_URLS["gameweek_fixtures"].format(gameweek)))
+                 for gameweek in gameweeks]
 
-        gameweek_fixtures = await asyncio.gather(task)
+        gameweek_fixtures = await asyncio.gather(*tasks)
         fixtures = list(itertools.chain(*gameweek_fixtures))
 
         if return_json:
