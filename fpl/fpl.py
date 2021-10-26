@@ -24,10 +24,10 @@ Fantasy Premier League API:
 * /transfers
 """
 import asyncio
+import certifi
 import itertools
-import os
 import json
-from urllib.request import urlopen
+import os
 
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
@@ -39,6 +39,7 @@ from .models.team import Team
 from .models.user import User
 from .utils import (average, fetch, get_current_user, logged_in,
                     position_converter, scale, team_converter)
+from urllib.request import urlopen
 
 
 class FPL:
@@ -47,7 +48,8 @@ class FPL:
     def __init__(self, session):
         self.session = session
 
-        static = json.loads(urlopen(API_URLS["static"]).read().decode("utf-8"))
+        resp = urlopen(API_URLS["static"], cafile=certifi.where())
+        static = json.loads(resp.read().decode("utf-8"))
         for k, v in static.items():
             try:
                 v = {w["id"]: w for w in v}
@@ -407,7 +409,6 @@ class FPL:
 
         Information is taken from e.g.:
             https://fantasy.premierleague.com/api/fixtures/
-            https://fantasy.premierleague.com/api/fixtures/?event=1
 
         :param return_json: (optional) Boolean. If ``True`` returns a list of
             ``dicts``, if ``False`` returns a list of  :class:`Fixture`
@@ -415,13 +416,9 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        gameweeks = range(1, 39)
-        tasks = [asyncio.ensure_future(
-                 fetch(self.session,
-                       API_URLS["gameweek_fixtures"].format(gameweek)))
-                 for gameweek in gameweeks]
+        task = asyncio.ensure_future(fetch(self.session, API_URLS["fixtures"]))
 
-        gameweek_fixtures = await asyncio.gather(*tasks)
+        gameweek_fixtures = await asyncio.gather(task)
         fixtures = list(itertools.chain(*gameweek_fixtures))
 
         if return_json:
