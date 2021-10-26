@@ -127,3 +127,6 @@ dmypy.json
 
 # Credentials
 credentials.cfg
+
+# main.py files
+main.py
