@@ -10,8 +10,8 @@ async def main():
 
         config = configparser.ConfigParser()
         config.read('credentials.cfg')
-        os.environ['FPL_EMAIL'] = config['CREDS']['FPL_EMAIL']
-        os.environ['FPL_PASSWORD'] = config['CREDS']['FPL_PASSWORD']
+        os.environ['FPL_EMAIL'] = config['CREDENTIALS']['FPL_EMAIL']
+        os.environ['FPL_PASSWORD'] = config['CREDENTIALS']['FPL_PASSWORD']
 
         await fpl.login()
         h2h_league = await fpl.get_h2h_league(829116)
