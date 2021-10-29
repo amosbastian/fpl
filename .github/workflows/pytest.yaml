@@ -38,5 +38,5 @@ jobs:
 
       - name: Run test suite
         run: |
-          pipenv run python setup.py develop
+          pipenv run python setup.py install
           pipenv run pytest tests/
