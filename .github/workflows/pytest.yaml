@@ -1,5 +1,5 @@
 # GitHub Action for running 
-name: PyTest
+name: pytest
 on:
   pull_request:
     branches:
