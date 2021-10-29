@@ -44,7 +44,7 @@ jobs:
         shell: bash
         env:
           FPL_EMAIL: ${{ secrets.FPL_EMAIL }}
-          FPL_PASSWWORD: ${{ secrets.FPL_PASSWORD }}
+          FPL_PASSWORD: ${{ secrets.FPL_PASSWORD }}
         
       - name: Run test suite
         run: |
