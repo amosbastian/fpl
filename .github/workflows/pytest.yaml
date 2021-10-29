@@ -1,10 +1,6 @@
 # GitHub Action for running 
 name: PyTest
 on:
-  push:
-    branches:
-      - master
-      - actions
   pull_request:
     branches:
       - master
