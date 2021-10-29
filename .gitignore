@@ -119,5 +119,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# VSCode
 .vscode/
+
+# CSV data
 *.csv
+
+# Credentials
+credentials.cfg
