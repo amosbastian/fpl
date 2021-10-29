@@ -43,7 +43,7 @@ jobs:
           echo FPL_PASSWORD="$FPL_PASSWORD" >> credentials.cfg
         shell: bash
         env:
-          SSH_KEY: ${{ secrets.FPL_EMAIL }}
+          FPL_EMAIL: ${{ secrets.FPL_EMAIL }}
           FPL_PASSWWORD: ${{ secrets.FPL_PASSWORD }}
         
       - name: Run test suite
