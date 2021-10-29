@@ -39,8 +39,8 @@ jobs:
       - name: Create credentials.cfg
         run: |
           echo [CREDENTIALS] >> credentials.cfg
-          'echo FPL_EMAIL="$FPL_EMAIL" >> credentials.cfg'
-          'echo FPL_PASSWORD="$FPL_PASSWORD" >> credentials.cfg'
+          echo FPL_EMAIL="$FPL_EMAIL" >> credentials.cfg
+          echo FPL_PASSWORD="$FPL_PASSWORD" >> credentials.cfg
         shell: bash
         env:
           SSH_KEY: ${{ secrets.FPL_EMAIL }}
