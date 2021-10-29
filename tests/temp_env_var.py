@@ -1,7 +1,8 @@
 import configparser
+import os
 
 config = configparser.ConfigParser()
-config.read("credentials.cfg")
+config.read(os.path.abspath("credentials.cfg"))
 
 TEMP_ENV_VARS = {
     "FPL_EMAIL": config["CREDENTIALS"]["FPL_EMAIL"],
