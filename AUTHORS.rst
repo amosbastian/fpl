@@ -7,3 +7,4 @@ Contributors
 ````````````
 
 - David MacLeod
+- Hayden MacDonald
