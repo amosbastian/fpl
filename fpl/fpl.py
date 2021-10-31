@@ -48,7 +48,7 @@ class FPL:
     def __init__(self, session):
         self.session = session
 
-        resp = urlopen(API_URLS["static"], cafile=certifi.where())
+        resp = urlopen(API_URLS["static"], context=ssl_context)
         static = json.loads(resp.read().decode("utf-8"))
         for k, v in static.items():
             try:
