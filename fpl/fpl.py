@@ -38,7 +38,7 @@ from .models.player import Player, PlayerSummary
 from .models.team import Team
 from .models.user import User
 from .utils import (average, fetch, get_current_user, logged_in,
-                    position_converter, scale, team_converter)
+                    position_converter, scale, team_converter, ssl_context)
 from urllib.request import urlopen
 
 
@@ -585,7 +585,8 @@ class FPL:
         }
 
         login_url = "https://users.premierleague.com/accounts/login/"
-        async with self.session.post(login_url, data=payload) as response:
+        async with self.session.post(login_url, data=payload,
+                                     ssl=ssl_context) as response:
             state = response.url.query["state"]
             if state == "fail":
                 reason = response.url.query["reason"]
