@@ -32,6 +32,16 @@ jobs:
         run: |
           pipenv install --dev -e .
 
+      - name: Create credentials.cfg
+        run: |
+          echo [CREDENTIALS] >> credentials.cfg
+          echo FPL_EMAIL="$FPL_EMAIL" >> credentials.cfg
+          echo FPL_PASSWORD="$FPL_PASSWORD" >> credentials.cfg
+        shell: bash
+        env:
+          FPL_EMAIL: ${{ secrets.FPL_EMAIL }}
+          FPL_PASSWORD: ${{ secrets.FPL_PASSWORD }}
+
       - name: Run test suite
         run: |
           pipenv run pytest tests/
