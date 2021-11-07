@@ -384,6 +384,9 @@ class User():
         except aiohttp.client_exceptions.ClientResponseError:
             raise Exception("User ID does not match provided email address!")
 
+        if response.get("detail") == "Not found.":
+            raise Exception("Data not found. Please ensure user ID matches provided email address.")
+        
         return response["picks"]
 
     async def get_chips(self):

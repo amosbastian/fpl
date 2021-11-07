@@ -284,9 +284,9 @@ class FPL:
 
         if not include_summary:
             if player_ids:
-                players = [player for player in players.values() if player["id"] in player_ids]
+                players = [player for player in list(players.values()) if player["id"] in player_ids]
             else:
-                players = players.values()
+                players = list(players.values())
 
             if not return_json:
                 players = [Player(player, self.session) for player in players]
@@ -294,7 +294,7 @@ class FPL:
             return players
 
         if not player_ids:
-            player_ids = [player["id"] for player in players.values()]
+            player_ids = [player["id"] for player in list(players.values())]
 
         tasks = [asyncio.ensure_future(
                  self.get_player(
@@ -406,10 +406,8 @@ class FPL:
 
     async def get_fixtures(self, return_json=False):
         """Returns a list of *all* fixtures.
-
         Information is taken from e.g.:
             https://fantasy.premierleague.com/api/fixtures/
-
         :param return_json: (optional) Boolean. If ``True`` returns a list of
             ``dicts``, if ``False`` returns a list of  :class:`Fixture`
             objects. Defaults to ``False``.

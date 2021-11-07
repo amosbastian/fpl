@@ -230,10 +230,10 @@ class TestFPL(object):
 
     async def test_h2h_league(self, loop, fpl):
         await fpl.login()
-        h2h_league = await fpl.get_h2h_league(902521)
+        h2h_league = await fpl.get_h2h_league(829116)
         assert isinstance(h2h_league, H2HLeague)
 
-        h2h_league = await fpl.get_h2h_league(902521, True)
+        h2h_league = await fpl.get_h2h_league(829116, True)
         assert isinstance(h2h_league, dict)
 
     async def test_login_with_no_email_password(
