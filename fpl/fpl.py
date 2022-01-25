@@ -433,7 +433,7 @@ class FPL:
             https://fantasy.premierleague.com/api/event/1/live/
 
         :param int gameweek_id: A gameweek's ID.
-        :param bool include_summary: (optional) Includes a gameweek's live data
+        :param bool include_live: (optional) Includes a gameweek's live data
             if ``True``.
         :param return_json: (optional) Boolean. If ``True`` returns a ``dict``,
             if ``False`` returns a :class:`Gameweek` object. Defaults to
