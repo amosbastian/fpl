@@ -29,8 +29,6 @@ import itertools
 import json
 import os
 
-from requests_toolbelt import user_agent
-
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
 from .models.fixture import Fixture
