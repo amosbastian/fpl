@@ -29,6 +29,8 @@ import itertools
 import json
 import os
 
+from requests_toolbelt import user_agent
+
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
 from .models.fixture import Fixture
@@ -586,7 +588,8 @@ class FPL:
 
         login_url = "https://users.premierleague.com/accounts/login/"
         async with self.session.post(login_url, data=payload,
-                                     ssl=ssl_context) as response:
+                                     ssl=ssl_context,
+                                     headers={"User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1; PRO 5 Build/LMY47D)"}) as response:
             state = response.url.query["state"]
             if state == "fail":
                 reason = response.url.query["reason"]
