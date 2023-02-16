@@ -65,10 +65,12 @@ def get_picks():
             "can_captain": True,
         }
     ]
+
+
 user_player_ids = [145, 302, 253, 270]
 
 
-class TestHelpers(object):
+class TestHelpers:
     @staticmethod
     def test_valid_gameweek_gameweek_out_of_range():
         with pytest.raises(ValueError):
@@ -174,8 +176,9 @@ class TestHelpers(object):
         assert not vice_captain["is_vice_captain"]
 
 
-class TestUser(object):
-    async def test_init(self, loop):
+class TestUser:
+    @pytest.mark.asyncio
+    async def test_init(self):
         session = aiohttp.ClientSession()
         user = User(user_data, session)
         assert user._session is session
@@ -184,34 +187,40 @@ class TestUser(object):
             assert getattr(user, k) == v
         await session.close()
 
+    @pytest.mark.asyncio
     async def test_get_gameweek_history_unknown_gameweek_cached(
-            self, loop, user):
+            self, user):
         history = await user.get_gameweek_history()
         assert history is user._history["current"]
         assert isinstance(history, list)
 
+    @pytest.mark.asyncio
     async def test_get_gameweek_history_unknown_gameweek_non_cached(
-            self, loop, user):
+            self, user):
         history = await user.get_gameweek_history()
         assert isinstance(history, list)
 
+    @pytest.mark.asyncio
     async def test_get_gameweek_history_known_gameweek_cached(
-            self, loop, user):
+            self, user):
         history = await user.get_gameweek_history(gameweek=1)
         assert history is user._history["current"][0]
         assert isinstance(history, dict)
 
+    @pytest.mark.asyncio
     async def test_get_gameweek_history_known_gameweek_non_cached(
-            self, loop, mocker, user):
+            self, user):
         history = await user.get_gameweek_history(gameweek=1)
         assert isinstance(history, dict)
 
-    async def test_get_season_history(self, loop, user):
+    @pytest.mark.asyncio
+    async def test_get_season_history(self, user):
         season_history = await user.get_season_history()
         assert season_history is user._history["past"]
         assert isinstance(season_history, list)
 
-    async def test_get_chips_history(self, loop, user):
+    @pytest.mark.asyncio
+    async def test_get_chips_history(self, user):
         chips_history = await user.get_chips_history()
         assert chips_history is user._history["chips"]
         assert isinstance(chips_history, list)
@@ -219,67 +228,79 @@ class TestUser(object):
         chips_history = await user.get_chips_history(gameweek=1)
         assert not chips_history
 
-    async def test_leagues(self, loop, user):
+    @pytest.mark.asyncio
+    async def test_leagues(self, user):
         leagues = user.leagues
         assert isinstance(leagues, dict)
 
-    async def test_get_picks_should_return_dict(self, loop, user):
+    @pytest.mark.asyncio
+    async def test_get_picks_should_return_dict(self, user):
         picks = await user.get_picks()
         assert isinstance(picks, dict)
 
+    @pytest.mark.asyncio
     async def test_get_picks_invalid_gameweek_should_raise_exception(
-            self, loop, user):
+            self, user):
         with pytest.raises(ValueError):
             await user.get_picks(gameweek=0)
 
+    @pytest.mark.asyncio
     async def test_get_picks_valid_gameweek_should_return_dict_with_one_item(
-            self, loop, user):
+            self, user):
         picks = await user.get_picks(gameweek=1)
         assert len(picks) == 1
 
+    @pytest.mark.asyncio
     async def test_get_picks_cached_with_unknown_gameweek(
-            self, loop, user):
+            self, user):
         picks_one = await user.get_picks()
         picks_two = await user.get_picks()
         assert len(picks_one) == len(picks_two)
 
+    @pytest.mark.asyncio
     async def test_get_picks_non_cached_with_unknown_gameweek(
-            self, loop, mocker, user):
+            self, user):
         picks = await user.get_picks()
         assert len(picks[1]) == 15
 
+    @pytest.mark.asyncio
     async def test_get_picks_cached_with_known_gameweek(
-            self, loop, user):
+            self, user):
         picks_one = await user.get_picks(gameweek=1)
         picks_two = await user.get_picks(gameweek=1)
         assert picks_one == picks_two
 
+    @pytest.mark.asyncio
     async def test_get_picks_non_cached_with_known_gameweek(
-            self, loop, user):
+            self, user):
         picks = await user.get_picks(gameweek=1)
         assert len(picks[1]) == 15
 
-    async def test_get_active_chips(self, loop, user):
+    @pytest.mark.asyncio
+    async def test_get_active_chips(self, user):
         active_chips = await user.get_active_chips()
         assert isinstance(active_chips, list)
         active_chips = await user.get_active_chips(gameweek=1)
         assert not active_chips
 
-    async def test_get_automatic_substitutions(self, loop, user):
+    @pytest.mark.asyncio
+    async def test_get_automatic_substitutions(self, user):
         substitutions = await user.get_automatic_substitutions()
         assert isinstance(substitutions, list)
         substitutions = await user.get_automatic_substitutions(gameweek=1)
         assert not substitutions
 
-    async def test_get_team_not_authenticated(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test_get_team_not_authenticated(self, mocker, user):
         mocked_logged_in = mocker.patch("fpl.models.user.logged_in",
                                         return_value=False)
         with pytest.raises(Exception):
             await user.get_team()
         mocked_logged_in.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_get_team_authenticated_not_matching_credentials_with_user_id(
-            self, loop, mocker, user):
+            self, mocker, user):
         mocked_logged_in = mocker.patch("fpl.models.user.logged_in",
                                         return_value=True)
         mocked_fetch = mocker.patch("fpl.models.user.fetch",
@@ -291,8 +312,9 @@ class TestUser(object):
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_get_team_authenticated_matching_credentials_with_user_id(
-            self, loop, mocker, user):
+            self, mocker, user):
         mocked_logged_in = mocker.patch("fpl.models.user.logged_in",
                                         return_value=True)
         data = {"picks": [{"element": 1}, {"element": 2}]}
@@ -304,15 +326,17 @@ class TestUser(object):
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
 
-    async def test_get_transfers(self, loop, user):
+    @pytest.mark.asyncio
+    async def test_get_transfers(self, user):
         transfers = await user.get_transfers()
         assert isinstance(transfers, list)
 
         transfers = await user.get_transfers(gameweek=1)
         assert isinstance(transfers, list)
 
+    @pytest.mark.asyncio
     async def test_get_latest_transfers_not_authenticated(
-            self, loop, mocker, user):
+            self, mocker, user):
         mocked_logged_in = mocker.patch("fpl.models.user.logged_in",
                                         return_value=False)
         with pytest.raises(Exception):
@@ -320,18 +344,20 @@ class TestUser(object):
         mocked_logged_in.assert_called_once()
 
     @pytest.mark.skip(reason="Cannot currently test it.")
-    async def test_get_wildcards_cached(self, loop, user):
+    async def test_get_wildcards_cached(self, user):
         transfers = await user.get_wildcards()
         assert isinstance(transfers, list)
 
-    async def test_get_watchlist_not_authenticated(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test_get_watchlist_not_authenticated(self, mocker, user):
         mocked_logged_in = mocker.patch("fpl.models.user.logged_in",
                                         return_value=False)
         with pytest.raises(Exception):
             await user.get_watchlist()
         mocked_logged_in.assert_called_once()
 
-    async def test_get_watchlist_authenticated(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test_get_watchlist_authenticated(self, mocker, user):
         mocked_logged_in = mocker.patch("fpl.models.user.logged_in",
                                         return_value=True)
         data = {"watched": []}
@@ -343,10 +369,12 @@ class TestUser(object):
         mocked_logged_in.assert_called_once()
         mocked_fetch.assert_called_once()
 
-    async def test__get_transfer_payload(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test__get_transfer_payload(self, user):
         pass
 
-    async def test_transfer(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test_transfer(self, user):
         # TODO: expand tests
         data = {
             "transfers": [{
@@ -361,26 +389,32 @@ class TestUser(object):
         with pytest.raises(Exception):
             await user.transfer([1], [2])
 
-    async def test__create_new_lineup(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test__create_new_lineup(self, user):
         pass
 
-    async def test__post_substitutions(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test__post_substitutions(self, user):
         pass
 
-    async def test__captain_helper(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test__captain_helper(self, user):
         pass
 
-    async def test_captain(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test_captain(self, user):
         # TODO: expand tests
         with pytest.raises(Exception):
             await user.captain(1)
 
-    async def test_vice_captain(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test_vice_captain(self, user):
         # TODO: expand tests
         with pytest.raises(Exception):
             await user.vice_captain(1)
 
-    async def test_substitute(self, loop, mocker, user):
+    @pytest.mark.asyncio
+    async def test_substitute(self, user):
         # TODO: expand tests
         with pytest.raises(Exception):
             await user.substitute([1], [2])

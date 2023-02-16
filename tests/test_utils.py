@@ -4,12 +4,14 @@ from fpl.utils import (chip_converter, get_current_gameweek, get_headers,
                        logged_in, position_converter, team_converter)
 
 
-class TestUtils(object):
-    async def test_get_current_gameweek(self, loop, fpl):
+class TestUtils:
+    @pytest.mark.asyncio
+    async def test_get_current_gameweek(self, fpl):
         current_gameweek = await get_current_gameweek(fpl.session)
         assert isinstance(current_gameweek, int)
 
-    async def test_team_converter(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_team_converter(self, fpl):
         teams = await fpl.get_teams()
         for team in teams:
             assert team_converter(team.id) == team.name
@@ -28,7 +30,8 @@ class TestUtils(object):
 
         assert chips == converted
 
-    async def test_logged_in(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_logged_in(self, fpl):
         await fpl.login()
         assert logged_in(fpl.session)
 
