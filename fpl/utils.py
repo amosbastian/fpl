@@ -3,6 +3,8 @@ import aiohttp
 import certifi
 import ssl
 
+from json import JSONDecodeError
+from aiohttp import ClientResponse
 from datetime import datetime
 from fpl.constants import API_URLS
 from functools import update_wrapper
@@ -30,6 +32,28 @@ async def fetch(session, url, retries=10, cooldown=1):
 async def post(session, url, payload, headers):
     async with session.post(url, data=payload, headers=headers) as response:
         return await response.json()
+
+
+async def post_transfer(session, url, payload, headers):
+    async with session.post(url, data=payload, headers=headers) as response:
+        return await check_response(response)
+
+
+async def check_response(response: ClientResponse) -> None:
+    if response.status == 200:
+        return
+    try:
+        result = await response.json(content_type=None)
+    except JSONDecodeError:
+        result = await response.text()
+        raise Exception(
+            f"Unknown error while requesting {response.url}. {response.status} - {result}"
+        )
+
+    if result.get("errorCode"):
+        message = result.get("error")
+
+        raise Exception(message if message else result)
 
 
 async def get_total_players(session):
@@ -183,7 +207,7 @@ def coroutine(func):
 def get_headers(referer):
     """Returns the headers needed for the transfer request."""
     return {
-        "Content-Type": "application/json; charset=UTF-8",
+        "Content-Type": "application/json;charset=UTF-8",
         "X-Requested-With": "XMLHttpRequest",
         "Referer": referer
     }
