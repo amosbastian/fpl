@@ -563,13 +563,15 @@ class FPL:
 
         return H2HLeague(league, session=self.session)
 
-    async def login(self, email=None, password=None):
+    async def login(self, email=None, password=None, cookie=None):
         """Returns a requests session with FPL login authentication.
 
         :param string email: Email address for the user's Fantasy Premier
             League account.
         :param string password: Password for the user's Fantasy Premier League
             account.
+        :param string cookie: Cookie extracted from the user's browser which increases
+            success chance when trying to log in.
         """
         if not email and not password:
             email = os.getenv("FPL_EMAIL", None)
@@ -584,10 +586,23 @@ class FPL:
             "redirect_uri": "https://fantasy.premierleague.com/a/login"
         }
 
+        if not cookie:
+            cookie = os.getenv('FPL_COOKIE')
+        headers = {
+            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1; PRO 5 Build/LMY47D)",
+        }
+        if cookie is not None:
+            headers['Cookie'] = cookie
+
         login_url = "https://users.premierleague.com/accounts/login/"
         async with self.session.post(login_url, data=payload,
                                      ssl=ssl_context,
-                                     headers={"User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1; PRO 5 Build/LMY47D)"}) as response:
+                                     headers=headers) as response:
+
+            if response.status == 403:
+                raise Exception('403 forbidden returned by FPL API, consider setting FPL_COOKIE environment variable '
+                                'to the cookie in your browser when logged into the fpl website.')
+
             state = response.url.query["state"]
             if state == "fail":
                 reason = response.url.query["reason"]
