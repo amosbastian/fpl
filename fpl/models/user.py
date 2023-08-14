@@ -1,11 +1,12 @@
 import asyncio
 import json
 
+
 import aiohttp
 from urllib3.util import response
 
 from ..constants import API_URLS, MIN_GAMEWEEK, MAX_GAMEWEEK
-from ..utils import fetch, logged_in, post, get_headers
+from ..utils import fetch, logged_in, post, post_transfer, get_headers
 
 is_c = "is_captain"
 is_vc = "is_vice_captain"
@@ -596,8 +597,15 @@ class User():
             players_out, players_in, user_team, players, wildcard, free_hit)
         headers = get_headers(
             "https://fantasy.premierleague.com/a/squad/transfers")
-        post_response = await post(
+        post_response = await post_transfer(
             self._session, API_URLS["transfers"], json.dumps(payload), headers)
+
+        if post_response is None:
+            # Everything is okay, so push the transfer through!
+            payload["confirmed"] = True
+            post_response = await post(
+                self._session, API_URLS["transfers"], json.dumps(payload), headers)
+            return post_response
 
         if "non_form_errors" in post_response:
             raise Exception(post_response["non_form_errors"])
@@ -606,12 +614,6 @@ class User():
             raise Exception(
                 f"Point hit for transfer(s) [-{post_response['spent_points']}]"
                 f" exceeds max_hit [{max_hit}].")
-
-        # Everything is okay, so push the transfer through!
-        payload["confirmed"] = True
-        post_response = await post(
-            self._session, API_URLS["transfers"], json.dumps(payload), headers)
-        return post_response
 
     async def _create_new_lineup(self, players_in, players_out, lineup):
         """Helper for creating the new lineup of players.
