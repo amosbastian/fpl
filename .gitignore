@@ -127,3 +127,4 @@ dmypy.json
 
 # Credentials
 credentials.cfg
+.pypirc
