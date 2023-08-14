@@ -528,7 +528,7 @@ fixture_data_not_finished = {
 }
 
 
-class TestFixture(object):
+class TestFixture:
     @staticmethod
     def test_init():
         fixture = Fixture(fixture_data)
@@ -556,8 +556,10 @@ class TestFixture(object):
         assert all([isinstance(d, dict) for d in data_dict['h']])
         assert all([tuple(d.keys()) == ('value', 'element') for d in data_dict['a']])
         assert all([tuple(d.keys()) == ('value', 'element') for d in data_dict['h']])
-        assert all([all([isinstance(v, int) for v in d.values()]) for d in data_dict['a']])
-        assert all([all([isinstance(v, int) for v in d.values()]) for d in data_dict['h']])
+        assert all([
+            all([isinstance(v, int) for v in d.values()]) for d in data_dict['a']])
+        assert all([
+            all([isinstance(v, int) for v in d.values()]) for d in data_dict['h']])
 
     def test_get_goalscorers_not_finished(self, fixture):
         self._do_test_not_finished(fixture, "get_goalscorers")
@@ -621,4 +623,4 @@ class TestFixture(object):
 
     @staticmethod
     def test_str(fixture):
-        assert str(fixture) == "Southampton vs. Brentford - Fri 20 Sep 19:00"
+        assert str(fixture) == "Nott'm Forest vs. Bournemouth - Fri 20 Sep 19:00"

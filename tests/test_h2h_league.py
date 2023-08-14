@@ -2,7 +2,7 @@ import aiohttp
 import pytest
 
 from fpl.models.h2h_league import H2HLeague
-from tests.helper import AsyncMock
+
 
 h2h_league_data = {
     "league": {
@@ -33,8 +33,9 @@ h2h_league_data = {
 }
 
 
-class TestH2HLeague(object):
-    async def test_init(self, loop):
+class TestH2HLeague:
+    @pytest.mark.asyncio
+    async def test_init(self):
         session = aiohttp.ClientSession()
         league = H2HLeague(h2h_league_data, session)
         assert league._session == session
@@ -43,17 +44,18 @@ class TestH2HLeague(object):
         await session.close()
 
     @staticmethod
-    def test_h2h_league(loop, h2h_league):
+    def test_h2h_league(h2h_league):
         assert h2h_league.__str__() == "THE PUNDITS H2H - 946125"
 
+    @pytest.mark.asyncio
     async def test_get_fixtures_with_known_gameweek_unauthorized(
-            self, loop, h2h_league):
+            self, h2h_league):
         with pytest.raises(Exception):
             await h2h_league.get_fixtures(gameweek=1)
 
     @pytest.mark.skip(reason="Need to mock logging in properly.")
     async def test_get_fixtures_with_known_gameweek_authorized(
-            self, loop, mocker, fpl, h2h_league):
+            self, mocker, fpl, h2h_league):
         mocked_logged_in = mocker.patch(
             "fpl.models.h2h_league.logged_in", return_value=True)
 
@@ -61,14 +63,15 @@ class TestH2HLeague(object):
         assert isinstance(fixtures, list)
         mocked_logged_in.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_get_fixtures_with_unknown_gameweek_unauthorized(
-            self, loop, h2h_league):
+            self, h2h_league):
         with pytest.raises(Exception):
             await h2h_league.get_fixtures()
 
     @pytest.mark.skip(reason="Need to mock logging in properly.")
     async def test_get_fixtures_with_unknown_gameweek_authorized(
-            self, loop, mocker, fpl, h2h_league):
+            self, mocker, fpl, h2h_league):
         mocked_logged_in = mocker.patch(
             "fpl.models.h2h_league.logged_in", return_value=True)
         await fpl.login()

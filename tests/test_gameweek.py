@@ -20,17 +20,17 @@ gameweek_data = {
 }
 
 
-class TestGameweek(object):
+class TestGameweek:
     @staticmethod
-    def test_init(loop):
+    def test_init():
         gameweek = Gameweek(gameweek_data)
         for k, v in gameweek_data.items():
             assert getattr(gameweek, k) == v
 
     @staticmethod
-    def test_str(loop, gameweek):
+    def test_str(gameweek):
         assert str(gameweek) == "Gameweek 1 - Deadline Fri 10 Aug 18:00"
 
     @staticmethod
-    def test_fixtures(loop, gameweek):
+    def test_fixtures(gameweek):
         assert isinstance(gameweek.fixtures, list)

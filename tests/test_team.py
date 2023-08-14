@@ -1,5 +1,7 @@
+import pytest
+
 from fpl.models import Player, Team
-from tests.helper import AsyncMock
+
 
 team_data = {
     "id": 1,
@@ -39,7 +41,7 @@ team_data = {
 }
 
 
-class TestTeam(object):
+class TestTeam:
     def test_init(self):
         session = None
         team = Team(team_data, session)
@@ -47,13 +49,12 @@ class TestTeam(object):
         for k, v in team_data.items():
             assert getattr(team, k) == v
 
-    @staticmethod
-    def test_str(loop, team):
+    def test_str(event_loop, team):
         assert str(team) == getattr(team, "name")
 
-    async def test_get_players_return_json_is_false(self, loop, team):
+    @pytest.mark.asyncio
+    async def test_get_players_return_json_is_false(self, team):
         players = await team.get_players(return_json=False)
-        print(players)
         assert isinstance(players, list)
         assert len(players) == len(team.players)
 
@@ -61,12 +62,14 @@ class TestTeam(object):
             assert isinstance(player, Player)
             assert getattr(player, "team") == getattr(team, "id")
 
-    async def test_get_players_return_json_is_true(self, loop, team):
+    @pytest.mark.asyncio
+    async def test_get_players_return_json_is_true(self, team):
         players = await team.get_players(return_json=True)
         assert isinstance(players, list)
         assert players == team.players
 
-    async def test_get_fixtures(self, loop, team):
+    @pytest.mark.asyncio
+    async def test_get_fixtures(self, team):
         fixtures = await team.get_fixtures(return_json=True)
         assert isinstance(fixtures, list)
         assert fixtures == team.fixtures

@@ -12,8 +12,9 @@ from fpl.models.user import User
 from tests.helper import AsyncMock
 
 
-class TestFPL(object):
-    async def test_init(self, loop):
+class TestFPL:
+    @pytest.mark.asyncio
+    async def test_init(self):
         session = aiohttp.ClientSession()
         fpl = FPL(session)
         assert fpl.session is session
@@ -34,7 +35,8 @@ class TestFPL(object):
         assert all([isinstance(getattr(fpl, key), int) for key in keys[-2:]])
         await session.close()
 
-    async def test_user(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_user(self, fpl):
         # test negative id
         with pytest.raises(AssertionError):
             await fpl.get_user(-10)
@@ -50,7 +52,8 @@ class TestFPL(object):
         user = await fpl.get_user(91928, True)
         assert isinstance(user, dict)
 
-    async def test_team(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_team(self, fpl):
         # test team id out of valid range
         with pytest.raises(AssertionError):
             await fpl.get_team(0)
@@ -63,7 +66,8 @@ class TestFPL(object):
         team = await fpl.get_team(1, True)
         assert isinstance(team, dict)
 
-    async def test_teams(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_teams(self, fpl):
         teams = await fpl.get_teams()
         assert isinstance(teams, list)
         assert len(teams) == 20
@@ -80,7 +84,8 @@ class TestFPL(object):
         assert isinstance(teams[0], Team)
         assert [team.id for team in teams] == [1, 2, 3]
 
-    async def test_player_summary(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_player_summary(self, fpl):
         # test non positive id
         with pytest.raises(AssertionError):
             await fpl.get_player_summary(0)
@@ -91,7 +96,8 @@ class TestFPL(object):
         player_summary = await fpl.get_player_summary(123, True)
         assert isinstance(player_summary, dict)
 
-    async def test_player_summaries(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_player_summaries(self, fpl):
         # test no specified IDs
         player_summaries = await fpl.get_player_summaries([])
         assert isinstance(player_summaries, list)
@@ -105,7 +111,8 @@ class TestFPL(object):
         player_summaries = await fpl.get_player_summaries([1, 2, 3], True)
         assert isinstance(player_summaries[0], dict)
 
-    async def test_player(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_player(self, fpl):
         # test invalid ID
         with pytest.raises(ValueError):
             await fpl.get_player(-1)
@@ -120,7 +127,8 @@ class TestFPL(object):
 
         assert isinstance(player_with_summary.fixtures, list)
 
-    async def test_players(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_players(self, fpl):
         players = await fpl.get_players()
         assert isinstance(players, list)
         assert isinstance(players[0], Player)
@@ -136,7 +144,8 @@ class TestFPL(object):
         assert len(players) == 3
         assert isinstance(players[0].fixtures, list)
 
-    async def test_fixture(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_fixture(self, fpl):
         # test fixture with unknown id
         with pytest.raises(ValueError):
             await fpl.get_fixture(0)
@@ -147,7 +156,8 @@ class TestFPL(object):
         fixture = await fpl.get_fixture(6, return_json=True)
         assert isinstance(fixture, dict)
 
-    async def test_fixtures_by_id(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_fixtures_by_id(self, fpl):
         # test empty fixture ids
         fixtures = await fpl.get_fixtures_by_id([])
         assert isinstance(fixtures, list)
@@ -165,7 +175,8 @@ class TestFPL(object):
         fixture_ids = [fixture["id"] for fixture in fixtures]
         assert [100, 200, 300] == fixture_ids
 
-    async def test_fixtures_by_gameweek(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_fixtures_by_gameweek(self, fpl):
         for gameweek in range(1, 39):
             fixtures = await fpl.get_fixtures_by_gameweek(gameweek)
             if (len(fixtures) == 0):
@@ -178,7 +189,8 @@ class TestFPL(object):
                 gameweek, return_json=True)
             assert isinstance(fixtures[0], dict)
 
-    async def test_fixtures(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_fixtures(self, fpl):
         fixtures = await fpl.get_fixtures()
         assert isinstance(fixtures, list)
         assert isinstance(fixtures[0], Fixture)
@@ -186,7 +198,8 @@ class TestFPL(object):
         fixtures = await fpl.get_fixtures(return_json=True)
         assert isinstance(fixtures[0], dict)
 
-    async def test_gameweeks(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_gameweeks(self, fpl):
         gameweeks = await fpl.get_gameweeks()
         assert isinstance(gameweeks, list)
         assert len(gameweeks) == 38
@@ -197,7 +210,8 @@ class TestFPL(object):
         assert len(gameweeks) == 3
         assert isinstance(gameweeks[0], dict)
 
-    async def test_gameweek(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_gameweek(self, fpl):
         gameweek = await fpl.get_gameweek(20)
         assert isinstance(gameweek, Gameweek)
         assert gameweek.id == 20
@@ -220,7 +234,7 @@ class TestFPL(object):
         assert isinstance(gameweek["elements"], dict)
 
     @pytest.mark.skip(reason="Cannot currently test it.")
-    async def test_classic_league(self, loop, fpl):
+    async def test_classic_league(self, fpl):
         await fpl.login()
         classic_league = await fpl.get_classic_league(173226)
         assert isinstance(classic_league, ClassicLeague)
@@ -228,7 +242,8 @@ class TestFPL(object):
         classic_league = await fpl.get_classic_league(173226, return_json=True)
         assert isinstance(classic_league, dict)
 
-    async def test_h2h_league(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_h2h_league(self, fpl):
         await fpl.login()
         h2h_league = await fpl.get_h2h_league(829116)
         assert isinstance(h2h_league, H2HLeague)
@@ -236,8 +251,8 @@ class TestFPL(object):
         h2h_league = await fpl.get_h2h_league(829116, True)
         assert isinstance(h2h_league, dict)
 
-    async def test_login_with_no_email_password(
-            self, loop, mocker, monkeypatch, fpl):
+    @pytest.mark.asyncio
+    async def test_login_with_no_email_password(self, mocker, monkeypatch, fpl):
         mocked_text = mocker.patch(
             'aiohttp.ClientResponse.text', new_callable=AsyncMock)
         monkeypatch.setenv("FPL_EMAIL", "")
@@ -246,25 +261,28 @@ class TestFPL(object):
             await fpl.login()
         mocked_text.assert_not_called()
 
-    async def test_login_with_invalid_email_password(
-            self, loop, mocker, monkeypatch, fpl):
+    @pytest.mark.asyncio
+    async def test_login_with_invalid_email_password(self, mocker, monkeypatch, fpl):
         with pytest.raises(ValueError):
             await fpl.login(123, 123)
 
-        monkeypatch.setenv("FPL_EMAIL", 123)
-        monkeypatch.setenv("FPL_PASSWORD", 123)
+        monkeypatch.setenv("FPL_EMAIL", "123")
+        monkeypatch.setenv("FPL_PASSWORD", "123")
 
         with pytest.raises(ValueError):
             await fpl.login()
 
-    async def test_login_with_valid_email_password(self, loop, mocker, fpl):
+    @pytest.mark.asyncio
+    async def test_login_with_valid_email_password(self, mocker, fpl):
         await fpl.login()
 
-    async def test_points_against(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_points_against(self, fpl):
         points_against = await fpl.get_points_against()
         assert isinstance(points_against, dict)
 
-    async def test_FDR(self, loop, fpl):
+    @pytest.mark.asyncio
+    async def test_FDR(self, fpl):
         def test_main(fdr):
             assert isinstance(fdr, dict)
 

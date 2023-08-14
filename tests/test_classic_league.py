@@ -1,4 +1,5 @@
 import aiohttp
+import pytest
 
 from fpl.models.classic_league import ClassicLeague
 from tests.helper import AsyncMock
@@ -68,8 +69,9 @@ classic_league_data = {
 }
 
 
-class TestClassicLeague(object):
-    async def test_init(self, loop):
+class TestClassicLeague:
+    @pytest.mark.asyncio
+    async def test_init(self, event_loop):
         session = aiohttp.ClientSession()
         classic_league = ClassicLeague(classic_league_data, session)
         assert classic_league._session is session
@@ -77,14 +79,18 @@ class TestClassicLeague(object):
             assert getattr(classic_league, k) == v
         await session.close()
 
-    async def test_str(self, loop, classic_league):
+    @pytest.mark.asyncio
+    async def test_str(self, event_loop, classic_league):
         assert str(classic_league) == "Steem Fantasy League - 633353"
 
-    async def test_get_standings(self, loop, mocker, classic_league):
+    @pytest.mark.asyncio
+    async def test_get_standings(self, event_loop, mocker, classic_league):
         data = {"standings": classic_league_data["standings"]}
-        mocked_fetch = mocker.patch("fpl.models.classic_league.fetch",
-                                    return_value=data,
-                                    new_callable=AsyncMock)
+        mocker.patch(
+            "fpl.models.classic_league.fetch",
+            return_value=data,
+            new_callable=AsyncMock
+        )
         standings = await classic_league.get_standings(1)
         assert isinstance(standings, dict)
         assert standings["page"] == 1
