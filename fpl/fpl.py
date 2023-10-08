@@ -579,7 +579,7 @@ class FPL:
         if not email or not password:
             raise ValueError("Email and password must be set")
         if not cookie:
-            raise ValueError("Must provide Cookie FPL session data (pl_profile, datadome)")
+            raise ValueError("Must provide Cookie FPL session data {\"pl_profile\":\"\", \"datadome\":\"\"}")
 
         payload = {
             "login": email,
