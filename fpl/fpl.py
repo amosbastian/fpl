@@ -578,6 +578,8 @@ class FPL:
             password = os.getenv("FPL_PASSWORD", None)
         if not email or not password:
             raise ValueError("Email and password must be set")
+        if not cookie:
+            raise ValueError("Must provide Cookie FPL session data {\"pl_profile\":\"\", \"datadome\":\"\"}")
 
         payload = {
             "login": email,
@@ -586,22 +588,22 @@ class FPL:
             "redirect_uri": "https://fantasy.premierleague.com/a/login"
         }
 
-        if not cookie:
-            cookie = os.getenv('FPL_COOKIE')
         headers = {
             "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1; PRO 5 Build/LMY47D)",
         }
-        if cookie is not None:
-            headers['Cookie'] = cookie
 
         login_url = "https://users.premierleague.com/accounts/login/"
         async with self.session.post(login_url, data=payload,
                                      ssl=ssl_context,
+                                     cookies=cookie,
                                      headers=headers) as response:
 
             if response.status == 403:
                 raise Exception('403 forbidden returned by FPL API, consider setting FPL_COOKIE environment variable '
                                 'to the cookie in your browser when logged into the fpl website.')
+
+            if 'state' not in response.url.query:
+                raise Exception(f"Unsuccessful login, states not found: {response.status_code}")
 
             state = response.url.query["state"]
             if state == "fail":
