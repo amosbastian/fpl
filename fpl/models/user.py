@@ -511,6 +511,13 @@ class User():
             self, players_out, players_in, user_team, players, wildcard,
             free_hit):
         """Returns the payload needed to make the desired transfers."""
+        if wildcard:
+            chip='wildcard'
+        elif free_hit:
+            chip='freehit'
+        else:
+            chip=None
+        
         event = 0
         if (self.current_event):
             event = self.current_event
@@ -519,8 +526,7 @@ class User():
             "entry": self.id,
             "event": event + 1,
             "transfers": [],
-            "wildcard": wildcard,
-            "freehit": free_hit
+            "chip": chip
         }
 
         for player_out_id, player_in_id in zip(players_out, players_in):
