@@ -145,7 +145,8 @@ def position_converter(position):
         1: "Goalkeeper",
         2: "Defender",
         3: "Midfielder",
-        4: "Forward"
+        4: "Forward",
+        5: "Manager"
     }
     return position_map[position]
 
