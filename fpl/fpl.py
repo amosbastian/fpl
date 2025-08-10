@@ -24,10 +24,18 @@ Fantasy Premier League API:
 * /transfers
 """
 import asyncio
-import certifi
+import base64
+import hashlib
 import itertools
 import json
 import os
+import re
+import secrets
+import uuid
+from urllib.request import urlopen
+
+import certifi
+import requests
 
 from .constants import API_URLS
 from .models.classic_league import ClassicLeague
@@ -38,15 +46,14 @@ from .models.player import Player, PlayerSummary
 from .models.team import Team
 from .models.user import User
 from .utils import (average, fetch, get_current_user, logged_in,
-                    position_converter, scale, team_converter, ssl_context)
-from urllib.request import urlopen
+                    position_converter, scale, ssl_context, team_converter)
 
 
 class FPL:
     """The FPL class."""
 
-    def __init__(self, session):
-        self.session = session
+    def __init__(self):
+        self.session = None
 
         resp = urlopen(API_URLS["static"], context=ssl_context)
         static = json.loads(resp.read().decode("utf-8"))
@@ -57,10 +64,11 @@ class FPL:
                 pass
             setattr(self, k, v)
         try:
-            setattr(self,
-                    "current_gameweek",
-                    next(event for event in static["events"]
-                         if event["is_current"])["id"])
+            setattr(
+                self,
+                "current_gameweek",
+                next(event for event in static["events"] if event["is_current"])["id"],
+            )
         except StopIteration:
             setattr(self, "current_gameweek", 0)
 
@@ -82,14 +90,18 @@ class FPL:
         else:
             # If no user ID provided get it from current session
             try:
-                user = await get_current_user(self.session)
+                user = await get_current_user(
+                    self.session, access_token=self.access_token
+                )
                 user_id = user["player"]["entry"]
             except TypeError:
-                raise Exception("You must log in before using `get_user` if "
-                                "you do not provide a user ID.")
+                raise Exception(
+                    "You must log in before using `get_user` if "
+                    "you do not provide a user ID."
+                )
 
         url = API_URLS["user"].format(user_id)
-        user = await fetch(self.session, url)
+        user = await fetch(self.session, url, access_token=self.access_token)
 
         if return_json:
             return user
@@ -121,8 +133,7 @@ class FPL:
         if return_json:
             return teams
 
-        return [Team(team_information, self.session)
-                for team_information in teams]
+        return [Team(team_information, self.session) for team_information in teams]
 
     async def get_team(self, team_id, return_json=False):
         """Returns the team with the given ``team_id``.
@@ -162,11 +173,9 @@ class FPL:
             19 - West Ham
             20 - Wolves
         """
-        assert 0 < int(
-            team_id) < 21, "Team ID must be a number between 1 and 20."
+        assert 0 < int(team_id) < 21, "Team ID must be a number between 1 and 20."
         teams = getattr(self, "teams")
-        team = next(team for team in teams.values()
-                    if team["id"] == int(team_id))
+        team = next(team for team in teams.values() if team["id"] == int(team_id))
 
         if return_json:
             return team
@@ -188,7 +197,7 @@ class FPL:
         """
         assert int(player_id) > 0, "Player's ID must be a positive number"
         url = API_URLS["player"].format(player_id)
-        player_summary = await fetch(self.session, url)
+        player_summary = await fetch(self.session, url, access_token=self.access_token)
 
         if return_json:
             return player_summary
@@ -212,20 +221,27 @@ class FPL:
         if not player_ids:
             return []
 
-        tasks = [asyncio.ensure_future(
-                 fetch(self.session, API_URLS["player"].format(player_id)))
-                 for player_id in player_ids]
+        tasks = [
+            asyncio.ensure_future(
+                fetch(
+                    self.session,
+                    API_URLS["player"].format(player_id),
+                    access_token=self.access_token,
+                )
+            )
+            for player_id in player_ids
+        ]
 
         player_summaries = await asyncio.gather(*tasks)
 
         if return_json:
             return player_summaries
 
-        return [PlayerSummary(player_summary)
-                for player_summary in player_summaries]
+        return [PlayerSummary(player_summary) for player_summary in player_summaries]
 
-    async def get_player(self, player_id, players=None, include_summary=False,
-                         return_json=False):
+    async def get_player(
+        self, player_id, players=None, include_summary=False, return_json=False
+    ):
         """Returns the player with the given ``player_id``.
 
         Information is taken from e.g.:
@@ -247,14 +263,16 @@ class FPL:
             players = getattr(self, "elements")
 
         try:
-            player = next(player for player in players.values()
-                          if player["id"] == player_id)
+            player = next(
+                player for player in players.values() if player["id"] == player_id
+            )
         except StopIteration:
             raise ValueError(f"Player with ID {player_id} not found")
 
         if include_summary:
             player_summary = await self.get_player_summary(
-                player["id"], return_json=True)
+                player["id"], return_json=True
+            )
             player.update(player_summary)
 
         if return_json:
@@ -262,8 +280,9 @@ class FPL:
 
         return Player(player, self.session)
 
-    async def get_players(self, player_ids=None, include_summary=False,
-                          return_json=False):
+    async def get_players(
+        self, player_ids=None, include_summary=False, return_json=False
+    ):
         """Returns either a list of *all* players, or a list of players whose
         IDs are in the given ``player_ids`` list.
 
@@ -284,7 +303,11 @@ class FPL:
 
         if not include_summary:
             if player_ids:
-                players = [player for player in list(players.values()) if player["id"] in player_ids]
+                players = [
+                    player
+                    for player in list(players.values())
+                    if player["id"] in player_ids
+                ]
             else:
                 players = list(players.values())
 
@@ -296,10 +319,12 @@ class FPL:
         if not player_ids:
             player_ids = [player["id"] for player in list(players.values())]
 
-        tasks = [asyncio.ensure_future(
-                 self.get_player(
-                     player_id, players, include_summary, return_json))
-                 for player_id in player_ids]
+        tasks = [
+            asyncio.ensure_future(
+                self.get_player(player_id, players, include_summary, return_json)
+            )
+            for player_id in player_ids
+        ]
         players = await asyncio.gather(*tasks)
 
         return players
@@ -319,25 +344,30 @@ class FPL:
         :rtype: :class:`Fixture` or ``dict``
         :raises ValueError: if fixture with ``fixture_id`` not found
         """
-        fixtures = await fetch(self.session, API_URLS["fixtures"])
+        fixtures = await fetch(
+            self.session, API_URLS["fixtures"], access_token=self.access_token
+        )
 
         try:
-            fixture = next(fixture for fixture in fixtures
-                           if fixture["id"] == fixture_id)
+            fixture = next(
+                fixture for fixture in fixtures if fixture["id"] == fixture_id
+            )
         except StopIteration:
             raise ValueError(f"Fixture with ID {fixture_id} not found")
         fixture_gameweek = fixture["event"]
 
         gameweek_fixtures = await fetch(
-            self.session,
-            API_URLS["gameweek_fixtures"].format(fixture_gameweek))
+            self.session, API_URLS["gameweek_fixtures"].format(fixture_gameweek)
+        )
 
         try:
-            fixture = next(fixture for fixture in gameweek_fixtures
-                           if fixture["id"] == fixture_id)
+            fixture = next(
+                fixture for fixture in gameweek_fixtures if fixture["id"] == fixture_id
+            )
         except StopIteration:
             raise ValueError(
-                f"Fixture with ID {fixture_id} not found in gameweek fixtures")
+                f"Fixture with ID {fixture_id} not found in gameweek fixtures"
+            )
 
         if return_json:
             return fixture
@@ -362,19 +392,25 @@ class FPL:
         if not fixture_ids:
             return []
 
-        fixtures = await fetch(self.session, API_URLS["fixtures"])
-        fixture_gameweeks = set(fixture["event"] for fixture in fixtures
-                                if fixture["id"] in fixture_ids)
-        tasks = [asyncio.ensure_future(
-                 fetch(self.session,
-                       API_URLS["gameweek_fixtures"].format(gameweek)))
-                 for gameweek in fixture_gameweeks]
+        fixtures = await fetch(
+            self.session, API_URLS["fixtures"], access_token=self.access_token
+        )
+        fixture_gameweeks = set(
+            fixture["event"] for fixture in fixtures if fixture["id"] in fixture_ids
+        )
+        tasks = [
+            asyncio.ensure_future(
+                fetch(self.session, API_URLS["gameweek_fixtures"].format(gameweek))
+            )
+            for gameweek in fixture_gameweeks
+        ]
 
         gameweek_fixtures = await asyncio.gather(*tasks)
         merged_fixtures = list(itertools.chain(*gameweek_fixtures))
 
-        fixtures = [fixture for fixture in merged_fixtures
-                    if fixture["id"] in fixture_ids]
+        fixtures = [
+            fixture for fixture in merged_fixtures if fixture["id"] in fixture_ids
+        ]
 
         if return_json:
             return fixtures
@@ -396,8 +432,9 @@ class FPL:
         :type return_json: bool
         :rtype: list
         """
-        fixtures = await fetch(self.session,
-                               API_URLS["gameweek_fixtures"].format(gameweek))
+        fixtures = await fetch(
+            self.session, API_URLS["gameweek_fixtures"].format(gameweek)
+        )
 
         if return_json:
             return fixtures
@@ -424,8 +461,7 @@ class FPL:
 
         return [Fixture(fixture) for fixture in fixtures]
 
-    async def get_gameweek(self, gameweek_id, include_live=False,
-                           return_json=False):
+    async def get_gameweek(self, gameweek_id, include_live=False, return_json=False):
         """Returns the gameweek with the ID ``gameweek_id``.
 
         Information is taken from e.g.:
@@ -446,18 +482,22 @@ class FPL:
 
         try:
             static_gameweek = next(
-                gameweek for gameweek in static_gameweeks.values() if
-                gameweek["id"] == gameweek_id)
+                gameweek
+                for gameweek in static_gameweeks.values()
+                if gameweek["id"] == gameweek_id
+            )
         except StopIteration:
             raise ValueError(f"Gameweek with ID {gameweek_id} not found")
 
         if include_live:
             live_gameweek = await fetch(
-                self.session, API_URLS["gameweek_live"].format(gameweek_id))
+                self.session, API_URLS["gameweek_live"].format(gameweek_id)
+            )
 
             # Convert element list to dict
             live_gameweek["elements"] = {
-                element["id"]: element for element in live_gameweek["elements"]}
+                element["id"]: element for element in live_gameweek["elements"]
+            }
 
             # Include live bonus points
             if not static_gameweek["finished"]:
@@ -469,13 +509,18 @@ class FPL:
                     bonus = fixture.get_bonus(provisional=True)
                     bonus_for_gameweek.extend(bonus["a"] + bonus["h"])
 
-                bonus_for_gameweek = {bonus["element"]: bonus["value"]
-                                      for bonus in bonus_for_gameweek}
+                bonus_for_gameweek = {
+                    bonus["element"]: bonus["value"] for bonus in bonus_for_gameweek
+                }
 
                 for player_id, bonus_points in bonus_for_gameweek.items():
                     if live_gameweek["elements"][player_id]["stats"]["bonus"] == 0:
-                        live_gameweek["elements"][player_id]["stats"]["bonus"] += bonus_points
-                        live_gameweek["elements"][player_id]["stats"]["total_points"] += bonus_points
+                        live_gameweek["elements"][player_id]["stats"][
+                            "bonus"
+                        ] += bonus_points
+                        live_gameweek["elements"][player_id]["stats"][
+                            "total_points"
+                        ] += bonus_points
 
             static_gameweek.update(live_gameweek)
 
@@ -484,8 +529,9 @@ class FPL:
 
         return Gameweek(static_gameweek)
 
-    async def get_gameweeks(self, gameweek_ids=None, include_live=False,
-                            return_json=False):
+    async def get_gameweeks(
+        self, gameweek_ids=None, include_live=False, return_json=False
+    ):
         """Returns either a list of *all* gamweeks, or a list of gameweeks
         whose IDs are in the ``gameweek_ids`` list.
 
@@ -504,9 +550,12 @@ class FPL:
         if not gameweek_ids:
             gameweek_ids = range(1, 39)
 
-        tasks = [asyncio.ensure_future(
-                 self.get_gameweek(gameweek_id, include_live, return_json))
-                 for gameweek_id in gameweek_ids]
+        tasks = [
+            asyncio.ensure_future(
+                self.get_gameweek(gameweek_id, include_live, return_json)
+            )
+            for gameweek_id in gameweek_ids
+        ]
 
         gameweeks = await asyncio.gather(*tasks)
         return gameweeks
@@ -556,13 +605,137 @@ class FPL:
             raise Exception("User must be logged in.")
 
         url = API_URLS["league_h2h"].format(league_id)
-        league = await fetch(self.session, url)
+        league = await fetch(self.session, url, access_token=self.access_token)
 
         if return_json:
             return league
 
-        return H2HLeague(league, session=self.session)
+        return H2HLeague(league, session=self.session, access_token=self.access_token)
 
+    def _generate_code_verifier(self):
+        return secrets.token_urlsafe(64)[:128]
+
+    def _generate_code_challenge(self, verifier):
+        digest = hashlib.sha256(verifier.encode()).digest()
+        return base64.urlsafe_b64encode(digest).decode().rstrip("=")
+
+    async def login_v2(self, email: str, password: str):
+        code_verifier = self._generate_code_verifier()  # code_verifier for PKCE
+        code_challenge = self._generate_code_challenge(
+            code_verifier
+        )  # code_challenge from the code_verifier
+        initial_state = uuid.uuid4().hex  # random initial state for the OAuth flow
+
+        session = requests.Session()
+
+        # Step 1: Request authorization page
+        params = {
+            "client_id": "bfcbaf69-aade-4c1b-8f00-c1cb8a193030",
+            "redirect_uri": "https://fantasy.premierleague.com/",
+            "response_type": "code",
+            "scope": "openid profile email offline_access",
+            "state": initial_state,
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
+        }
+        auth_response = session.get(API_URLS["auth"], params=params)
+        login_html = auth_response.text
+
+        access_token = re.search(r'"accessToken":"([^"]+)"', login_html).group(1)
+        # need to read state here for when we resume the OAuth flow later on
+        new_state = re.search(
+            r'<input[^>]+name="state"[^>]+value="([^"]+)"', login_html
+        ).group(1)
+
+        # Step 2: Use accessToken to get interaction id and token
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        }
+        response = session.post(API_URLS["start"], headers=headers).json()
+        interaction_id = response["interactionId"]
+        interaction_token = response["interactionToken"]
+
+        # Step 3: log in with interaction tokens (requires 2 post requests)
+        response = session.post(
+            API_URLS["login"],
+            headers={
+                "interactionId": interaction_id,
+                "interactionToken": interaction_token,
+            },
+            json={
+                "id": response["id"],
+                "eventName": "continue",
+                "parameters": {"eventType": "polling"},
+                "pollProps": {
+                    "status": "continue",
+                    "delayInMs": 10,
+                    "retriesAllowed": 1,
+                    "pollChallengeStatus": False,
+                },
+            },
+        )
+
+        response = session.post(
+            API_URLS["login"],
+            headers={
+                "interactionId": interaction_id,
+                "interactionToken": interaction_token,
+            },
+            json={
+                "id": response.json()["id"],
+                "nextEvent": {
+                    "constructType": "skEvent",
+                    "eventName": "continue",
+                    "params": [],
+                    "eventType": "post",
+                    "postProcess": {},
+                },
+                "parameters": {
+                    "buttonType": "form-submit",
+                    "buttonValue": "SIGNON",
+                    "username": email,
+                    "password": password,
+                },
+                "eventName": "continue",
+            },
+        )
+        dv_response = response.json()["dvResponse"]
+
+        # Step 4: Resume the login using the dv_response and handle redirect
+        response = session.post(
+            API_URLS["resume"],
+            data={
+                "dvResponse": dv_response,
+                "state": new_state,
+            },
+            allow_redirects=False,
+        )
+
+        location = response.headers["Location"]
+        auth_code = re.search(r"[?&]code=([^&]+)", location).group(1)
+
+        # Step 5: Exchange auth code for access token
+        response = session.post(
+            API_URLS["token"],
+            data={
+                "grant_type": "authorization_code",
+                "redirect_uri": "https://fantasy.premierleague.com/",
+                "code": auth_code,  # from the parsed redirect URL
+                "code_verifier": code_verifier,  # the original code_verifier generated at the start
+                "client_id": "bfcbaf69-aade-4c1b-8f00-c1cb8a193030",
+            },
+        )
+
+        self.access_token = response.json()["access_token"]
+        response = session.get(
+            API_URLS["me"],
+            headers={"X-API-Authorization": f"Bearer {self.access_token}"},
+        )
+        # print(response.json())
+        self.session = session
+
+    @DeprecationWarning
     async def login(self, email=None, password=None, cookie=None):
         """Returns a requests session with FPL login authentication.
 
@@ -583,25 +756,26 @@ class FPL:
             "login": email,
             "password": password,
             "app": "plfpl-web",
-            "redirect_uri": "https://fantasy.premierleague.com/a/login"
+            "redirect_uri": "https://fantasy.premierleague.com/a/login",
         }
 
         if not cookie:
-            cookie = os.getenv('FPL_COOKIE')
+            cookie = os.getenv("FPL_COOKIE")
         headers = {
             "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1; PRO 5 Build/LMY47D)",
         }
         if cookie is not None:
-            headers['Cookie'] = cookie
+            headers["Cookie"] = cookie
 
         login_url = "https://users.premierleague.com/accounts/login/"
-        async with self.session.post(login_url, data=payload,
-                                     ssl=ssl_context,
-                                     headers=headers) as response:
-
+        async with self.session.post(
+            login_url, data=payload, ssl=ssl_context, headers=headers
+        ) as response:
             if response.status == 403:
-                raise Exception('403 forbidden returned by FPL API, consider setting FPL_COOKIE environment variable '
-                                'to the cookie in your browser when logged into the fpl website.')
+                raise Exception(
+                    "403 forbidden returned by FPL API, consider setting FPL_COOKIE environment variable "
+                    "to the cookie in your browser when logged into the fpl website."
+                )
 
             state = response.url.query["state"]
             if state == "fail":
@@ -644,8 +818,7 @@ class FPL:
 
         :rtype: dict
         """
-        players = await self.get_players(
-            include_summary=True, return_json=True)
+        players = await self.get_players(include_summary=True, return_json=True)
         points_against = {}
 
         for player in players:
@@ -666,8 +839,8 @@ class FPL:
                         "goalkeeper": {"H": [], "A": []},
                         "defender": {"H": [], "A": []},
                         "midfielder": {"H": [], "A": []},
-                        "forward": {"H": [], "A": []}
-                    }
+                        "forward": {"H": [], "A": []},
+                    },
                 )
 
                 points_against[opponent]["all"][location].append(points)
@@ -735,6 +908,7 @@ class FPL:
 
         :rtype: dict
         """
+
         def average_points_against(points_against):
             """Returns a dict with the average points scored against all teams,
             per position and location.

@@ -4,7 +4,7 @@ from ..constants import API_URLS
 from ..utils import fetch, get_current_gameweek, logged_in
 
 
-class H2HLeague():
+class H2HLeague:
     """
     A class representing a H2H league in the Fantasy Premier League.
 
@@ -30,8 +30,9 @@ class H2HLeague():
       League 829116 - 829116
     """
 
-    def __init__(self, league_information, session):
+    def __init__(self, league_information, session, access_token):
         self._session = session
+        self._access_token = access_token
 
         for k, v in league_information.items():
             setattr(self, k, v)
@@ -50,14 +51,15 @@ class H2HLeague():
             return []
 
         if not logged_in(self._session):
-            raise Exception(
-                "Not authorised to get H2H fixtures. Log in first.")
+            raise Exception("Not authorised to get H2H fixtures. Log in first.")
 
         url_query = "event={gameweek}".format(gameweek=gameweek)
 
         fixtures = await fetch(
-            self._session, API_URLS["league_h2h_fixture"].format(
-                self.league["id"], url_query))
+            self._session,
+            API_URLS["league_h2h_fixture"].format(self.league["id"], url_query),
+            access_token=self._access_token,
+        )
 
         return fixtures["results"]
 
@@ -77,8 +79,7 @@ class H2HLeague():
             return []
 
         if not logged_in(self._session):
-            raise Exception(
-                "Not authorised to get H2H fixtures. Log in first.")
+            raise Exception("Not authorized to get H2H fixtures. Log in first.")
 
         url_query = f"event={gameweek}&" if gameweek else ""
         has_next = True
@@ -86,8 +87,12 @@ class H2HLeague():
 
         while has_next:
             fixtures = await fetch(
-                self._session, API_URLS["league_h2h_fixtures"].format(
-                    self.league["id"], url_query, page))
+                self._session,
+                API_URLS["league_h2h_fixtures"].format(
+                    self.league["id"], url_query, page
+                ),
+                access_token=self._access_token,
+            )
             results.extend(fixtures["results"])
 
             has_next = fixtures["has_next"]
